@@ -1,0 +1,19 @@
+th.text-center > div[class^="form-"] > input {
+  float: unset;
+}
+
+td.text-center > div[class^="form-"] > input {
+  float: unset;
+}
+
+th.text-center > div[class*=" form-"] > input {
+  float: unset;
+}
+
+td.text-center > div[class*=" form-"] > input {
+  float: unset;
+}
+
+.select-menu {
+  width: 100%;
+}
