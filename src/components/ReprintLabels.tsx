@@ -12,13 +12,46 @@ import FormInputSelect from './forms/FormInputSelect';
 // Importing the Bootstrap CSS
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import SupplierLotList from '../data/SupplierLotList';
+import SupplierLotList, { ISupplierLot } from '../data/SupplierLotList';
 import PreObjectList from '../data/PreObjectList';
+import { useState } from 'react';
+import { useEffect } from 'react';
+import axios from 'axios';
 
-const supplierLotList = SupplierLotList();
 const preObjectList = PreObjectList('lot');
 
 export default function ReprintLabels() {
+    // State
+    const [error, setError] = useState<string>('');
+    const [isLoaded, setIsLoaded] = useState(false);
+    const [supplierLotList, setSupplierLotList] = useState<ISupplierLot[]>([]);
+
+    useEffect(() => {
+        if (process.env['REACT_APP_API'] === 'Enabled') {
+            axios
+                .get<ISupplierLot[]>(
+                    'https://www.fxsupplierportal.com/api/SupplierLots?supplierCode=ROC0010',
+                )
+                .then((response) => {
+                    setSupplierLotList(response.data);
+                    setIsLoaded(true);
+                })
+                .catch((ex) => {
+                    let error =
+                        ex.code === 'ECONNABORTED'
+                            ? 'A timeout has occurred'
+                            : ex.response?.status === 404
+                            ? 'Resource not found'
+                            : 'An unexpected error has occurred';
+                    setError(error);
+                    setIsLoaded(false);
+                });
+            return;
+        }
+        setSupplierLotList(SupplierLotList());
+        setIsLoaded(true);
+    }, [isLoaded]);
+
     return (
         <>
             <Container>
