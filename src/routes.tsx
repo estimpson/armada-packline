@@ -6,16 +6,30 @@ import ReprintLabels from './components/ReprintLabels';
 import GenerateASN from './components/GenerateASN';
 import SupplierSettings from './components/SupplierSettings';
 import PrinterList from './components/Printers';
+import { IIdentity, selectIdentity } from './features/identity/identitySlice';
+import { useAppSelector } from './app/hooks';
 
 export function Routes() {
+    const identity: IIdentity = useAppSelector(selectIdentity);
+
     return (
         <Switch>
             <Route exact path={'/'} component={Home} />
-            <Route path={'/generate-inventory'} component={GenerateInventory} />
-            <Route path={'/reprint-labels'} component={ReprintLabels} />
-            <Route path={'/generate-asn'} component={GenerateASN} />
-            <Route path={'/printers'} component={PrinterList} />
-            <Route path={'/supplier-settings'} component={SupplierSettings} />
+            {identity.userName && (
+                <>
+                    <Route
+                        path={'/generate-inventory'}
+                        component={GenerateInventory}
+                    />
+                    <Route path={'/reprint-labels'} component={ReprintLabels} />
+                    <Route path={'/generate-asn'} component={GenerateASN} />
+                    <Route path={'/printers'} component={PrinterList} />
+                    <Route
+                        path={'/supplier-settings'}
+                        component={SupplierSettings}
+                    />
+                </>
+            )}
             <Redirect to={'/'} />
         </Switch>
     );
