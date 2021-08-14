@@ -23,6 +23,9 @@ export function MainMenu() {
                         <Nav.Link as={Link} to="/generate-asn">
                             Generate ASN
                         </Nav.Link>
+                        <Nav.Link as={Link} to="/printers">
+                            Printers
+                        </Nav.Link>
                         <NavDropdown
                             title="Supplier Settings"
                             id="basic-nav-dropdown"
