@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useEffect } from 'react';
 import { Button, Card, Col, Container, Form, Row } from 'react-bootstrap';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import {
@@ -15,10 +14,6 @@ export default function Home() {
 
     const identity: IIdentity = useAppSelector(selectIdentity);
     const dispatch = useAppDispatch();
-
-    // useEffect(() => {
-    //     dispatch(loginAsync({ fxSPID: 'ROC0010', password: 'ROC0010' }));
-    // }, []);
 
     return (
         <>
