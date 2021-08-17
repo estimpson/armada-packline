@@ -39,10 +39,12 @@ interface FormInputSelectProps {
     controlId: string;
     label: string;
     values: string[];
+    selectionHandler?: any;
 }
 
 export default function FormInputSelect(props: FormInputSelectProps) {
-    const [filterText, setFilterText] = useState('');
+    const [filterText, setFilterText] = useState<string | null>('');
+    const [selectedKey, setSelectedKey] = useState<string | null>(null);
     const [showDropdown, setShowDropdown] = useState(false);
 
     const toggleState = () => setShowDropdown(!showDropdown);
@@ -58,21 +60,34 @@ export default function FormInputSelect(props: FormInputSelectProps) {
                         aria-label="Text input with dropdown button"
                         autoComplete="off"
                         onFocus={() => setShowDropdown(true)}
-                        onBlur={() => setShowDropdown(false)}
                         onChange={(event) => {
                             setFilterText(event.target.value);
                         }}
+                        value={
+                            filterText
+                                ? filterText
+                                : selectedKey
+                                ? selectedKey
+                                : ''
+                        }
                     />
 
                     <Dropdown
                         id="input-group-dropdown-2"
                         align="end"
-                        show={showDropdown}
                         autoClose={false}
+                        show={showDropdown}
+                        onSelect={(e: string | null) => {
+                            setShowDropdown(false);
+                            setFilterText('');
+                            setSelectedKey(e);
+                            props.selectionHandler(e);
+                        }}
                     >
                         <Dropdown.Toggle
                             variant="outline-secondary"
                             id="dropdown-basic"
+                            onClick={() => toggleState()}
                         ></Dropdown.Toggle>
                         <Dropdown.Menu as={SelectMenu}>
                             <Container>
@@ -88,7 +103,18 @@ export default function FormInputSelect(props: FormInputSelectProps) {
                                     )
                                     .map((value: string) => {
                                         return (
-                                            <Dropdown.Item key={value}>
+                                            <Dropdown.Item
+                                                key={value}
+                                                eventKey={value}
+                                                onSelect={(e) => {
+                                                    console.log(e);
+                                                    props.selectionHandler(e);
+                                                }}
+                                                onClick={(e) => {
+                                                    console.log(e);
+                                                    props.selectionHandler(e);
+                                                }}
+                                            >
                                                 {value}
                                             </Dropdown.Item>
                                         );

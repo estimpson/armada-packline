@@ -13,28 +13,33 @@ import FormInputSelect from './forms/FormInputSelect';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import SupplierLotList, { ISupplierLot } from '../data/SupplierLotList';
-import PreObjectList from '../data/PreObjectList';
+import PreObjectList, { IPreObject } from '../data/PreObjectList';
 import { useState } from 'react';
 import { useEffect } from 'react';
 import axios from 'axios';
-
-const preObjectList = PreObjectList('lot');
+import { IIdentity, selectIdentity } from '../features/identity/identitySlice';
+import { useAppSelector } from '../app/hooks';
 
 export default function ReprintLabels() {
     // State
     const [error, setError] = useState<string>('');
-    const [isLoaded, setIsLoaded] = useState(false);
+    const [isLotListLoaded, setIsLotListLoaded] = useState(false);
     const [supplierLotList, setSupplierLotList] = useState<ISupplierLot[]>([]);
+    const [lotNumber, setLotNumber] = useState<string>('');
+    const [preObjectList, setPreObjectList] = useState<IPreObject[]>([]);
+    const [isPreObjectListLoaded, setIsPreObjectListLoaded] = useState(false);
+
+    const identity: IIdentity = useAppSelector(selectIdentity);
 
     useEffect(() => {
         if (process.env['REACT_APP_API'] === 'Enabled') {
             axios
                 .get<ISupplierLot[]>(
-                    'https://www.fxsupplierportal.com/api/SupplierLots?supplierCode=ROC0010',
+                    `https://www.fxsupplierportal.com/api/SupplierLots?supplierCode=${identity.supplierCode}`,
                 )
                 .then((response) => {
                     setSupplierLotList(response.data);
-                    setIsLoaded(true);
+                    setIsLotListLoaded(true);
                 })
                 .catch((ex) => {
                     let error =
@@ -44,13 +49,44 @@ export default function ReprintLabels() {
                             ? 'Resource not found'
                             : 'An unexpected error has occurred';
                     setError(error);
-                    setIsLoaded(false);
+                    setIsLotListLoaded(false);
                 });
             return;
         }
         setSupplierLotList(SupplierLotList());
-        setIsLoaded(true);
-    }, [isLoaded]);
+        setIsLotListLoaded(true);
+    }, [isLotListLoaded]);
+
+    useEffect(() => {
+        if (process.env['REACT_APP_API'] === 'Enabled') {
+            axios
+                .get<IPreObject[]>(
+                    `https://www.fxsupplierportal.com/api/PreObjects/Lot?supplierCode=${identity.supplierCode}&lotNumber=${lotNumber}`,
+                )
+                .then((response) => {
+                    setPreObjectList(response.data);
+                    setIsPreObjectListLoaded(true);
+                })
+                .catch((ex) => {
+                    let error =
+                        ex.code === 'ECONNABORTED'
+                            ? 'A timeout has occurred'
+                            : ex.response?.status === 404
+                            ? 'Resource not found'
+                            : 'An unexpected error has occurred';
+                    setError(error);
+                    setIsPreObjectListLoaded(false);
+                });
+            return;
+        }
+        setPreObjectList(PreObjectList('lot'));
+        setIsPreObjectListLoaded(true);
+    }, [isPreObjectListLoaded]);
+
+    const lotSelectionHandler = (e: string | null) => {
+        setLotNumber(e ? e : '');
+        setIsPreObjectListLoaded(false);
+    };
 
     return (
         <>
@@ -69,6 +105,7 @@ export default function ReprintLabels() {
                                 values={supplierLotList.map(
                                     (supplierLot) => supplierLot.lotNumber,
                                 )}
+                                selectionHandler={lotSelectionHandler}
                             ></FormInputSelect>
                         </Form>
                     </Card.Body>
@@ -77,7 +114,8 @@ export default function ReprintLabels() {
                     <Card.Body>
                         <Card.Title>
                             (Optionally) Edit the inventory in this batch to
-                            adjust quantities. Then select and print labels.
+                            adjust quantities. Then select and print labels.{' '}
+                            {lotNumber}
                         </Card.Title>
                         <Form>
                             <Table
