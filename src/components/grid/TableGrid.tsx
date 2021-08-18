@@ -1,11 +1,16 @@
 import {
+    faCheck,
+    faCheckDouble,
+    faCheckSquare,
     faPencilAlt,
     faSdCard,
+    faSquare,
     faUndoAlt,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
-import { FormCheck, FormControl, Table } from 'react-bootstrap';
+import { FormControl, Table } from 'react-bootstrap';
+import { IPreObject } from '../../data/PreObjectList';
 
 export interface ITableGridColumnProps {
     columnName: string;
@@ -19,23 +24,74 @@ export interface ITableGridProps {
     editableRows?: boolean;
     columns: Array<ITableGridColumnProps>;
     data: Array<any>;
-    rowUpdater?(rowOriginal: any, rowModified: any): boolean;
+    rowUpdateHandler?(rowOriginal: any, rowModified: any): boolean;
+    rowSelectHandler?(selectedRows: Array<any>): void;
 }
 
 export default function TableGrid(props: ITableGridProps) {
+    const [prevData, setPrevData] = useState<Array<IPreObject> | undefined>(
+        undefined,
+    );
     const [rowEditIndex, setRowEditIndex] = useState<number | undefined>(
         undefined,
     );
     const [modifiedRowData, setModifiedRowData] = useState<any | undefined>(
         undefined,
     );
+    const [selectedRowIndexes, setSelectedRowIndexes] = useState<
+        Array<boolean>
+    >([]);
+
+    if (props.data !== prevData) {
+        // Data has changed so reset the editing and row selection.
+        setRowEditIndex(undefined);
+        setModifiedRowData(undefined);
+        setSelectedRowIndexes(Array(props.data.length).fill(false));
+        setPrevData(props.data);
+    }
+
+    const selectedState = (selectedRowIndexes: Array<boolean>) => {
+        const selectedRowCount = selectedRowIndexes.filter((row) => row).length;
+        return selectedRowCount === 0
+            ? 'none'
+            : selectedRowCount === props.data.length
+            ? 'all'
+            : 'partial';
+    };
+    const selectedStateIcon = (selectedRowIndexes: Array<boolean>) => {
+        let state = selectedState(selectedRowIndexes);
+        return state === 'none'
+            ? faSquare
+            : state === 'all'
+            ? faCheckDouble
+            : faCheckSquare;
+    };
+
     return (
         <Table striped bordered hover size="sm">
             <thead>
                 <tr>
                     {props.select && (
                         <th className="text-center">
-                            <FormCheck type="checkbox"></FormCheck>
+                            <FontAwesomeIcon
+                                icon={selectedStateIcon(selectedRowIndexes)}
+                                onClick={() => {
+                                    const state =
+                                        selectedState(selectedRowIndexes);
+                                    const a = Array(props.data.length);
+                                    if (state === 'all') {
+                                        setSelectedRowIndexes(a.fill(false));
+                                    } else {
+                                        setSelectedRowIndexes(a.fill(true));
+                                    }
+                                    if (props.rowSelectHandler) {
+                                        const selectedRows = props.data.filter(
+                                            (row, rowindex) => a[rowindex],
+                                        );
+                                        props.rowSelectHandler(selectedRows);
+                                    }
+                                }}
+                            />
                         </th>
                     )}
                     {props.columns.map((column) => {
@@ -56,7 +112,38 @@ export default function TableGrid(props: ITableGridProps) {
                         <tr>
                             {props.select && (
                                 <td className="text-center">
-                                    <FormCheck type="checkbox" />
+                                    <FontAwesomeIcon
+                                        icon={
+                                            selectedRowIndexes[rowIndex]
+                                                ? faCheck
+                                                : faSquare
+                                        }
+                                        onClick={() => {
+                                            const a = Array(
+                                                props.data.length,
+                                            ).fill(false);
+                                            for (
+                                                let index = 0;
+                                                index < a.length;
+                                                index++
+                                            ) {
+                                                a[index] =
+                                                    selectedRowIndexes[index];
+                                            }
+                                            a[rowIndex] = !a[rowIndex];
+                                            setSelectedRowIndexes(a);
+                                            if (props.rowSelectHandler) {
+                                                const selectedRows =
+                                                    props.data.filter(
+                                                        (row, rowindex) =>
+                                                            a[rowindex],
+                                                    );
+                                                props.rowSelectHandler(
+                                                    selectedRows,
+                                                );
+                                            }
+                                        }}
+                                    />
                                 </td>
                             )}
                             {props.columns.map((column) => (
@@ -92,8 +179,8 @@ export default function TableGrid(props: ITableGridProps) {
                                                 className="mx-2"
                                                 onClick={() => {
                                                     if (
-                                                        props.rowUpdater &&
-                                                        props.rowUpdater(
+                                                        props.rowUpdateHandler &&
+                                                        props.rowUpdateHandler(
                                                             row,
                                                             modifiedRowData,
                                                         )

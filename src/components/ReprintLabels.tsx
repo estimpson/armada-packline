@@ -14,7 +14,7 @@ import axios from 'axios';
 import { IIdentity, selectIdentity } from '../features/identity/identitySlice';
 import { useAppSelector } from '../app/hooks';
 import TableGrid from './grid/TableGrid';
-import { original } from '@reduxjs/toolkit';
+import { Button } from 'react-bootstrap';
 
 export default function ReprintLabels() {
     // State
@@ -23,6 +23,9 @@ export default function ReprintLabels() {
     const [supplierLotList, setSupplierLotList] = useState<ISupplierLot[]>([]);
     const [lotNumber, setLotNumber] = useState<string>('');
     const [preObjectList, setPreObjectList] = useState<IPreObject[]>([]);
+    const [selectedPreObjectList, setSelectedPreObjectList] = useState<
+        IPreObject[]
+    >([]);
     const [isPreObjectListLoaded, setIsPreObjectListLoaded] = useState(false);
 
     const identity: IIdentity = useAppSelector(selectIdentity);
@@ -110,8 +113,12 @@ export default function ReprintLabels() {
                     <Card.Body>
                         <Card.Title>
                             (Optionally) Edit the inventory in this batch to
-                            adjust quantities. Then select and print labels.
+                            adjust quantities and/or lot numbers. Then select
+                            and print labels.
                         </Card.Title>
+                        <Button>
+                            Print {selectedPreObjectList.length} select labels
+                        </Button>
                         <Form>
                             <TableGrid
                                 select
@@ -132,7 +139,7 @@ export default function ReprintLabels() {
                                     },
                                 ]}
                                 data={preObjectList}
-                                rowUpdater={(
+                                rowUpdateHandler={(
                                     originalRow: IPreObject,
                                     modifiedRow: IPreObject,
                                 ) => {
@@ -147,6 +154,11 @@ export default function ReprintLabels() {
                                         return true;
                                     }
                                     return false;
+                                }}
+                                rowSelectHandler={(
+                                    selectedRows: Array<IPreObject>,
+                                ) => {
+                                    setSelectedPreObjectList(selectedRows);
                                 }}
                             />
                         </Form>
