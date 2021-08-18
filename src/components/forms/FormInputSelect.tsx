@@ -17,7 +17,6 @@ type SelectMenuProps = {
 
 const SelectMenu = React.forwardRef(
     (props: SelectMenuProps, ref: React.Ref<HTMLDivElement>) => {
-        const [value, setValue] = useState('');
         return (
             <Container>
                 <div
@@ -35,14 +34,14 @@ const SelectMenu = React.forwardRef(
     },
 );
 
-interface FormInputSelectProps {
+interface IFormInputSelectProps {
     controlId: string;
     label: string;
     values: string[];
     selectionHandler?: any;
 }
 
-export default function FormInputSelect(props: FormInputSelectProps) {
+export default function FormInputSelect(props: IFormInputSelectProps) {
     const [filterText, setFilterText] = useState<string | null>('');
     const [selectedKey, setSelectedKey] = useState<string | null>(null);
     const [showDropdown, setShowDropdown] = useState(false);
