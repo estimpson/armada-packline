@@ -15,6 +15,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import SupplierPartList, { ISupplierPart } from '../data/SupplierPartList';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import TableGrid from './grid/TableGrid';
 
 // const supplierPartList = SupplisrPartList();
 
@@ -205,11 +206,30 @@ export default function GenerateInventory() {
                                     </tr>
                                 </tbody>
                             </Table>
+                            <TableGrid
+                                select
+                                editableRows
+                                striped
+                                columns={[
+                                    {
+                                        columnName: 'serial',
+                                        columnHeader: 'Serial',
+                                    },
+                                    {
+                                        columnName: 'lotNumber',
+                                        columnHeader: 'Lot',
+                                    },
+                                    {
+                                        columnName: 'quantity',
+                                        columnHeader: 'Qty',
+                                    },
+                                ]}
+                                data={[]}
+                            />
                         </Form>
                     </Card.Body>
                 </Card>
             </Container>
-            <div>{process.env['REACT_APP_API']}</div>
         </>
     );
 }

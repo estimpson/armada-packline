@@ -1,12 +1,6 @@
 import Card from 'react-bootstrap/Card';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
-import Button from 'react-bootstrap/Button';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Table from 'react-bootstrap/Table';
-import FormControl from 'react-bootstrap/FormControl';
-import FormCheck from 'react-bootstrap/FormCheck';
 import FormInputSelect from './forms/FormInputSelect';
 
 // Importing the Bootstrap CSS
@@ -19,6 +13,8 @@ import { useEffect } from 'react';
 import axios from 'axios';
 import { IIdentity, selectIdentity } from '../features/identity/identitySlice';
 import { useAppSelector } from '../app/hooks';
+import TableGrid from './grid/TableGrid';
+import { original } from '@reduxjs/toolkit';
 
 export default function ReprintLabels() {
     // State
@@ -114,42 +110,45 @@ export default function ReprintLabels() {
                     <Card.Body>
                         <Card.Title>
                             (Optionally) Edit the inventory in this batch to
-                            adjust quantities. Then select and print labels.{' '}
-                            {lotNumber}
+                            adjust quantities. Then select and print labels.
                         </Card.Title>
                         <Form>
-                            <Table
-                                striped
-                                bordered
-                                hover
-                                size="sm"
-                                variant="dark"
-                            >
-                                <thead>
-                                    <tr>
-                                        <th className="text-center">
-                                            <FormCheck type="checkbox" />
-                                        </th>
-                                        <th>Serial</th>
-                                        <th>Lot</th>
-                                        <th>Qty per Object</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {preObjectList.map((preObject) => (
-                                        <tr key={preObject.serial}>
-                                            <td className="text-center">
-                                                <FormCheck type="checkbox" />
-                                            </td>
-                                            <td>{preObject.serial}</td>
-                                            <td>{preObject.lotNumber}</td>
-                                            <td>{preObject.quantity}</td>
-                                            <td>Edit</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </Table>
+                            <TableGrid
+                                select
+                                editableRows
+                                columns={[
+                                    {
+                                        columnName: 'serial',
+                                        columnHeader: 'Serial',
+                                        readonly: true,
+                                    },
+                                    {
+                                        columnName: 'lotNumber',
+                                        columnHeader: 'Lot',
+                                    },
+                                    {
+                                        columnName: 'quantity',
+                                        columnHeader: 'Qty',
+                                    },
+                                ]}
+                                data={preObjectList}
+                                rowUpdater={(
+                                    originalRow: IPreObject,
+                                    modifiedRow: IPreObject,
+                                ) => {
+                                    const rowIndex = preObjectList.findIndex(
+                                        (preObject) =>
+                                            preObject.serial ===
+                                            originalRow.serial,
+                                    );
+                                    if (rowIndex) {
+                                        preObjectList[rowIndex] = modifiedRow;
+                                        setPreObjectList(preObjectList);
+                                        return true;
+                                    }
+                                    return false;
+                                }}
+                            />
                         </Form>
                     </Card.Body>
                 </Card>
