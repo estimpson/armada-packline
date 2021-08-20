@@ -16,6 +16,52 @@ import { useAppSelector } from '../app/hooks';
 import TableGrid from './grid/TableGrid';
 import { Button } from 'react-bootstrap';
 
+interface IPrinter {
+    printerName: string;
+    printerDriver: string;
+}
+
+interface ILabelPacket {
+    serial: number;
+    labelData: string;
+}
+
+function printLabels(
+    supplierCode: string,
+    serialList: string,
+    printerDriver: string,
+) {
+    if (process.env['REACT_APP_API'] === 'Enabled') {
+        let queryString = `https://www.fxsupplierportal.com/api/PreObjects/Labels?supplierCode=${encodeURIComponent(
+            supplierCode,
+        )}&serialList=${encodeURIComponent(
+            serialList,
+        )}&printDriver=${encodeURIComponent(printerDriver)}`;
+        console.log(queryString);
+        axios
+            .get<ILabelPacket[]>(queryString)
+            .then((response) => {
+                let labelPackets = response.data;
+                labelPackets.forEach((labelPacket) => {
+                    axios
+                        .post(`/api/printlabel`, labelPacket.labelData)
+                        .then(() => console.log(labelPacket.serial));
+                    console.log(labelPacket);
+                });
+            })
+            .catch((ex) => {
+                let error =
+                    ex.code === 'ECONNABORTED'
+                        ? 'A timeout has occurred'
+                        : ex.response?.status === 404
+                        ? 'Resource not found'
+                        : 'An unexpected error has occurred';
+                console.log(error);
+            });
+        return;
+    }
+}
+
 export default function ReprintLabels() {
     // State
     const [error, setError] = useState<string>('');
@@ -27,6 +73,10 @@ export default function ReprintLabels() {
         IPreObject[]
     >([]);
     const [isPreObjectListLoaded, setIsPreObjectListLoaded] = useState(false);
+    const [currentPrinter, setCurrentPrinter] = useState<IPrinter | undefined>(
+        undefined,
+    );
+    const [isCurrentPrinterLoaded, setIsCurrentPrinterLoaded] = useState(false);
 
     const identity: IIdentity = useAppSelector(selectIdentity);
 
@@ -82,6 +132,26 @@ export default function ReprintLabels() {
         setIsPreObjectListLoaded(true);
     }, [isPreObjectListLoaded]);
 
+    useEffect(() => {
+        axios
+            .get<IPrinter>('/api/currentprinter')
+            .then((response) => {
+                setCurrentPrinter(response.data);
+                setIsCurrentPrinterLoaded(true);
+            })
+            .catch((ex) => {
+                let error =
+                    ex.code === 'ECONNABORTED'
+                        ? 'A timeout has occurred'
+                        : ex.response.status === 404
+                        ? 'Resource Not Found'
+                        : 'An unexpected error has occurred';
+
+                setError(error);
+                setIsCurrentPrinterLoaded(false);
+            });
+    }, [isCurrentPrinterLoaded]);
+
     const lotSelectionHandler = (e: string | null) => {
         setLotNumber(e ? e : '');
         setIsPreObjectListLoaded(false);
@@ -116,7 +186,24 @@ export default function ReprintLabels() {
                             adjust quantities and/or lot numbers. Then select
                             and print labels.
                         </Card.Title>
-                        <Button>
+                        <Button
+                            onClick={() => {
+                                let supplierCode = identity.supplierCode || '';
+                                console.log(supplierCode);
+                                let serialList = selectedPreObjectList
+                                    .map((po) => po.serial)
+                                    .join();
+                                console.log(serialList);
+                                let printerDriver =
+                                    currentPrinter?.printerDriver || '';
+                                console.log(printerDriver);
+                                printLabels(
+                                    supplierCode,
+                                    serialList,
+                                    printerDriver,
+                                );
+                            }}
+                        >
                             Print {selectedPreObjectList.length} select labels
                         </Button>
                         <Form>
@@ -130,12 +217,22 @@ export default function ReprintLabels() {
                                         readonly: true,
                                     },
                                     {
+                                        columnName: 'supplierPartCode',
+                                        columnHeader: 'Part',
+                                        readonly: true,
+                                    },
+                                    {
                                         columnName: 'lotNumber',
                                         columnHeader: 'Lot',
                                     },
                                     {
                                         columnName: 'quantity',
                                         columnHeader: 'Qty',
+                                    },
+                                    {
+                                        columnName: 'labelFormatName',
+                                        columnHeader: 'Label',
+                                        readonly: true,
                                     },
                                 ]}
                                 data={preObjectList}
