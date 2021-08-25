@@ -80,7 +80,9 @@ export default function FormInputSelect(props: IFormInputSelectProps) {
                             setShowDropdown(false);
                             setFilterText('');
                             setSelectedKey(e);
-                            props.selectionHandler(e);
+                            if (props.selectionHandler) {
+                                props.selectionHandler(e);
+                            }
                         }}
                     >
                         <Dropdown.Toggle
@@ -107,11 +109,23 @@ export default function FormInputSelect(props: IFormInputSelectProps) {
                                                 eventKey={value}
                                                 onSelect={(e) => {
                                                     console.log(e);
-                                                    props.selectionHandler(e);
+                                                    if (
+                                                        props.selectionHandler
+                                                    ) {
+                                                        props.selectionHandler(
+                                                            e,
+                                                        );
+                                                    }
                                                 }}
                                                 onClick={(e) => {
                                                     console.log(e);
-                                                    props.selectionHandler(e);
+                                                    if (
+                                                        props.selectionHandler
+                                                    ) {
+                                                        props.selectionHandler(
+                                                            e,
+                                                        );
+                                                    }
                                                 }}
                                             >
                                                 {value}
