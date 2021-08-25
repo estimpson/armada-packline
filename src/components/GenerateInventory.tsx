@@ -4,9 +4,6 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import Table from 'react-bootstrap/Table';
-import FormControl from 'react-bootstrap/FormControl';
-import FormCheck from 'react-bootstrap/FormCheck';
 import FormInputSelect from './forms/FormInputSelect';
 
 // Importing the Bootstrap CSS
@@ -16,26 +13,90 @@ import SupplierPartList, { ISupplierPart } from '../data/SupplierPartList';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import TableGrid from './grid/TableGrid';
+import { IPreObject } from '../data/PreObjectList';
+import { IIdentity, selectIdentity } from '../features/identity/identitySlice';
+import { useAppSelector } from '../app/hooks';
+import { IPrinter, printLabels } from '../app/services/LocalPrinter';
 
-// const supplierPartList = SupplisrPartList();
+function generateBatch(
+    supplierCode: string,
+    supplierPartCode: string,
+    internalPartCode: string,
+    lotNumber: string,
+    quantityPerObject: number,
+    numberOfObjects: number,
+    setResult: (results: Array<IPreObject>) => void,
+    setError: (error: string) => void,
+) {
+    if (process.env['REACT_APP_API'] === 'Enabled') {
+        let queryString = `https://www.fxsupplierportal.com/api/PreObjects/Batch?supplierCode=${encodeURIComponent(
+            supplierCode,
+        )}&supplierPartCode=${encodeURIComponent(
+            supplierPartCode,
+        )}&internalPartCode=${encodeURIComponent(
+            internalPartCode,
+        )}&lotNumber=${encodeURIComponent(
+            lotNumber,
+        )}&qtyPerObject=${encodeURIComponent(
+            quantityPerObject,
+        )}&objectCount=${encodeURIComponent(numberOfObjects)}`;
+        console.log(queryString);
+        axios
+            .post<IPreObject[]>(queryString)
+            .then((response) => {
+                setResult(response.data);
+            })
+            .catch((ex) => {
+                let error =
+                    ex.code === 'ECONNABORTED'
+                        ? 'A timeout has occurred'
+                        : ex.response?.status === 404
+                        ? 'Resource not found'
+                        : 'An unexpected error has occurred';
+                console.log(error);
+                setError(error);
+                return;
+            });
+    }
+}
 
 export default function GenerateInventory() {
     // State
     const [error, setError] = useState<string>('');
-    const [isLoaded, setIsLoaded] = useState(false);
+    const [isPartListLoaded, setIsPartListLoaded] = useState(false);
     const [supplierPartList, setSupplierPartList] = useState<ISupplierPart[]>(
         [],
     );
+    const [supplierPart, setSupplierPart] = useState<ISupplierPart | undefined>(
+        undefined,
+    );
+    const [lotNumber, setLotNumber] = useState<string | undefined>(undefined);
+    const [numberOfObjects, setNumberOfObjects] = useState<number | undefined>(
+        undefined,
+    );
+    const [quantityPerObject, setQuantityPerObject] = useState<
+        number | undefined
+    >(undefined);
+    const [preObjectList, setPreObjectList] = useState<IPreObject[]>([]);
+    const [selectedPreObjectList, setSelectedPreObjectList] = useState<
+        IPreObject[]
+    >([]);
+    const [currentPrinter, setCurrentPrinter] = useState<IPrinter | undefined>(
+        undefined,
+    );
+    const [isCurrentPrinterLoaded, setIsCurrentPrinterLoaded] = useState(false);
+
+    const identity: IIdentity = useAppSelector(selectIdentity);
 
     useEffect(() => {
         if (process.env['REACT_APP_API'] === 'Enabled') {
             axios
                 .get<ISupplierPart[]>(
-                    'https://www.fxsupplierportal.com/api/SupplierParts?supplierCode=ROC0010',
+                    `https://www.fxsupplierportal.com/api/SupplierParts?supplierCode=${identity.supplierCode}`,
                 )
                 .then((response) => {
                     setSupplierPartList(response.data);
-                    setIsLoaded(true);
+                    setIsPartListLoaded(true);
                 })
                 .catch((ex) => {
                     let error =
@@ -45,13 +106,44 @@ export default function GenerateInventory() {
                             ? 'Resource not found'
                             : 'An unexpected error has occurred';
                     setError(error);
-                    setIsLoaded(false);
+                    setIsPartListLoaded(false);
                 });
             return;
         }
         setSupplierPartList(SupplierPartList());
-        setIsLoaded(true);
-    }, [isLoaded]);
+        setIsPartListLoaded(true);
+    }, [isPartListLoaded]);
+
+    useEffect(() => {
+        axios
+            .get<IPrinter>('/api/currentprinter')
+            .then((response) => {
+                setCurrentPrinter(response.data);
+                setIsCurrentPrinterLoaded(true);
+            })
+            .catch((ex) => {
+                let error =
+                    ex.code === 'ECONNABORTED'
+                        ? 'A timeout has occurred'
+                        : ex.response.status === 404
+                        ? 'Resource Not Found'
+                        : 'An unexpected error has occurred';
+
+                setError(error);
+                setIsCurrentPrinterLoaded(false);
+            });
+    }, [isCurrentPrinterLoaded]);
+
+    const partSelectionHandler = (e: string | null) => {
+        setSupplierPart(
+            supplierPartList.find(
+                (supplierPart) => supplierPart?.supplierPartCode === e,
+            ),
+        );
+        setLotNumber(undefined);
+        setNumberOfObjects(undefined);
+        setQuantityPerObject(supplierPart?.supplierStdPack);
+    };
 
     return (
         <>
@@ -71,6 +163,7 @@ export default function GenerateInventory() {
                                     (supplierPart) =>
                                         supplierPart.supplierPartCode,
                                 )}
+                                selectionHandler={partSelectionHandler}
                             ></FormInputSelect>
 
                             <Form.Group
@@ -82,7 +175,10 @@ export default function GenerateInventory() {
                                     Part (Internal):
                                 </Form.Label>
                                 <Col sm="12" md="8" lg="4">
-                                    <Form.Control readOnly />
+                                    <Form.Control
+                                        readOnly
+                                        value={supplierPart?.internalPartCode}
+                                    />
                                 </Col>
                             </Form.Group>
 
@@ -95,7 +191,12 @@ export default function GenerateInventory() {
                                     Lot Number:
                                 </Form.Label>
                                 <Col sm="12" md="8" lg="4">
-                                    <Form.Control />
+                                    <Form.Control
+                                        value={lotNumber || ''}
+                                        onChange={(event) => {
+                                            setLotNumber(event.target.value);
+                                        }}
+                                    />
                                 </Col>
                             </Form.Group>
 
@@ -108,7 +209,15 @@ export default function GenerateInventory() {
                                     Number of Objects:
                                 </Form.Label>
                                 <Col sm="12" md="8" lg="4">
-                                    <Form.Control type="number" />
+                                    <Form.Control
+                                        type="number"
+                                        value={numberOfObjects || ''}
+                                        onChange={(event) => {
+                                            setNumberOfObjects(
+                                                parseInt(event.target.value),
+                                            );
+                                        }}
+                                    />
                                 </Col>
                             </Form.Group>
 
@@ -121,7 +230,15 @@ export default function GenerateInventory() {
                                     Quantity per Object:
                                 </Form.Label>
                                 <Col sm="12" md="8" lg="4">
-                                    <Form.Control />
+                                    <Form.Control
+                                        type="number"
+                                        value={quantityPerObject || ''}
+                                        onChange={(event) => {
+                                            setQuantityPerObject(
+                                                parseInt(event.target.value),
+                                            );
+                                        }}
+                                    />
                                 </Col>
                             </Form.Group>
 
@@ -134,101 +251,127 @@ export default function GenerateInventory() {
                                     Label Format:
                                 </Form.Label>
                                 <Col sm="12" md="8" lg="4">
-                                    <Form.Control readOnly />
+                                    <Form.Control
+                                        readOnly
+                                        value={supplierPart?.labelFormatName}
+                                    />
                                 </Col>
                             </Form.Group>
                         </Form>
-                        <Button>Generate Inventory</Button>
+                        <Button
+                            disabled={
+                                !identity.supplierCode ||
+                                !supplierPart ||
+                                !lotNumber ||
+                                !numberOfObjects ||
+                                !quantityPerObject
+                            }
+                            onClick={() => {
+                                generateBatch(
+                                    identity.supplierCode!,
+                                    supplierPart!.supplierPartCode!,
+                                    supplierPart!.internalPartCode!,
+                                    lotNumber!,
+                                    quantityPerObject!,
+                                    numberOfObjects!,
+                                    setPreObjectList,
+                                    setError,
+                                );
+                            }}
+                        >
+                            Generate Inventory
+                        </Button>
                     </Card.Body>
                 </Card>
-                <Card className="mt-5">
-                    <Card.Body>
-                        <Card.Title>
-                            Edit the inventory in this batch to adjust
-                            quantities. Then select and print labels.
-                        </Card.Title>
-                        <Form>
-                            <Table
-                                striped
-                                bordered
-                                hover
-                                size="sm"
-                                variant="dark"
+                {preObjectList.length ? (
+                    <Card className="mt-5">
+                        <Card.Body>
+                            <Card.Title>
+                                Edit the inventory in this batch to adjust
+                                quantities. Then select and print labels.
+                            </Card.Title>
+                            <Button
+                                onClick={() => {
+                                    let supplierCode =
+                                        identity.supplierCode || '';
+                                    console.log(supplierCode);
+                                    let serialList = selectedPreObjectList
+                                        .map((po) => po.serial)
+                                        .join();
+                                    console.log(serialList);
+                                    let printerDriver =
+                                        currentPrinter?.printerDriver || '';
+                                    console.log(printerDriver);
+                                    printLabels(
+                                        supplierCode,
+                                        serialList,
+                                        printerDriver,
+                                    );
+                                }}
                             >
-                                <thead>
-                                    <tr>
-                                        <th className="text-center">
-                                            <FormCheck type="checkbox" />
-                                        </th>
-                                        <th>Serial</th>
-                                        <th>Lot</th>
-                                        <th>Qty per Object</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td className="text-center">
-                                            <FormCheck type="checkbox" />
-                                        </td>
-                                        <td>123</td>
-                                        <td>XYZ</td>
-                                        <td>100.0</td>
-                                        <td>Edit</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="text-center">
-                                            <FormCheck type="checkbox" />
-                                        </td>
-                                        <td>124</td>
-                                        <td>
-                                            <FormControl
-                                                className="p-0"
-                                                defaultValue="XYZ"
-                                            />
-                                        </td>
-                                        <td>
-                                            <FormControl
-                                                className="p-0"
-                                                defaultValue="100.0"
-                                            />
-                                        </td>
-                                        <td>Update | Cancel</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="text-center">
-                                            <FormCheck type="checkbox" />
-                                        </td>
-                                        <td>125</td>
-                                        <td>XYZ</td>
-                                        <td>100.0</td>
-                                        <td>Edit</td>
-                                    </tr>
-                                </tbody>
-                            </Table>
-                            <TableGrid
-                                select
-                                editableRows
-                                striped
-                                columns={[
-                                    {
-                                        columnName: 'serial',
-                                        columnHeader: 'Serial',
-                                    },
-                                    {
-                                        columnName: 'lotNumber',
-                                        columnHeader: 'Lot',
-                                    },
-                                    {
-                                        columnName: 'quantity',
-                                        columnHeader: 'Qty',
-                                    },
-                                ]}
-                                data={[]}
-                            />
-                        </Form>
-                    </Card.Body>
-                </Card>
+                                Print {selectedPreObjectList.length} select
+                                labels
+                            </Button>
+                            <Form>
+                                <TableGrid
+                                    select
+                                    editableRows
+                                    columns={[
+                                        {
+                                            columnName: 'serial',
+                                            columnHeader: 'Serial',
+                                            readonly: true,
+                                        },
+                                        {
+                                            columnName: 'supplierPartCode',
+                                            columnHeader: 'Part',
+                                            readonly: true,
+                                        },
+                                        {
+                                            columnName: 'lotNumber',
+                                            columnHeader: 'Lot',
+                                        },
+                                        {
+                                            columnName: 'quantity',
+                                            columnHeader: 'Qty',
+                                        },
+                                        {
+                                            columnName: 'labelFormatName',
+                                            columnHeader: 'Label',
+                                            readonly: true,
+                                        },
+                                    ]}
+                                    data={preObjectList}
+                                    rowUpdateHandler={(
+                                        originalRow: IPreObject,
+                                        modifiedRow: IPreObject,
+                                    ) => {
+                                        const rowIndex =
+                                            preObjectList.findIndex(
+                                                (preObject) =>
+                                                    preObject.serial ===
+                                                    originalRow.serial,
+                                            );
+                                        if (rowIndex) {
+                                            preObjectList[rowIndex] =
+                                                modifiedRow;
+                                            setPreObjectList(preObjectList);
+                                            return true;
+                                        }
+                                        return false;
+                                    }}
+                                    rowSelectHandler={(
+                                        selectedRows: Array<IPreObject>,
+                                    ) => {
+                                        setSelectedPreObjectList(selectedRows);
+                                    }}
+                                />
+                            </Form>
+                        </Card.Body>
+                    </Card>
+                ) : (
+                    <></>
+                )}
             </Container>
         </>
     );
