@@ -257,5 +257,10 @@ _Pvt_Extensions
 
 # FAKE - F# Make
 .fake/
+
+# Debugging output
 Output.*.prn
-468995a1ce7452defb76e2b27c0eb033.ico.zip
+printjob*.json
+
+# Zips
+*.zip
