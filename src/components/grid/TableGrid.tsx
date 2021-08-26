@@ -2,6 +2,8 @@ import {
     faCheck,
     faCheckDouble,
     faCheckSquare,
+    faCircle,
+    faDotCircle,
     faPencilAlt,
     faSdCard,
     faSquare,
@@ -20,12 +22,15 @@ export interface ITableGridColumnProps {
 
 export interface ITableGridProps {
     striped?: boolean;
-    select?: boolean;
+    singleRowSelect?: boolean;
+    multiRowCheckboxSelect?: boolean;
     editableRows?: boolean;
     columns: Array<ITableGridColumnProps>;
     data: Array<any>;
+    singleSelectedRow?: any;
     rowUpdateHandler?(rowOriginal: any, rowModified: any): boolean;
-    rowSelectHandler?(selectedRows: Array<any>): void;
+    multirowSelectionHandler?(selectedRows: Array<any>): void;
+    rowSelectionHandler?(selectedRow: any): void;
 }
 
 export default function TableGrid(props: ITableGridProps) {
@@ -41,6 +46,7 @@ export default function TableGrid(props: ITableGridProps) {
     const [selectedRowIndexes, setSelectedRowIndexes] = useState<
         Array<boolean>
     >([]);
+    const [selectedRow, setSelectedRow] = useState<any | undefined>(undefined);
 
     if (props.data !== prevData) {
         // Data has changed so reset the editing and row selection.
@@ -68,10 +74,11 @@ export default function TableGrid(props: ITableGridProps) {
     };
 
     return (
-        <Table striped bordered hover size="sm">
+        <Table striped={props.striped} bordered hover size="sm">
             <thead>
                 <tr>
-                    {props.select && (
+                    {props.singleRowSelect && <th></th>}
+                    {props.multiRowCheckboxSelect && (
                         <th className="text-center">
                             <FontAwesomeIcon
                                 icon={selectedStateIcon(selectedRowIndexes)}
@@ -84,11 +91,13 @@ export default function TableGrid(props: ITableGridProps) {
                                     } else {
                                         setSelectedRowIndexes(a.fill(true));
                                     }
-                                    if (props.rowSelectHandler) {
+                                    if (props.multirowSelectionHandler) {
                                         const selectedRows = props.data.filter(
                                             (row, rowindex) => a[rowindex],
                                         );
-                                        props.rowSelectHandler(selectedRows);
+                                        props.multirowSelectionHandler(
+                                            selectedRows,
+                                        );
                                     }
                                 }}
                             />
@@ -110,7 +119,25 @@ export default function TableGrid(props: ITableGridProps) {
                 {props.data &&
                     props.data.map((row, rowIndex) => (
                         <tr>
-                            {props.select && (
+                            {props.singleRowSelect && (
+                                <td className="text-center">
+                                    <FontAwesomeIcon
+                                        icon={
+                                            row === props.singleSelectedRow
+                                                ? faDotCircle
+                                                : faCircle
+                                        }
+                                        fixedWidth
+                                        onClick={() => {
+                                            setSelectedRow(row);
+                                            if (props.rowSelectionHandler) {
+                                                props.rowSelectionHandler(row);
+                                            }
+                                        }}
+                                    />
+                                </td>
+                            )}
+                            {props.multiRowCheckboxSelect && (
                                 <td className="text-center">
                                     <FontAwesomeIcon
                                         icon={
@@ -118,6 +145,7 @@ export default function TableGrid(props: ITableGridProps) {
                                                 ? faCheck
                                                 : faSquare
                                         }
+                                        fixedWidth
                                         onClick={() => {
                                             const a = Array(
                                                 props.data.length,
@@ -132,13 +160,15 @@ export default function TableGrid(props: ITableGridProps) {
                                             }
                                             a[rowIndex] = !a[rowIndex];
                                             setSelectedRowIndexes(a);
-                                            if (props.rowSelectHandler) {
+                                            if (
+                                                props.multirowSelectionHandler
+                                            ) {
                                                 const selectedRows =
                                                     props.data.filter(
                                                         (row, rowindex) =>
                                                             a[rowindex],
                                                     );
-                                                props.rowSelectHandler(
+                                                props.multirowSelectionHandler(
                                                     selectedRows,
                                                 );
                                             }
@@ -174,8 +204,9 @@ export default function TableGrid(props: ITableGridProps) {
                                     {rowIndex === rowEditIndex ? (
                                         <>
                                             <FontAwesomeIcon
-                                                size="sm"
                                                 icon={faSdCard}
+                                                fixedWidth
+                                                size="sm"
                                                 className="mx-2"
                                                 onClick={() => {
                                                     if (
@@ -195,8 +226,9 @@ export default function TableGrid(props: ITableGridProps) {
                                                 }}
                                             />
                                             <FontAwesomeIcon
-                                                size="sm"
                                                 icon={faUndoAlt}
+                                                fixedWidth
+                                                size="sm"
                                                 className="mx-2"
                                                 onClick={() => {
                                                     setModifiedRowData(
@@ -209,6 +241,7 @@ export default function TableGrid(props: ITableGridProps) {
                                     ) : (
                                         <FontAwesomeIcon
                                             icon={faPencilAlt}
+                                            fixedWidth
                                             size="sm"
                                             className="mx-2"
                                             onClick={() => {
