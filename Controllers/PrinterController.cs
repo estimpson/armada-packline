@@ -214,7 +214,7 @@ public class PrinterController : ControllerBase
                 await Request.Body.CopyToAsync(ms);
                 var printData = Encoding.ASCII.GetString(ms.ToArray());
                 Winspool.Print(CurrentPrinter, printData);
-                System.IO.File.WriteAllText($"printjob{UtcNowTicks}.json", printData);
+                System.IO.File.WriteAllText($@"\debug\printjob{UtcNowTicks}.json", printData);
             }
         }
         catch
