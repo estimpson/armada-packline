@@ -163,7 +163,7 @@ export default function ReprintLabels() {
                         </Button>
                         <Form>
                             <TableGrid
-                                select
+                                multiRowCheckboxSelect
                                 editableRows
                                 columns={[
                                     {
@@ -207,7 +207,7 @@ export default function ReprintLabels() {
                                     }
                                     return false;
                                 }}
-                                rowSelectHandler={(
+                                multirowSelectionHandler={(
                                     selectedRows: Array<IPreObject>,
                                 ) => {
                                     setSelectedPreObjectList(selectedRows);

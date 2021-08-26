@@ -314,7 +314,7 @@ export default function GenerateInventory() {
                             </Button>
                             <Form>
                                 <TableGrid
-                                    select
+                                    multiRowCheckboxSelect
                                     editableRows
                                     columns={[
                                         {
@@ -360,7 +360,7 @@ export default function GenerateInventory() {
                                         }
                                         return false;
                                     }}
-                                    rowSelectHandler={(
+                                    multirowSelectionHandler={(
                                         selectedRows: Array<IPreObject>,
                                     ) => {
                                         setSelectedPreObjectList(selectedRows);
