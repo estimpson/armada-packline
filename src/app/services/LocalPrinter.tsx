@@ -43,3 +43,80 @@ export function printLabels(
         return;
     }
 }
+
+export function getDefaultPrinter(
+    setCurrentPrinter: (printer: IPrinter) => void,
+    setIsLoaded: (printerListIsLoaded: boolean) => void,
+    setError: (error: string) => void,
+) {
+    axios
+        .get<IPrinter>('/api/currentprinter')
+        .then((response) => {
+            setCurrentPrinter(response.data);
+            setIsLoaded(true);
+        })
+        .catch((ex) => {
+            let error =
+                ex.code === 'ECONNABORTED'
+                    ? 'A timeout has occurred'
+                    : ex.response.status === 404
+                    ? 'Resource Not Found'
+                    : 'An unexpected error has occurred';
+
+            setError(error);
+            setIsLoaded(false);
+        });
+}
+
+export function setDefaultPrinter(
+    printer: IPrinter,
+    setCurrentPrinter: (printer: IPrinter) => void,
+    setIsLoaded: (printerListIsLoaded: boolean) => void,
+    setError: (error: string) => void,
+) {
+    axios
+        .patch<boolean>(
+            `/api/setcurrentprinter?printerName=${encodeURIComponent(
+                printer.printerName,
+            )}`,
+        )
+        .then((response) => {
+            setCurrentPrinter(printer);
+            setIsLoaded(true);
+        })
+        .catch((ex) => {
+            let error =
+                ex.code === 'ECONNABORTED'
+                    ? 'A timeout has occurred'
+                    : ex.response.status === 404
+                    ? 'Resource Not Found'
+                    : 'An unexpected error has occurred';
+
+            setError(error);
+            setIsLoaded(false);
+        });
+}
+
+export function getPrinterList(
+    setPrinters: (printerList: IPrinter[]) => void,
+    setIsLoaded: (printerListIsLoaded: boolean) => void,
+    setError: (error: string) => void,
+) {
+    axios
+        .get<IPrinter[]>('/api/printerlist')
+        .then((response) => {
+            setPrinters(response.data);
+            setIsLoaded(true);
+        })
+        .catch((ex) => {
+            let error =
+                ex.code === 'ECONNABORTED'
+                    ? 'A timeout has occurred'
+                    : ex.response.status === 404
+                    ? 'Resource Not Found'
+                    : 'An unexpected error has occurred';
+
+            setError(error);
+            setIsLoaded(false);
+        });
+}

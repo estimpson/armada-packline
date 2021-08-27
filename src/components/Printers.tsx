@@ -10,78 +10,87 @@ import {
 } from 'react-bootstrap';
 
 import { Link } from 'react-router-dom';
-
-interface IPrinter {
-    printerName: string;
-    printerDriver: string;
-}
+import {
+    getDefaultPrinter,
+    getPrinterList,
+    IPrinter,
+    setDefaultPrinter,
+} from '../app/services/LocalPrinter';
+import TableGrid from './grid/TableGrid';
 
 export default function PrinterList() {
     // State
     const [error, setError] = useState<string>('');
-    const [isLoaded, setIsLoaded] = useState(false);
-    const [printers, setPrinters] = useState<IPrinter[]>([]);
+    const [printerList, setPrinterList] = useState<IPrinter[]>([]);
+    const [isPrinterListLoaded, setIsPrinterListLoaded] = useState(false);
+    const [currentPrinter, setCurrentPrinter] = useState<IPrinter | undefined>(
+        undefined,
+    );
+    const [isCurrentPrinterLoaded, setIsCurrentPrinterLoaded] = useState(false);
 
     useEffect(() => {
-        axios
-            .get<IPrinter[]>('/api/printerlist')
-            .then((response) => {
-                setPrinters(response.data);
-                setIsLoaded(true);
-            })
-            .catch((ex) => {
-                let error =
-                    ex.code === 'ECONNABORTED'
-                        ? 'A timeout has occurred'
-                        : ex.response.status === 404
-                        ? 'Resource Not Found'
-                        : 'An unexpected error has occurred';
-
-                setError(error);
-                setIsLoaded(false);
-            });
+        getPrinterList(setPrinterList, setIsPrinterListLoaded, setError);
     }, []);
+
+    useEffect(() => {
+        getDefaultPrinter(
+            setCurrentPrinter,
+            setIsCurrentPrinterLoaded,
+            setError,
+        );
+    }, [isCurrentPrinterLoaded]);
 
     return (
         <Container>
-            <Row>
-                <Col xs={12}>
-                    <Card>
-                        <Card.Body>
-                            <Card.Title>Available Printers</Card.Title>
-                            {error ? (
-                                <span>'Error: ' {error}</span>
-                            ) : isLoaded ? (
-                                <ListGroup>
-                                    {printers.map((printer) => {
-                                        return (
-                                            <ListGroupItem
-                                                key={printer.printerName}
-                                            >
-                                                <Row>
-                                                    <Col xs={6}>
-                                                        {printer.printerName}
-                                                    </Col>
-                                                    <Col xs={6}>
-                                                        {printer.printerDriver}
-                                                    </Col>
-                                                </Row>
-                                            </ListGroupItem>
-                                        );
-                                    })}
-                                </ListGroup>
-                            ) : (
-                                <Card.Text>Loading...</Card.Text>
-                            )}
-                        </Card.Body>
-                    </Card>
-                </Col>
-            </Row>
-            <Row>
-                <Col xs={12}>
-                    <Link to="/">Return to home</Link>
-                </Col>
-            </Row>
+            <h1>Printers</h1>
+            <Card>
+                <Card.Body>
+                    <Card.Title>
+                        Select the printer to use from the list of available
+                        printers on your machine.
+                    </Card.Title>
+                    <p className="fw-light fst-italic text-dark">
+                        {currentPrinter
+                            ? `Your current printer is ${currentPrinter.printerName}.`
+                            : 'No current printer defined.'}
+                    </p>
+                    {error ? (
+                        <span>'Error: ' {error}</span>
+                    ) : isPrinterListLoaded ? (
+                        <Container className="pt-3 mx-0 px-0">
+                            <TableGrid
+                                singleRowSelect={true}
+                                columns={[
+                                    {
+                                        columnName: 'printerName',
+                                        columnHeader: 'Printer Name',
+                                    },
+                                    {
+                                        columnName: 'printerDriver',
+                                        columnHeader: 'Driver Name',
+                                    },
+                                ]}
+                                data={printerList}
+                                singleSelectedRow={printerList.find(
+                                    (printer) =>
+                                        printer.printerName ===
+                                        currentPrinter?.printerName,
+                                )}
+                                rowSelectionHandler={(printer: IPrinter) => {
+                                    setDefaultPrinter(
+                                        printer,
+                                        setCurrentPrinter,
+                                        setIsCurrentPrinterLoaded,
+                                        setError,
+                                    );
+                                }}
+                            />
+                        </Container>
+                    ) : (
+                        <Card.Text>Loading...</Card.Text>
+                    )}
+                </Card.Body>
+            </Card>
         </Container>
     );
 }
