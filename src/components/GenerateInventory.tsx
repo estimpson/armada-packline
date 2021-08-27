@@ -4,6 +4,7 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import Toast from 'react-bootstrap/Toast';
 import FormInputSelect from './forms/FormInputSelect';
 
 // Importing the Bootstrap CSS
@@ -17,6 +18,7 @@ import { IPreObject } from '../data/PreObjectList';
 import { IIdentity, selectIdentity } from '../features/identity/identitySlice';
 import { useAppSelector } from '../app/hooks';
 import { IPrinter, printLabels } from '../app/services/LocalPrinter';
+import { saveLotQuantityChange } from '../app/services/PreObjects';
 
 function generateBatch(
     supplierCode: string,
@@ -352,11 +354,14 @@ export default function GenerateInventory() {
                                                     preObject.serial ===
                                                     originalRow.serial,
                                             );
-                                        if (rowIndex) {
-                                            preObjectList[rowIndex] =
-                                                modifiedRow;
-                                            setPreObjectList(preObjectList);
-                                            return true;
+                                        if (rowIndex >= 0) {
+                                            return saveLotQuantityChange(
+                                                preObjectList,
+                                                rowIndex,
+                                                modifiedRow,
+                                                setPreObjectList,
+                                                setError,
+                                            );
                                         }
                                         return false;
                                     }}
@@ -369,6 +374,23 @@ export default function GenerateInventory() {
                             </Form>
                         </Card.Body>
                     </Card>
+                ) : (
+                    <></>
+                )}
+                {error ? (
+                    <Toast bg="danger" onClose={() => setError('')}>
+                        <Toast.Header>
+                            <img
+                                src="favicon.png"
+                                alt=""
+                                style={{ width: 24 }}
+                            />
+                            <strong className="me-auto">
+                                Aztec Supplier Portal
+                            </strong>
+                        </Toast.Header>
+                        <Toast.Body className="danger">{error}</Toast.Body>
+                    </Toast>
                 ) : (
                     <></>
                 )}

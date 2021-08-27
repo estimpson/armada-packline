@@ -1,7 +1,9 @@
 import Card from 'react-bootstrap/Card';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
+import Toast from 'react-bootstrap/Toast';
 import FormInputSelect from './forms/FormInputSelect';
+import Button from 'react-bootstrap/Button';
 
 // Importing the Bootstrap CSS
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -14,46 +16,8 @@ import axios from 'axios';
 import { IIdentity, selectIdentity } from '../features/identity/identitySlice';
 import { useAppSelector } from '../app/hooks';
 import TableGrid from './grid/TableGrid';
-import { Button, Toast } from 'react-bootstrap';
 import { IPrinter, printLabels } from '../app/services/LocalPrinter';
-
-function saveLotQuantityChange(
-    preObjectList: IPreObject[],
-    rowIndex: number,
-    modifiedPreObject: IPreObject,
-    setError: React.Dispatch<React.SetStateAction<string>>,
-    setPreObjectList: React.Dispatch<React.SetStateAction<IPreObject[]>>,
-) {
-    if (process.env['REACT_APP_API'] === 'Enabled') {
-        let queryString = `https://www.fxsupplierportal.com/api/PreObjects/PreObject?supplierCode=${encodeURIComponent(
-            modifiedPreObject.supplierCode,
-        )}&serialNumber=${encodeURIComponent(
-            modifiedPreObject.serial,
-        )}&newLotNumber=${encodeURIComponent(
-            modifiedPreObject.lotNumber,
-        )}&newQuantity=${encodeURIComponent(modifiedPreObject.quantity)}`;
-
-        console.log(queryString);
-        axios
-            .patch<IPreObject>(queryString)
-            .then((response) => {
-                preObjectList[rowIndex] = response.data;
-            })
-            .catch((ex) => {
-                let error =
-                    ex.code === 'ECONNABORTED'
-                        ? 'A timeout has occurred'
-                        : ex.response?.status === 404
-                        ? 'Resource not found'
-                        : 'An unexpected error has occurred';
-                setError(error);
-            });
-    } else {
-        preObjectList[rowIndex] = modifiedPreObject;
-    }
-    setPreObjectList(preObjectList);
-    return true;
-}
+import { saveLotQuantityChange } from '../app/services/PreObjects';
 
 export default function ReprintLabels() {
     // State
@@ -252,13 +216,13 @@ export default function ReprintLabels() {
                                                             preObject.serial ===
                                                             originalRow.serial,
                                                     );
-                                                if (rowIndex) {
+                                                if (rowIndex >= 0) {
                                                     return saveLotQuantityChange(
                                                         preObjectList,
                                                         rowIndex,
                                                         modifiedRow,
-                                                        setError,
                                                         setPreObjectList,
+                                                        setError,
                                                     );
                                                 }
                                                 return false;
