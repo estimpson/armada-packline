@@ -14,8 +14,46 @@ import axios from 'axios';
 import { IIdentity, selectIdentity } from '../features/identity/identitySlice';
 import { useAppSelector } from '../app/hooks';
 import TableGrid from './grid/TableGrid';
-import { Button } from 'react-bootstrap';
+import { Button, Toast } from 'react-bootstrap';
 import { IPrinter, printLabels } from '../app/services/LocalPrinter';
+
+function saveLotQuantityChange(
+    preObjectList: IPreObject[],
+    rowIndex: number,
+    modifiedPreObject: IPreObject,
+    setError: React.Dispatch<React.SetStateAction<string>>,
+    setPreObjectList: React.Dispatch<React.SetStateAction<IPreObject[]>>,
+) {
+    if (process.env['REACT_APP_API'] === 'Enabled') {
+        let queryString = `https://www.fxsupplierportal.com/api/PreObjects/PreObject?supplierCode=${encodeURIComponent(
+            modifiedPreObject.supplierCode,
+        )}&serialNumber=${encodeURIComponent(
+            modifiedPreObject.serial,
+        )}&newLotNumber=${encodeURIComponent(
+            modifiedPreObject.lotNumber,
+        )}&newQuantity=${encodeURIComponent(modifiedPreObject.quantity)}`;
+
+        console.log(queryString);
+        axios
+            .patch<IPreObject>(queryString)
+            .then((response) => {
+                preObjectList[rowIndex] = response.data;
+            })
+            .catch((ex) => {
+                let error =
+                    ex.code === 'ECONNABORTED'
+                        ? 'A timeout has occurred'
+                        : ex.response?.status === 404
+                        ? 'Resource not found'
+                        : 'An unexpected error has occurred';
+                setError(error);
+            });
+    } else {
+        preObjectList[rowIndex] = modifiedPreObject;
+    }
+    setPreObjectList(preObjectList);
+    return true;
+}
 
 export default function ReprintLabels() {
     // State
@@ -122,100 +160,144 @@ export default function ReprintLabels() {
                             Select a previous lot number and select labels to
                             reprint.
                         </Card.Title>
-                        <Form>
-                            <FormInputSelect
-                                controlId="formSupplierParts"
-                                label="Lot:"
-                                values={supplierLotList.map(
-                                    (supplierLot) => supplierLot.lotNumber,
-                                )}
-                                selectionHandler={lotSelectionHandler}
-                            ></FormInputSelect>
-                        </Form>
+                        {isLotListLoaded ? (
+                            <Form>
+                                <FormInputSelect
+                                    controlId="formSupplierParts"
+                                    label="Lot:"
+                                    values={supplierLotList.map(
+                                        (supplierLot) => supplierLot.lotNumber,
+                                    )}
+                                    selectionHandler={lotSelectionHandler}
+                                ></FormInputSelect>
+                            </Form>
+                        ) : (
+                            <Card.Text>Loading...</Card.Text>
+                        )}
                     </Card.Body>
                 </Card>
-                <Card className="mt-5">
-                    <Card.Body>
-                        <Card.Title>
-                            (Optionally) Edit the inventory in this batch to
-                            adjust quantities and/or lot numbers. Then select
-                            and print labels.
-                        </Card.Title>
-                        <Button
-                            onClick={() => {
-                                let supplierCode = identity.supplierCode || '';
-                                console.log(supplierCode);
-                                let serialList = selectedPreObjectList
-                                    .map((po) => po.serial)
-                                    .join();
-                                console.log(serialList);
-                                let printerDriver =
-                                    currentPrinter?.printerDriver || '';
-                                console.log(printerDriver);
-                                printLabels(
-                                    supplierCode,
-                                    serialList,
-                                    printerDriver,
-                                );
-                            }}
-                        >
-                            Print {selectedPreObjectList.length} select labels
-                        </Button>
-                        <Form>
-                            <TableGrid
-                                multiRowCheckboxSelect
-                                editableRows
-                                columns={[
-                                    {
-                                        columnName: 'serial',
-                                        columnHeader: 'Serial',
-                                        readonly: true,
-                                    },
-                                    {
-                                        columnName: 'supplierPartCode',
-                                        columnHeader: 'Part',
-                                        readonly: true,
-                                    },
-                                    {
-                                        columnName: 'lotNumber',
-                                        columnHeader: 'Lot',
-                                    },
-                                    {
-                                        columnName: 'quantity',
-                                        columnHeader: 'Qty',
-                                    },
-                                    {
-                                        columnName: 'labelFormatName',
-                                        columnHeader: 'Label',
-                                        readonly: true,
-                                    },
-                                ]}
-                                data={preObjectList}
-                                rowUpdateHandler={(
-                                    originalRow: IPreObject,
-                                    modifiedRow: IPreObject,
-                                ) => {
-                                    const rowIndex = preObjectList.findIndex(
-                                        (preObject) =>
-                                            preObject.serial ===
-                                            originalRow.serial,
-                                    );
-                                    if (rowIndex) {
-                                        preObjectList[rowIndex] = modifiedRow;
-                                        setPreObjectList(preObjectList);
-                                        return true;
-                                    }
-                                    return false;
-                                }}
-                                multirowSelectionHandler={(
-                                    selectedRows: Array<IPreObject>,
-                                ) => {
-                                    setSelectedPreObjectList(selectedRows);
-                                }}
+                {lotNumber ? (
+                    <Card className="mt-5">
+                        <Card.Body>
+                            <Card.Title>
+                                (Optionally) Edit the inventory in this batch to
+                                adjust quantities and/or lot numbers. Then
+                                select and print labels.
+                            </Card.Title>
+                            {isPreObjectListLoaded ? (
+                                <>
+                                    <Button
+                                        onClick={() => {
+                                            let supplierCode =
+                                                identity.supplierCode || '';
+                                            console.log(supplierCode);
+                                            let serialList =
+                                                selectedPreObjectList
+                                                    .map((po) => po.serial)
+                                                    .join();
+                                            console.log(serialList);
+                                            let printerDriver =
+                                                currentPrinter?.printerDriver ||
+                                                '';
+                                            console.log(printerDriver);
+                                            printLabels(
+                                                supplierCode,
+                                                serialList,
+                                                printerDriver,
+                                            );
+                                        }}
+                                    >
+                                        Print {selectedPreObjectList.length}{' '}
+                                        select labels
+                                    </Button>
+                                    <Form>
+                                        <TableGrid
+                                            multiRowCheckboxSelect
+                                            editableRows
+                                            columns={[
+                                                {
+                                                    columnName: 'serial',
+                                                    columnHeader: 'Serial',
+                                                    readonly: true,
+                                                },
+                                                {
+                                                    columnName:
+                                                        'supplierPartCode',
+                                                    columnHeader: 'Part',
+                                                    readonly: true,
+                                                },
+                                                {
+                                                    columnName: 'lotNumber',
+                                                    columnHeader: 'Lot',
+                                                },
+                                                {
+                                                    columnName: 'quantity',
+                                                    columnHeader: 'Qty',
+                                                },
+                                                {
+                                                    columnName:
+                                                        'labelFormatName',
+                                                    columnHeader: 'Label',
+                                                    readonly: true,
+                                                },
+                                            ]}
+                                            data={preObjectList}
+                                            rowUpdateHandler={(
+                                                originalRow: IPreObject,
+                                                modifiedRow: IPreObject,
+                                            ) => {
+                                                const rowIndex =
+                                                    preObjectList.findIndex(
+                                                        (preObject) =>
+                                                            preObject.serial ===
+                                                            originalRow.serial,
+                                                    );
+                                                if (rowIndex) {
+                                                    return saveLotQuantityChange(
+                                                        preObjectList,
+                                                        rowIndex,
+                                                        modifiedRow,
+                                                        setError,
+                                                        setPreObjectList,
+                                                    );
+                                                }
+                                                return false;
+                                            }}
+                                            multirowSelectionHandler={(
+                                                selectedRows: Array<IPreObject>,
+                                            ) => {
+                                                setSelectedPreObjectList(
+                                                    selectedRows,
+                                                );
+                                            }}
+                                        />
+                                    </Form>
+                                </>
+                            ) : (
+                                <Card.Text>Loaing...</Card.Text>
+                            )}
+                        </Card.Body>
+                    </Card>
+                ) : (
+                    <></>
+                )}
+                {error ? (
+                    <Toast bg="danger" onClose={() => setError('')}>
+                        <Toast.Header>
+                            <img
+                                src="favicon.png"
+                                alt=""
+                                style={{ width: 24 }}
                             />
-                        </Form>
-                    </Card.Body>
-                </Card>
+                            <strong className="me-auto">
+                                Aztec Supplier Portal
+                            </strong>
+                        </Toast.Header>
+                        <Toast.Body className="danger">{error}</Toast.Body>
+                    </Toast>
+                ) : (
+                    <></>
+                )}
             </Container>
         </>
     );
