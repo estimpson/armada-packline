@@ -46,8 +46,8 @@ export function printLabels(
 
 export function getDefaultPrinter(
     setCurrentPrinter: (printer: IPrinter) => void,
-    setIsLoaded: (printerListIsLoaded: boolean) => void,
-    setError: (error: string) => void,
+    setIsLoaded: React.Dispatch<React.SetStateAction<boolean>>,
+    setError: React.Dispatch<React.SetStateAction<string>>,
 ) {
     axios
         .get<IPrinter>('/api/currentprinter')
@@ -71,8 +71,8 @@ export function getDefaultPrinter(
 export function setDefaultPrinter(
     printer: IPrinter,
     setCurrentPrinter: (printer: IPrinter) => void,
-    setIsLoaded: (printerListIsLoaded: boolean) => void,
-    setError: (error: string) => void,
+    setIsLoaded: React.Dispatch<React.SetStateAction<boolean>>,
+    setError: React.Dispatch<React.SetStateAction<string>>,
 ) {
     axios
         .patch<boolean>(
@@ -100,7 +100,7 @@ export function setDefaultPrinter(
 export function getPrinterList(
     setPrinters: (printerList: IPrinter[]) => void,
     setIsLoaded: (printerListIsLoaded: boolean) => void,
-    setError: (error: string) => void,
+    setError: React.Dispatch<React.SetStateAction<string>>,
 ) {
     axios
         .get<IPrinter[]>('/api/printerlist')
