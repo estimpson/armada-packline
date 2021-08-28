@@ -46,7 +46,6 @@ export default function TableGrid(props: ITableGridProps) {
     const [selectedRowIndexes, setSelectedRowIndexes] = useState<
         Array<boolean>
     >([]);
-    const [selectedRow, setSelectedRow] = useState<any | undefined>(undefined);
 
     if (props.data !== prevData) {
         // Data has changed so reset the editing and row selection.
@@ -129,7 +128,6 @@ export default function TableGrid(props: ITableGridProps) {
                                         }
                                         fixedWidth
                                         onClick={() => {
-                                            setSelectedRow(row);
                                             if (props.rowSelectionHandler) {
                                                 props.rowSelectionHandler(row);
                                             }
