@@ -1,7 +1,5 @@
 import axios from 'axios';
-import { IPreObject } from '../../data/PreObjectList';
-import SupplierLotList, { ISupplierLot } from '../../data/SupplierLotList';
-import { IIdentity } from '../../features/identity/identitySlice';
+import { IPreObject } from '../PreObjectList';
 
 export function saveLotQuantityChange(
     preObjectList: IPreObject[],

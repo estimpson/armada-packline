@@ -17,8 +17,8 @@ import TableGrid from './grid/TableGrid';
 import { IPreObject } from '../data/PreObjectList';
 import { IIdentity, selectIdentity } from '../features/identity/identitySlice';
 import { useAppSelector } from '../app/hooks';
-import { IPrinter, printLabels } from '../app/services/LocalPrinter';
-import { saveLotQuantityChange } from '../app/services/PreObjects';
+import { IPrinter, printLabels } from '../data/services/LocalPrinter';
+import { saveLotQuantityChange } from '../data/services/PreObjects';
 
 function generateBatch(
     supplierCode: string,
@@ -114,7 +114,7 @@ export default function GenerateInventory() {
         }
         setSupplierPartList(SupplierPartList());
         setIsPartListLoaded(true);
-    }, [isPartListLoaded]);
+    }, [identity.supplierCode, isPartListLoaded]);
 
     useEffect(() => {
         axios

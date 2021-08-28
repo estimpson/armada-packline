@@ -1,21 +1,12 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
-import {
-    Card,
-    Col,
-    Container,
-    ListGroup,
-    ListGroupItem,
-    Row,
-} from 'react-bootstrap';
+import { Card, Container } from 'react-bootstrap';
 
-import { Link } from 'react-router-dom';
 import {
     getDefaultPrinter,
     getPrinterList,
     IPrinter,
     setDefaultPrinter,
-} from '../app/services/LocalPrinter';
+} from '../data/services/LocalPrinter';
 import TableGrid from './grid/TableGrid';
 
 export default function PrinterList() {

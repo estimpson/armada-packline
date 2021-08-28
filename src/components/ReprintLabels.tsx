@@ -16,8 +16,8 @@ import axios from 'axios';
 import { IIdentity, selectIdentity } from '../features/identity/identitySlice';
 import { useAppSelector } from '../app/hooks';
 import TableGrid from './grid/TableGrid';
-import { IPrinter, printLabels } from '../app/services/LocalPrinter';
-import { saveLotQuantityChange } from '../app/services/PreObjects';
+import { IPrinter, printLabels } from '../data/services/LocalPrinter';
+import { saveLotQuantityChange } from '../data/services/PreObjects';
 
 export default function ReprintLabels() {
     // State
@@ -61,7 +61,7 @@ export default function ReprintLabels() {
         }
         setSupplierLotList(SupplierLotList());
         setIsLotListLoaded(true);
-    }, [isLotListLoaded]);
+    }, [identity.supplierCode, isLotListLoaded]);
 
     useEffect(() => {
         if (process.env['REACT_APP_API'] === 'Enabled') {
@@ -87,7 +87,7 @@ export default function ReprintLabels() {
         }
         setPreObjectList(PreObjectList('lot'));
         setIsPreObjectListLoaded(true);
-    }, [isPreObjectListLoaded]);
+    }, [identity.supplierCode, isPreObjectListLoaded, lotNumber]);
 
     useEffect(() => {
         axios
