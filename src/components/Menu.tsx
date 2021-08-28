@@ -1,8 +1,7 @@
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-import NavDropdown from 'react-bootstrap/NavDropdown';
-import { Switch, Route, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAppSelector } from '../app/hooks';
 import { IIdentity, selectIdentity } from '../features/identity/identitySlice';
 
@@ -26,33 +25,9 @@ export function MainMenu() {
                                 <Nav.Link as={Link} to="/reprint-labels">
                                     Reprint Labels
                                 </Nav.Link>
-                                <Nav.Link as={Link} to="/generate-asn">
-                                    Generate ASN
-                                </Nav.Link>
                                 <Nav.Link as={Link} to="/printers">
                                     Printers
                                 </Nav.Link>
-                                <NavDropdown
-                                    title="Supplier Settings"
-                                    id="basic-nav-dropdown"
-                                >
-                                    <NavDropdown.Item
-                                        as={Link}
-                                        to="/supplier-settings"
-                                    >
-                                        Settings
-                                    </NavDropdown.Item>
-                                    <NavDropdown.Item href="#action/3.2">
-                                        Another action
-                                    </NavDropdown.Item>
-                                    <NavDropdown.Item href="#action/3.3">
-                                        Something
-                                    </NavDropdown.Item>
-                                    <NavDropdown.Divider />
-                                    <NavDropdown.Item href="#action/3.4">
-                                        Separated link
-                                    </NavDropdown.Item>
-                                </NavDropdown>
                             </Nav>
                         </Navbar.Collapse>
                     </>

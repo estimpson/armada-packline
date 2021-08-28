@@ -22,12 +22,7 @@ export function Routes() {
                         component={GenerateInventory}
                     />
                     <Route path={'/reprint-labels'} component={ReprintLabels} />
-                    <Route path={'/generate-asn'} component={GenerateASN} />
                     <Route path={'/printers'} component={PrinterList} />
-                    <Route
-                        path={'/supplier-settings'}
-                        component={SupplierSettings}
-                    />
                 </>
             )}
             <Redirect to={'/'} />
