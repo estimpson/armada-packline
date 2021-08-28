@@ -1,4 +1,5 @@
 import axios from 'axios';
+import React from 'react';
 import { IIdentity } from './identitySlice';
 
 interface IIdentityAPI {
@@ -8,7 +9,11 @@ interface IIdentityAPI {
     printerQty: number;
 }
 
-export function validateLogin(fxSPID: string, password: string) {
+export function validateLogin(
+    fxSPID: string,
+    password: string,
+    setError?: React.Dispatch<React.SetStateAction<string>>,
+) {
     return new Promise<{
         data: IIdentity;
     }>((resolve) => {
@@ -34,6 +39,7 @@ export function validateLogin(fxSPID: string, password: string) {
                             : ex.response?.status === 404
                             ? 'Resource not found'
                             : 'An unexpected error has occurred';
+                    setError && setError(error);
                 });
         }
 
