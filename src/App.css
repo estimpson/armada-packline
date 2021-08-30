@@ -1,19 +1,23 @@
-th.text-center > div[class^="form-"] > input {
-  float: unset;
+th.text-center > div[class^='form-'] > input {
+    float: unset;
 }
 
-td.text-center > div[class^="form-"] > input {
-  float: unset;
+td.text-center > div[class^='form-'] > input {
+    float: unset;
 }
 
-th.text-center > div[class*=" form-"] > input {
-  float: unset;
+th.text-center > div[class*=' form-'] > input {
+    float: unset;
 }
 
-td.text-center > div[class*=" form-"] > input {
-  float: unset;
+td.text-center > div[class*=' form-'] > input {
+    float: unset;
 }
 
 .select-menu {
-  width: 100%;
+    width: 100%;
+}
+
+main > .container {
+    padding: 60px 15px 0;
 }

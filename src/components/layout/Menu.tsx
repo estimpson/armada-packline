@@ -2,14 +2,17 @@ import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import { Link } from 'react-router-dom';
-import { useAppSelector } from '../app/hooks';
-import { IIdentity, selectIdentity } from '../features/identity/identitySlice';
+import { useAppSelector } from '../../app/hooks';
+import {
+    IIdentity,
+    selectIdentity,
+} from '../../features/identity/identitySlice';
 
 export function MainMenu() {
     const identity: IIdentity = useAppSelector(selectIdentity);
 
     return (
-        <Navbar bg="dark" variant="dark" expand="lg" className="mb-3">
+        <Navbar bg="dark" variant="dark" expand="lg">
             <Container>
                 <Navbar.Brand as={Link} to="/">
                     Aztec Supplier Portal
