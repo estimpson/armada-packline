@@ -63,7 +63,7 @@ export default function FormInputSelect(props: IFormInputSelectProps) {
                             setFilterText(event.target.value);
                         }}
                         value={
-                            filterText
+                            filterText !== null
                                 ? filterText
                                 : selectedKey
                                 ? selectedKey
@@ -78,7 +78,7 @@ export default function FormInputSelect(props: IFormInputSelectProps) {
                         show={showDropdown}
                         onSelect={(e: string | null) => {
                             setShowDropdown(false);
-                            setFilterText('');
+                            setFilterText(null);
                             setSelectedKey(e);
                             if (props.selectionHandler) {
                                 props.selectionHandler(e);
