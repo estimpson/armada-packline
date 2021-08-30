@@ -238,7 +238,7 @@ export default function ReprintLabels() {
                                     </Form>
                                 </>
                             ) : (
-                                <Card.Text>Loaing...</Card.Text>
+                                <Card.Text>Loading...</Card.Text>
                             )}
                         </Card.Body>
                     </Card>
