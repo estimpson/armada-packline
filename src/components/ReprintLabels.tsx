@@ -174,7 +174,7 @@ export default function ReprintLabels() {
                                         Print {selectedPreObjectList.length}{' '}
                                         select labels
                                     </Button>
-                                    <Form>
+                                    <Form className="mt-3">
                                         <TableGrid
                                             multiRowCheckboxSelect
                                             editableRows
