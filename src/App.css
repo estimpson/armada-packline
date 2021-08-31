@@ -1,6 +1,15 @@
+.bd-lead {
+    font-size: calc(1.275rem + 0.3vw);
+    font-weight: 300;
+}
+
 .select-menu {
     max-height: 50vh;
     overflow-y: auto;
+}
+
+.text-justify {
+    text-align: justify;
 }
 
 th.text-center > div[class^='form-'] > input {
