@@ -18,10 +18,10 @@ import { useAppSelector } from '../app/hooks';
 import TableGrid from './grid/TableGrid';
 import { IPrinter, printLabels } from '../data/services/LocalPrinter';
 import { saveLotQuantityChange } from '../data/services/PreObjects';
+import { AxiosErrorHandler } from '../data/services/AxiosErrorHandler';
 
 export default function ReprintLabels() {
     // State
-    const [error, setError] = useState<string>('');
     const [isLotListLoaded, setIsLotListLoaded] = useState(false);
     const [supplierLotList, setSupplierLotList] = useState<ISupplierLot[]>([]);
     const [lotNumber, setLotNumber] = useState<string>('');
@@ -39,22 +39,15 @@ export default function ReprintLabels() {
 
     useEffect(() => {
         if (process.env['REACT_APP_API'] === 'Enabled') {
+            const queryString = `https://www.fxsupplierportal.com/api/SupplierLots?supplierCode=${identity.supplierCode}`;
             axios
-                .get<ISupplierLot[]>(
-                    `https://www.fxsupplierportal.com/api/SupplierLots?supplierCode=${identity.supplierCode}`,
-                )
+                .get<ISupplierLot[]>(queryString)
                 .then((response) => {
                     setSupplierLotList(response.data);
                     setIsLotListLoaded(true);
                 })
                 .catch((ex) => {
-                    let error =
-                        ex.code === 'ECONNABORTED'
-                            ? 'A timeout has occurred'
-                            : ex.response?.status === 404
-                            ? 'Resource not found'
-                            : 'An unexpected error has occurred';
-                    setError(error);
+                    AxiosErrorHandler(ex, queryString);
                     setIsLotListLoaded(false);
                 });
             return;
@@ -65,22 +58,15 @@ export default function ReprintLabels() {
 
     useEffect(() => {
         if (process.env['REACT_APP_API'] === 'Enabled') {
+            const queryString = `https://www.fxsupplierportal.com/api/PreObjects/Lot?supplierCode=${identity.supplierCode}&lotNumber=${lotNumber}`;
             axios
-                .get<IPreObject[]>(
-                    `https://www.fxsupplierportal.com/api/PreObjects/Lot?supplierCode=${identity.supplierCode}&lotNumber=${lotNumber}`,
-                )
+                .get<IPreObject[]>(queryString)
                 .then((response) => {
                     setPreObjectList(response.data);
                     setIsPreObjectListLoaded(true);
                 })
                 .catch((ex) => {
-                    let error =
-                        ex.code === 'ECONNABORTED'
-                            ? 'A timeout has occurred'
-                            : ex.response?.status === 404
-                            ? 'Resource not found'
-                            : 'An unexpected error has occurred';
-                    setError(error);
+                    AxiosErrorHandler(ex, queryString);
                     setIsPreObjectListLoaded(false);
                 });
             return;
@@ -90,21 +76,15 @@ export default function ReprintLabels() {
     }, [identity.supplierCode, isPreObjectListLoaded, lotNumber]);
 
     useEffect(() => {
+        const queryString = '/api/currentprinter';
         axios
-            .get<IPrinter>('/api/currentprinter')
+            .get<IPrinter>(queryString)
             .then((response) => {
                 setCurrentPrinter(response.data);
                 setIsCurrentPrinterLoaded(true);
             })
             .catch((ex) => {
-                let error =
-                    ex.code === 'ECONNABORTED'
-                        ? 'A timeout has occurred'
-                        : ex.response.status === 404
-                        ? 'Resource Not Found'
-                        : 'An unexpected error has occurred';
-
-                setError(error);
+                AxiosErrorHandler(ex, queryString);
                 setIsCurrentPrinterLoaded(false);
             });
     }, [isCurrentPrinterLoaded]);
@@ -222,7 +202,6 @@ export default function ReprintLabels() {
                                                         rowIndex,
                                                         modifiedRow,
                                                         setPreObjectList,
-                                                        setError,
                                                     );
                                                 }
                                                 return false;
@@ -242,23 +221,6 @@ export default function ReprintLabels() {
                             )}
                         </Card.Body>
                     </Card>
-                ) : (
-                    <></>
-                )}
-                {error ? (
-                    <Toast bg="danger" onClose={() => setError('')}>
-                        <Toast.Header>
-                            <img
-                                src="favicon.png"
-                                alt=""
-                                style={{ width: 24 }}
-                            />
-                            <strong className="me-auto">
-                                Aztec Supplier Portal
-                            </strong>
-                        </Toast.Header>
-                        <Toast.Body className="danger">{error}</Toast.Body>
-                    </Toast>
                 ) : (
                     <></>
                 )}

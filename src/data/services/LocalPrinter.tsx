@@ -1,4 +1,10 @@
 import axios from 'axios';
+import { store } from '../../app/store';
+import {
+    applicationErrorOccurred,
+    ApplicationErrorType,
+} from '../../features/applicationError/applicationErrorSlice';
+import { AxiosErrorHandler } from './AxiosErrorHandler';
 
 export interface IPrinter {
     printerName: string;
@@ -15,7 +21,7 @@ export function printLabel(
     printerDriver: string,
 ) {
     if (process.env['REACT_APP_API'] === 'Enabled') {
-        let queryString = `https://www.fxsupplierportal.com/api/PreObjects/LabelData?supplierCode=${encodeURIComponent(
+        const queryString = `https://www.fxsupplierportal.com/api/PreObjects/LabelData?supplierCode=${encodeURIComponent(
             supplierCode,
         )}&serialNumber=${encodeURIComponent(
             serial,
@@ -24,21 +30,22 @@ export function printLabel(
         axios
             .get<ILabelPacket>(queryString)
             .then((response) => {
-                let labelPacket = response.data;
-                axios
-                    .post(`/api/printlabel`, labelPacket.labelData)
-                    .then(() => console.log(labelPacket.serial));
-                console.log(labelPacket);
+                const labelPacket = response.data;
+                if (labelPacket.labelData) {
+                    axios
+                        .post(`/api/printlabel`, labelPacket.labelData)
+                        .then(() => console.log(labelPacket.serial));
+                    console.log(labelPacket);
+                } else {
+                    store.dispatch(
+                        applicationErrorOccurred({
+                            type: ApplicationErrorType.Unknown,
+                            message: `Label definition for ${printerDriver} not found.  Please choose a different printer.`,
+                        }),
+                    );
+                }
             })
-            .catch((ex) => {
-                let error =
-                    ex.code === 'ECONNABORTED'
-                        ? 'A timeout has occurred'
-                        : ex.response?.status === 404
-                        ? 'Resource not found'
-                        : 'An unexpected error has occurred';
-                console.log(error);
-            });
+            .catch((ex) => AxiosErrorHandler(ex, queryString));
         return;
     }
 }
@@ -49,7 +56,7 @@ export function printLabels(
     printerDriver: string,
 ) {
     if (process.env['REACT_APP_API'] === 'Enabled') {
-        let queryString = `https://www.fxsupplierportal.com/api/PreObjects/Labels?supplierCode=${encodeURIComponent(
+        const queryString = `https://www.fxsupplierportal.com/api/PreObjects/Labels?supplierCode=${encodeURIComponent(
             supplierCode,
         )}&serialList=${encodeURIComponent(
             serialList,
@@ -58,7 +65,7 @@ export function printLabels(
         axios
             .get<ILabelPacket[]>(queryString)
             .then((response) => {
-                let labelPackets = response.data;
+                const labelPackets = response.data;
                 labelPackets.forEach((labelPacket) => {
                     axios
                         .post(`/api/printlabel`, labelPacket.labelData)
@@ -66,15 +73,7 @@ export function printLabels(
                     console.log(labelPacket);
                 });
             })
-            .catch((ex) => {
-                let error =
-                    ex.code === 'ECONNABORTED'
-                        ? 'A timeout has occurred'
-                        : ex.response?.status === 404
-                        ? 'Resource not found'
-                        : 'An unexpected error has occurred';
-                console.log(error);
-            });
+            .catch((ex) => AxiosErrorHandler(ex, queryString));
         return;
     }
 }
@@ -82,76 +81,44 @@ export function printLabels(
 export function getDefaultPrinter(
     setCurrentPrinter: (printer: IPrinter) => void,
     setIsLoaded: React.Dispatch<React.SetStateAction<boolean>>,
-    setError: React.Dispatch<React.SetStateAction<string>>,
 ) {
+    const queryString = '/api/currentprinter';
     axios
-        .get<IPrinter>('/api/currentprinter')
+        .get<IPrinter>(queryString)
         .then((response) => {
             setCurrentPrinter(response.data);
             setIsLoaded(true);
         })
-        .catch((ex) => {
-            let error =
-                ex.code === 'ECONNABORTED'
-                    ? 'A timeout has occurred'
-                    : ex.response.status === 404
-                    ? 'Resource Not Found'
-                    : 'An unexpected error has occurred';
-
-            setError(error);
-            setIsLoaded(false);
-        });
+        .catch((ex) => AxiosErrorHandler(ex, queryString));
 }
 
 export function setDefaultPrinter(
     printer: IPrinter,
     setCurrentPrinter: (printer: IPrinter) => void,
     setIsLoaded: React.Dispatch<React.SetStateAction<boolean>>,
-    setError: React.Dispatch<React.SetStateAction<string>>,
 ) {
+    const queryString = `/api/setcurrentprinter?printerName=${encodeURIComponent(
+        printer.printerName,
+    )}`;
     axios
-        .patch<boolean>(
-            `/api/setcurrentprinter?printerName=${encodeURIComponent(
-                printer.printerName,
-            )}`,
-        )
+        .patch<boolean>(queryString)
         .then((response) => {
             setCurrentPrinter(printer);
             setIsLoaded(true);
         })
-        .catch((ex) => {
-            let error =
-                ex.code === 'ECONNABORTED'
-                    ? 'A timeout has occurred'
-                    : ex.response.status === 404
-                    ? 'Resource Not Found'
-                    : 'An unexpected error has occurred';
-
-            setError(error);
-            setIsLoaded(false);
-        });
+        .catch((ex) => AxiosErrorHandler(ex, queryString));
 }
 
 export function getPrinterList(
     setPrinters: (printerList: IPrinter[]) => void,
     setIsLoaded: (printerListIsLoaded: boolean) => void,
-    setError: React.Dispatch<React.SetStateAction<string>>,
 ) {
+    const queryString = '/api/printerlist';
     axios
-        .get<IPrinter[]>('/api/printerlist')
+        .get<IPrinter[]>(queryString)
         .then((response) => {
             setPrinters(response.data);
             setIsLoaded(true);
         })
-        .catch((ex) => {
-            let error =
-                ex.code === 'ECONNABORTED'
-                    ? 'A timeout has occurred'
-                    : ex.response.status === 404
-                    ? 'Resource Not Found'
-                    : 'An unexpected error has occurred';
-
-            setError(error);
-            setIsLoaded(false);
-        });
+        .catch((ex) => AxiosErrorHandler(ex, queryString));
 }

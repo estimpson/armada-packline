@@ -1,9 +1,10 @@
 import { BrowserRouter as Router } from 'react-router-dom';
 import { Routes } from './routes';
+import Container from 'react-bootstrap/container';
 import { MainMenu } from './components/layout/Menu';
-import './App.css';
 import { Footer } from './components/layout/Footer';
-import { Container } from 'react-bootstrap';
+import { ApplicationError } from './components/layout/ApplicationError';
+import './App.css';
 
 export default function App() {
     return (
@@ -13,6 +14,7 @@ export default function App() {
                 <Routes />
             </Container>
             <Footer />
+            <ApplicationError />
         </Router>
     );
 }

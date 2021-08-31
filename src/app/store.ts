@@ -1,4 +1,6 @@
 import identityReducer from '../features/identity/identitySlice';
+import applicationErrorReducer from '../features/applicationError/applicationErrorSlice';
+
 import {
     Action,
     combineReducers,
@@ -8,7 +10,10 @@ import {
 import storage from 'redux-persist/lib/storage';
 import persistReducer from 'redux-persist/es/persistReducer';
 
-const reducers = combineReducers({ identity: identityReducer });
+const reducers = combineReducers({
+    identity: identityReducer,
+    applicationError: applicationErrorReducer,
+});
 const persistConfig = {
     key: 'root',
     storage,

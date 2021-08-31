@@ -157,9 +157,4 @@ export default function Home() {
             </Container>
         </>
     );
-    // {
-    //   (identity) ?
-    //   <h1 className="header">Welcome {identity.userName}</h1>
-    //   : <h1 className="header">Please login</h1>
-    // });
 }

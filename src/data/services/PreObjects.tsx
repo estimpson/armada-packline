@@ -1,12 +1,12 @@
 import axios from 'axios';
 import { IPreObject } from '../PreObjectList';
+import { AxiosErrorHandler } from './AxiosErrorHandler';
 
 export function saveLotQuantityChange(
     preObjectList: IPreObject[],
     rowIndex: number,
     modifiedPreObject: IPreObject,
     setPreObjectList: React.Dispatch<React.SetStateAction<IPreObject[]>>,
-    setError: React.Dispatch<React.SetStateAction<string>>,
 ) {
     if (process.env['REACT_APP_API'] === 'Enabled') {
         let queryString = `https://www.fxsupplierportal.com/api/PreObjects/PreObject?supplierCode=${encodeURIComponent(
@@ -23,15 +23,7 @@ export function saveLotQuantityChange(
             .then((response) => {
                 preObjectList[rowIndex] = response.data;
             })
-            .catch((ex) => {
-                let error =
-                    ex.code === 'ECONNABORTED'
-                        ? 'A timeout has occurred'
-                        : ex.response?.status === 404
-                        ? 'Resource not found'
-                        : 'An unexpected error has occurred';
-                setError(error);
-            });
+            .catch((ex) => AxiosErrorHandler(ex, queryString));
     } else {
         preObjectList[rowIndex] = modifiedPreObject;
     }

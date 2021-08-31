@@ -19,6 +19,7 @@ import { IIdentity, selectIdentity } from '../features/identity/identitySlice';
 import { useAppSelector } from '../app/hooks';
 import { IPrinter, printLabels } from '../data/services/LocalPrinter';
 import { saveLotQuantityChange } from '../data/services/PreObjects';
+import { AxiosErrorHandler } from '../data/services/AxiosErrorHandler';
 
 function generateBatch(
     supplierCode: string,
@@ -28,7 +29,6 @@ function generateBatch(
     quantityPerObject: number,
     numberOfObjects: number,
     setResult: (results: Array<IPreObject>) => void,
-    setError: (error: string) => void,
 ) {
     if (process.env['REACT_APP_API'] === 'Enabled') {
         let queryString = `https://www.fxsupplierportal.com/api/PreObjects/Batch?supplierCode=${encodeURIComponent(
@@ -48,23 +48,12 @@ function generateBatch(
             .then((response) => {
                 setResult(response.data);
             })
-            .catch((ex) => {
-                let error =
-                    ex.code === 'ECONNABORTED'
-                        ? 'A timeout has occurred'
-                        : ex.response?.status === 404
-                        ? 'Resource not found'
-                        : 'An unexpected error has occurred';
-                console.log(error);
-                setError(error);
-                return;
-            });
+            .catch((ex) => AxiosErrorHandler(ex, queryString));
     }
 }
 
 export default function GenerateInventory() {
     // State
-    const [error, setError] = useState<string>('');
     const [isPartListLoaded, setIsPartListLoaded] = useState(false);
     const [supplierPartList, setSupplierPartList] = useState<ISupplierPart[]>(
         [],
@@ -92,22 +81,15 @@ export default function GenerateInventory() {
 
     useEffect(() => {
         if (process.env['REACT_APP_API'] === 'Enabled') {
+            const queryString = `https://www.fxsupplierportal.com/api/SupplierParts?supplierCode=${identity.supplierCode}`;
             axios
-                .get<ISupplierPart[]>(
-                    `https://www.fxsupplierportal.com/api/SupplierParts?supplierCode=${identity.supplierCode}`,
-                )
+                .get<ISupplierPart[]>(queryString)
                 .then((response) => {
                     setSupplierPartList(response.data);
                     setIsPartListLoaded(true);
                 })
                 .catch((ex) => {
-                    let error =
-                        ex.code === 'ECONNABORTED'
-                            ? 'A timeout has occurred'
-                            : ex.response?.status === 404
-                            ? 'Resource not found'
-                            : 'An unexpected error has occurred';
-                    setError(error);
+                    AxiosErrorHandler(ex, queryString);
                     setIsPartListLoaded(false);
                 });
             return;
@@ -117,21 +99,15 @@ export default function GenerateInventory() {
     }, [identity.supplierCode, isPartListLoaded]);
 
     useEffect(() => {
+        const queryString = '/api/currentprinter';
         axios
-            .get<IPrinter>('/api/currentprinter')
+            .get<IPrinter>(queryString)
             .then((response) => {
                 setCurrentPrinter(response.data);
                 setIsCurrentPrinterLoaded(true);
             })
             .catch((ex) => {
-                let error =
-                    ex.code === 'ECONNABORTED'
-                        ? 'A timeout has occurred'
-                        : ex.response.status === 404
-                        ? 'Resource Not Found'
-                        : 'An unexpected error has occurred';
-
-                setError(error);
+                AxiosErrorHandler(ex, queryString);
                 setIsCurrentPrinterLoaded(false);
             });
     }, [isCurrentPrinterLoaded]);
@@ -277,7 +253,6 @@ export default function GenerateInventory() {
                                     quantityPerObject!,
                                     numberOfObjects!,
                                     setPreObjectList,
-                                    setError,
                                 );
                             }}
                         >
@@ -360,7 +335,6 @@ export default function GenerateInventory() {
                                                 rowIndex,
                                                 modifiedRow,
                                                 setPreObjectList,
-                                                setError,
                                             );
                                         }
                                         return false;
@@ -374,23 +348,6 @@ export default function GenerateInventory() {
                             </Form>
                         </Card.Body>
                     </Card>
-                ) : (
-                    <></>
-                )}
-                {error ? (
-                    <Toast bg="danger" onClose={() => setError('')}>
-                        <Toast.Header>
-                            <img
-                                src="favicon.png"
-                                alt=""
-                                style={{ width: 24 }}
-                            />
-                            <strong className="me-auto">
-                                Aztec Supplier Portal
-                            </strong>
-                        </Toast.Header>
-                        <Toast.Body className="danger">{error}</Toast.Body>
-                    </Toast>
                 ) : (
                     <></>
                 )}
