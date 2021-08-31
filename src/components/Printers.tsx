@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Card, Container } from 'react-bootstrap';
+import Button from 'react-bootstrap/Button';
+import { useAppSelector } from '../app/hooks';
 
 import {
     getDefaultPrinter,
     getPrinterList,
     IPrinter,
+    printLabel,
     setDefaultPrinter,
 } from '../data/services/LocalPrinter';
+import { IIdentity, selectIdentity } from '../features/identity/identitySlice';
 import TableGrid from './grid/TableGrid';
 
 export default function PrinterList() {
@@ -18,6 +22,8 @@ export default function PrinterList() {
         undefined,
     );
     const [isCurrentPrinterLoaded, setIsCurrentPrinterLoaded] = useState(false);
+
+    const identity: IIdentity = useAppSelector(selectIdentity);
 
     useEffect(() => {
         getPrinterList(setPrinterList, setIsPrinterListLoaded, setError);
@@ -41,9 +47,35 @@ export default function PrinterList() {
                         printers on your machine.
                     </Card.Title>
                     <p className="fw-light fst-italic text-dark">
-                        {currentPrinter
-                            ? `Your current printer is ${currentPrinter.printerName}.`
-                            : 'No current printer defined.'}
+                        {currentPrinter ? (
+                            <>
+                                <p>
+                                    Your current printer is{' '}
+                                    {currentPrinter.printerName}.
+                                </p>
+                                <Button
+                                    onClick={() => {
+                                        let supplierCode =
+                                            identity.supplierCode || '';
+                                        console.log(supplierCode);
+                                        let serial = 0;
+                                        console.log(serial);
+                                        let printerDriver =
+                                            currentPrinter?.printerDriver || '';
+                                        console.log(printerDriver);
+                                        printLabel(
+                                            supplierCode,
+                                            serial,
+                                            printerDriver,
+                                        );
+                                    }}
+                                >
+                                    Print Sample
+                                </Button>
+                            </>
+                        ) : (
+                            'No current printer defined.'
+                        )}
                     </p>
                     {error ? (
                         <span>'Error: ' {error}</span>
