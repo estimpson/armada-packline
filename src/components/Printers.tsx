@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Card, Container } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
-import { useAppDispatch, useAppSelector } from '../app/hooks';
+import { useAppSelector } from '../app/hooks';
 
 import {
     getDefaultPrinter,
