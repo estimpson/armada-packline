@@ -26,9 +26,14 @@ export default function Home() {
     if (ipcRenderer) {
         ipcRenderer.on('got_app_version', (sender: any, data: string) => {
             console.log(`sender: ${sender}`);
-            console.log(`data: ${data}`);
+            console.log(`version: ${data}`);
         });
         ipcRenderer.send('app_version');
+        ipcRenderer.on('got_app_updates', (sender: any, data: string) => {
+            console.log(`sender: ${sender}`);
+            console.log(`updates: ${data}`);
+        });
+        ipcRenderer.send('app_updates');
     }
 
     return (

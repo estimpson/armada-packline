@@ -95,6 +95,22 @@ namespace FxSupplierPortal_electron
                 Electron.IpcMain.Send(mainWindow, "got_app_version", version);
             });
 
+            Electron.IpcMain.On("app_updates", async (args) =>
+            {
+                try
+                {
+                    var currentVersion = await Electron.App.GetVersionAsync();
+                    var updateCheckResult = await Electron.AutoUpdater.CheckForUpdatesAndNotifyAsync();
+                    var availableVersion = updateCheckResult.UpdateInfo.Version;
+                    string information = $"Current version: {currentVersion} - available version: {availableVersion}";
+                    var mainWindow = Electron.WindowManager.BrowserWindows.First();
+                    Electron.IpcMain.Send(mainWindow, "got_app_updates", information);
+                }
+                catch (System.Exception)
+                {
+                }
+            });
+
             var browserWindow = await Electron.WindowManager.CreateWindowAsync(new BrowserWindowOptions
             {
                 Width = 1152,

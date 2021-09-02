@@ -1,7 +1,7 @@
 {
     "executable": "FxSupplierPortal-electron",
     "splashscreen": {
-        "imageFile": "../../../public/favicon.png"
+        "imageFile": "/public/favicon.png"
     },
     "name": "FxSupplierPortal-electron",
     "author": "",
