@@ -21,6 +21,16 @@ export default function Home() {
     const identity: IIdentity = useAppSelector(selectIdentity);
     const dispatch = useAppDispatch();
 
+    const require = window.require ? window.require : null;
+    const ipcRenderer = require ? require('electron')?.ipcRenderer : null;
+    if (ipcRenderer) {
+        ipcRenderer.on('got_app_version', (sender: any, data: string) => {
+            console.log(`sender: ${sender}`);
+            console.log(`data: ${data}`);
+        });
+        ipcRenderer.send('app_version');
+    }
+
     return (
         <>
             <Container>
@@ -95,6 +105,13 @@ export default function Home() {
                             (optionally) and reprint any or all labels in that
                             batch.
                         </p>
+                        {ipcRenderer ? (
+                            <Button onClick={() => ipcRenderer.send('close')}>
+                                Close
+                            </Button>
+                        ) : (
+                            <></>
+                        )}
                     </>
                 ) : (
                     <>

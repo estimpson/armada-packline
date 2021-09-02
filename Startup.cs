@@ -8,6 +8,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using ElectronNET.API;
+using ElectronNET.API.Entities;
+using System.Linq;
 
 namespace FxSupplierPortal_electron
 {
@@ -71,7 +73,44 @@ namespace FxSupplierPortal_electron
             });
 
             // Open the Electron-Window here
-            Task.Run(async () => await Electron.WindowManager.CreateWindowAsync());
+            // Task.Run(async () => await Electron.WindowManager.CreateWindowAsync());
+            // Task.Run(async () => ElectronBootstrap());
+            if (HybridSupport.IsElectronActive)
+            {
+                ElectronBootstrap();
+            }
+        }
+
+        public async void ElectronBootstrap()
+        {
+            Electron.IpcMain.On("close", (args) =>
+            {
+                Electron.WindowManager.BrowserWindows.FirstOrDefault()?.Close();
+            });
+
+            Electron.IpcMain.On("app_version", async (args) =>
+            {
+                var version = await Electron.App.GetVersionAsync();
+                var mainWindow = Electron.WindowManager.BrowserWindows.First();
+                Electron.IpcMain.Send(mainWindow, "got_app_version", version);
+            });
+
+            var browserWindow = await Electron.WindowManager.CreateWindowAsync(new BrowserWindowOptions
+            {
+                Width = 1152,
+                Height = 940,
+                Show = false,
+                Frame = false,
+                TitleBarStyle = TitleBarStyle.hidden,
+                Title = "Supplier Portal",
+                Resizable = true,
+                Icon = "./public/favicon.png"
+            });
+
+            await browserWindow.WebContents.Session.ClearCacheAsync();
+
+            browserWindow.OnReadyToShow += () => browserWindow.Show();
+            browserWindow.SetTitle("Aztec Supplier Portal");
         }
     }
 }

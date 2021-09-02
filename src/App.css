@@ -1,3 +1,12 @@
+.navbar {
+    -webkit-app-region: drag;
+}
+
+button,
+a {
+    -webkit-app-region: no-drag;
+}
+
 .bd-lead {
     font-size: calc(1.275rem + 0.3vw);
     font-weight: 300;
