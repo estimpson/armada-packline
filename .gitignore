@@ -264,3 +264,4 @@ printjob*.json
 
 # Zips
 *.zip
+.env
