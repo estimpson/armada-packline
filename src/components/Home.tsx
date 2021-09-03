@@ -4,7 +4,7 @@ import {
     faUndoAlt,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Card, Col, Container, Form, Row } from 'react-bootstrap';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import {
@@ -25,16 +25,25 @@ export default function Home() {
     const ipcRenderer = require ? require('electron')?.ipcRenderer : null;
     if (ipcRenderer) {
         ipcRenderer.on('got_app_version', (sender: any, data: string) => {
-            console.log(`sender: ${sender}`);
-            console.log(`version: ${data}`);
+            console.log(`got_app_version: ${data}`);
         });
-        ipcRenderer.send('app_version');
         ipcRenderer.on('got_app_updates', (sender: any, data: string) => {
-            console.log(`sender: ${sender}`);
-            console.log(`updates: ${data}`);
+            console.log(`got_app_updates: ${data}`);
         });
-        ipcRenderer.send('app_updates');
+        ipcRenderer.on('update_available', (sender: any) => {
+            console.log(`update_available`);
+        });
+        ipcRenderer.on('update_downloaded', (sender: any) => {
+            console.log(`update_downloaded`);
+        });
     }
+
+    useEffect(() => {
+        if (ipcRenderer) {
+            ipcRenderer.send('app_updates');
+            ipcRenderer.send('app_version');
+        }
+    }, [ipcRenderer]);
 
     return (
         <>

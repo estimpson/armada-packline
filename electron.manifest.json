@@ -11,7 +11,7 @@
         "appId": "com.FxSupplierPortal-electron.app",
         "productName": "FxSupplierPortal-electron",
         "copyright": "Copyright © 2021",
-        "buildVersion": "0.2.0",
+        "buildVersion": "0.3.0",
         "compression": "maximum",
         "win": {
             "icon": "../../../public/favicon.png",

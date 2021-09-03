@@ -100,11 +100,15 @@ namespace FxSupplierPortal_electron
                 try
                 {
                     var currentVersion = await Electron.App.GetVersionAsync();
+                    Electron.AutoUpdater.AutoDownload = true;
+                    Electron.AutoUpdater.AutoInstallOnAppQuit = true;
                     var updateCheckResult = await Electron.AutoUpdater.CheckForUpdatesAndNotifyAsync();
                     var availableVersion = updateCheckResult.UpdateInfo.Version;
                     string information = $"Current version: {currentVersion} - available version: {availableVersion}";
                     var mainWindow = Electron.WindowManager.BrowserWindows.First();
                     Electron.IpcMain.Send(mainWindow, "got_app_updates", information);
+                    Electron.AutoUpdater.OnUpdateAvailable += info => Electron.IpcMain.Send(mainWindow, "update_available");
+                    Electron.AutoUpdater.OnUpdateDownloaded += info => Electron.IpcMain.Send(mainWindow, "update_downloaded");
                 }
                 catch (System.Exception)
                 {
