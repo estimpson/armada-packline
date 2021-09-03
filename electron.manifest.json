@@ -1,17 +1,17 @@
 {
-    "executable": "FxSupplierPortal-electron",
+    "executable": "FxSupplierPortal",
     "splashscreen": {
         "imageFile": "/public/favicon.png"
     },
-    "name": "FxSupplierPortal-electron",
+    "name": "FxSupplierPortal",
     "author": "",
     "singleInstance": false,
     "environment": "Production",
     "build": {
-        "appId": "com.FxSupplierPortal-electron.app",
-        "productName": "FxSupplierPortal-electron",
+        "appId": "com.fx-supplier-portal.app",
+        "productName": "FxSupplierPortal",
         "copyright": "Copyright © 2021",
-        "buildVersion": "0.3.1",
+        "buildVersion": "0.3.2",
         "compression": "maximum",
         "win": {
             "icon": "../../../public/favicon.png",
