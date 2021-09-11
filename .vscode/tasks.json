@@ -7,11 +7,9 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/FxSupplierPortal-electron.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
+                "${workspaceFolder}/dotnetcore/dotnetcore.csproj"
             ],
-            "problemMatcher": "$msCompile"
+            "problemMatcher": "$tsc"
         },
         {
             "label": "publish",
@@ -19,11 +17,9 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/FxSupplierPortal-electron.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
+                "${workspaceFolder}/dotnetcore/dotnetcore.csproj"
             ],
-            "problemMatcher": "$msCompile"
+            "problemMatcher": "$tsc"
         },
         {
             "label": "watch",
@@ -32,11 +28,9 @@
             "args": [
                 "watch",
                 "run",
-                "${workspaceFolder}/FxSupplierPortal-electron.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
+                "${workspaceFolder}/dotnetcore/dotnetcore.csproj"
             ],
-            "problemMatcher": "$msCompile"
+            "problemMatcher": "$tsc"
         }
     ]
 }
