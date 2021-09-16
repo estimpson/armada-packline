@@ -1,91 +1,164 @@
-import { InMemoryCache } from "apollo-cache-inmemory";
-import { ApolloClient } from "apollo-client";
-import { HttpLink } from "apollo-link-http";
-import gql from "graphql-tag";
-import fetch from "isomorphic-fetch";
-import React, { useMemo, useState } from "react";
-import "./App.css";
-import logo from "./logo.svg";
+import React, { useEffect, useState } from 'react';
+import logo from './logo.svg';
+import './App.css';
+import axios from 'axios';
+import parseISO from 'date-fns/parseISO';
 
-const ipcRenderer = (window as any).isInElectronRenderer
-        ? (window as any).nodeRequire("electron").ipcRenderer
-        : (window as any).ipcRendererStub;
+interface ILocalApiDetails {
+    port: string;
+    signingKey: string;
+}
 
-const App = () => {
-    const [mathResult, setMathResult] = useState("");
-    const [apiPort, setApiPort] = useState(0);
-    const [apiSigningKey, setApiSigningKey] = useState("");
-
-    const appGlobalClient = useMemo(() => {
-        if (apiPort === 0) {
-            if (ipcRenderer) {
-                ipcRenderer.on("apiDetails", ({}, argString:string) => {
-                    const arg:{ port:number, signingKey:string } = JSON.parse(argString);
-                    setApiPort(arg.port); // setting apiPort causes useMemo'd appGlobalClient to be re-evaluated
-                    setApiSigningKey(arg.signingKey);
-                });
-                ipcRenderer.send("getApiDetails");
-            }
-            return null;
-        }
-        return new ApolloClient({
-            cache: new InMemoryCache(),
-            link: new HttpLink({
-                fetch:(fetch as any),
-                uri: "http://127.0.0.1:" + apiPort + "/graphql/",
-            }),
-        });
-    }, [apiPort]);
-
-    const handleKeyDown = (event:React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === "Enter") {
-            const math = event.currentTarget.value;
-            if (appGlobalClient === null) {
-                setMathResult("this page only works when hosted in electron");
-                return;
-            }
-            appGlobalClient.query({
-                query:gql`query calc($signingkey:String!, $math:String!) {
-                    calc(signingkey:$signingkey, math:$math)
-                }`,
-                variables: {
-                    math,
-                    signingkey: apiSigningKey,
-                },
-            })
-            .then(({ data }) => {
-                setMathResult(data.calc);
-            })
-            .catch((e) => {
-                console.log("Error contacting graphql server");
-                console.log(e);
-                setMathResult("Error getting result with port=" + apiPort + " and signingkey='" + apiSigningKey + "' (if this is the first call, the server may need a few seconds to initialize)");
-            });
-        }
+declare const window: Window &
+    typeof globalThis & {
+        electron?: {
+            versions: {
+                node: string;
+            };
+            send: (channel: string, data?: any) => void;
+            receive: (channel: string, func: any) => void;
+        };
     };
+
+const electron = window?.electron;
+const versions = window?.electron ? window.electron.versions : undefined;
+
+interface IWeatherForecast {
+    date: Date;
+    temperatureC: number;
+    temperatureF: number;
+    summary: string;
+}
+
+function getWeatherForecasts(
+    localApiDetails: ILocalApiDetails,
+    setResult: (results: Array<IWeatherForecast>) => void,
+) {
+    let queryString = `http://localhost:${localApiDetails.port}/WeatherForecast`;
+    let customHeaders = {
+        headers: {
+            Accept: 'application/json, text/plain, */*',
+            'x-signing-key': localApiDetails.signingKey,
+        },
+    };
+    axios
+        .get<IWeatherForecast[]>(queryString, customHeaders)
+        .then((response) => {
+            setResult(
+                response.data.map((weatherForecast) => {
+                    weatherForecast.date = parseISO(
+                        weatherForecast.date.toString(),
+                    );
+                    return weatherForecast;
+                }),
+            );
+        })
+        .catch((ex) => console.log(`${ex} - ${queryString}`));
+}
+
+function App() {
+    const [localApiDetails, setLocalApiDetails] = useState<
+        ILocalApiDetails | undefined
+    >(undefined);
+    const [weatherForecasts, setWeatherForecasts] =
+        useState<IWeatherForecast[]>();
+
+    useEffect(() => {
+        if (!localApiDetails) {
+            if (electron) {
+                electron.receive('api-details', (data: string) => {
+                    console.log(`Received ${data} about dotnet api`);
+                    setLocalApiDetails(JSON.parse(data));
+                });
+                electron.receive('api-details-error', (err: string) => {
+                    console.log(
+                        `Received ${
+                            err ? err : '[no error details]'
+                        } about dotnet api`,
+                    );
+                });
+                electron.send('get-api-details');
+            }
+        }
+    }, [localApiDetails]);
 
     return (
         <div className="App">
             <header className="App-header">
-                <img src={logo} className="App-logo" alt="logo"/>
+                <img src={logo} className="App-logo" alt="logo" />
                 <p>
                     Edit <code>src/App.tsx</code> and save to reload.
                 </p>
-                <p>Input something like <code>1 + 1</code>.</p>
-                <p>
-                    This calculator supports <code>+-*/^()</code>,
-                    whitespaces, and integers and floating numbers.
-                </p>
-                <input
-                    style={{ color:"black" }}
-                    onKeyDown={handleKeyDown}
-                />
-                <div>
-                    {mathResult}
-                </div>
+                <a
+                    className="App-link"
+                    href="https://reactjs.org"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Learn React
+                </a>
+                <button
+                    onClick={() => {
+                        if (localApiDetails)
+                            getWeatherForecasts(
+                                localApiDetails,
+                                setWeatherForecasts,
+                            );
+                    }}
+                >
+                    Let's see the weather
+                </button>
+                {weatherForecasts ? (
+                    <>
+                        <p>Local Weather</p>
+                        {/* {weatherForecasts.map((weatherForecast) => (
+                            <p>{weatherForecast.date}</p>
+                        ))} */}
+                        <ul>
+                            {weatherForecasts.map((weatherForecast) => (
+                                <li key={weatherForecast.date.getDay()}>
+                                    {weatherForecast.date.toDateString()} :{' '}
+                                    {weatherForecast.summary}
+                                </li>
+                            ))}
+                        </ul>
+                    </>
+                ) : (
+                    <></>
+                )}
+                {localApiDetails ? (
+                    <>
+                        <p>Local API</p>
+                        <ul>
+                            {Object.entries(localApiDetails).map(
+                                ([key, value]) => (
+                                    <li key={key}>
+                                        {key} : {value}
+                                    </li>
+                                ),
+                            )}
+                        </ul>
+                    </>
+                ) : (
+                    <></>
+                )}
+                {versions ? (
+                    <>
+                        <p>Versions</p>
+                        <ul>
+                            {Object.entries(versions).map(([key, value]) => (
+                                <li key={key}>
+                                    {key} : {value}
+                                </li>
+                            ))}
+                        </ul>
+                    </>
+                ) : (
+                    <></>
+                )}
             </header>
         </div>
     );
-};
+}
 
 export default App;

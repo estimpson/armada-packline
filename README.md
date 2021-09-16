@@ -1,51 +1,46 @@
-# Electron + C# dotnet
+# Getting Started with Create React App
 
-This sample shows how to build C# dotnet apps that run in Electron. I'm using it to combine .NET backends with React frontends but if you prefer to use Razor or Blazor or some other aspnet core based frontend tech that should be a very simple thing to add. The Electron main (backend) process spawns a dotnet core webserver and provides a randomly generated authentication token to both the webserver and the Electron renderer (frontend) process for use in authenticating messages sent between the frontend and the webserver. 
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-The webserver currently exposes a GraphQL endpoint for the frontend to interact with but the backend is just a plain old dotnet exe so you can tweak it to host whatever sort of Razor, Blazor, MVC, REST, WebApi, or other dotnet web services as might be needed by your application. The React frontend part of the sample is similarly based on a stock create-react-app site, so it should be easy to customize as needed. The only significant embelishments to the stock cra app are (1) the bare minimal amount of https://github.com/sharegate/craco to support hooking into electron without needing to eject the create react app and (2) typescript support, which you don't have to use but if you're a C# developer you're almost certainly going to want sooner or later.
+## Available Scripts
 
-This example builds a stand-alone Electron + Create-React-App + dotnet application and installer. On Windows it builds the app into `./dist/win-unpacked/My Electron DotNet App.exe` and the installer into `./dist/My Electron DotNet App Setup 1.0.0.exe` (OSX and Linux destinations are similar). You can change the name of the application by changing the `name` property in `package.json`.
+In the project directory, you can run:
 
-# Installation
+### `npm start`
 
-```bash
-# start with the obvious step you always need to do with node projects
-npm install
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-# Depending on the packages you install, with Electron projects you may need to do 
-# an npm rebuild to rebuild any included binaries for the current OS. It's probably
-# not needed here but I do it out of habit because its fast and the issues can be
-# a pain to track down if they come up and you dont realize a rebuild is needed
-npm rebuild
+The page will reload if you make edits.\
+You will also see any lint errors in the console.
 
-# prep the dotnet build environment
-dotnet restore dotnet/api.csproj
+### `npm test`
 
-# run a dev build of electron
-npm run start
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-# convert the source code in dotnet/ into an executable, build the electron app 
-# into a subdirectory of dist/, and run electron-packager to package the electron 
-# app as a platform-specific installer in dist/
-npm run build
+### `npm run build`
 
-# double-click to run the either the platform-specific app that is built into 
-# a subdirectory of dist/ or the platform-specific installer that is built and 
-# placed in the dist/ folder
-```
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-# Debugging the dotnet process
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
-To test the dotnet GraphQL server, run `npm run dotnet-build`, cd into the newly generated `dotnet/bin/release/netcoreapp2.1/` platform folder, and run `api.exe --apiport 5000 --signingkey devkey` then browse to `http://127.0.0.1:5000/graphiql/` to access a GraphiQL view of the server. For a more detailed example, try `http://127.0.0.1:5000/graphiql/?query={calc(math:"1/2",signingkey:"devkey")}` which works great if you copy and paste into the browser but which is a complex enough URL that it will confuse chrome if you try to click directly on it.
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-# Notes
+### `npm run eject`
 
-The electron main process both spawns the dotnet child process and creates the window. The electron renderer process communicates with the dotnet backend via GraphQL web service calls.
+**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
 
-The C# class `dotnet/Calc.cs` provides a function: `Eval(string s)` that can take text like `1 + 1` and return the result like `2`. The calc functionality is exposed as a GraphQL api by `dotnet/startup.cs`.
+If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-The details of how the electron app launches the dotnet executable is tricky because of differences between packaged and unpackaged scenarios. This complexity is handled by `main/with-dotnet.ts`. If the Electron app is not packaged, the code needs to `spawn` the dotnet executable file. If the Electron app is packaged, it needs to `execFile` the packaged dotnet executable found in the app.asar. To decide whether the Electron app itself has been packaged for distribution or not, `main/with-dotnet.ts` checks whether the `__dirname` looks like an asar folder or not. 
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
 
-# Important
+You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
-Killing spawned processes under Electron can be tricky so the electron main process sends a message to the dotnet server telling it to exit when Electron is shutting down (and yes, that does mean that if you are debugging and control-c to kill the npm process hosting the app you can leave a zombie dotnet process, so it's better to close the app normally by closing the window before killing your npm process).
+## Learn More
+
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+
+To learn React, check out the [React documentation](https://reactjs.org/).

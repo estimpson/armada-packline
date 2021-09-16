@@ -17,12 +17,13 @@
         "skipLibCheck": true,
         "strict": true,
         "target": "es5",
-
         "baseUrl": ".",
         "module": "commonjs",
         "outDir": "buildMain",
         "paths": {
-            "*": ["node_modules/*"]
+            "*": [
+                "node_modules/*"
+            ]
         },
         "sourceMap": true
     },
