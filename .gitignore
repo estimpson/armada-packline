@@ -12,6 +12,7 @@
 /build
 /buildMain
 /dist
+/dotnet-*
 
 # misc
 .DS_Store
