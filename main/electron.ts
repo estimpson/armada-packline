@@ -1,11 +1,14 @@
 // Module to control the application lifecycle and the native browser window.
-import { app, BrowserWindow, protocol } from 'electron';
+import { app, BrowserWindow, ipcMain, protocol } from 'electron';
 import path from 'path';
 import url from 'url';
+import './with-dotnet';
+
+let mainWindow: BrowserWindow;
 
 // Create the native browser window.
 function createWindow() {
-    const mainWindow = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
         // Set the path of an additional "preload" script that can be used to
@@ -83,5 +86,11 @@ app.on('web-contents-created', (event, contents) => {
     });
 });
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+// An example of ipc through contextBridge
+ipcMain.on('to-main', (event, args) => {
+    console.log("ipcMain.on('to-main')");
+    // Do something
+
+    // Send results back to renderer process
+    mainWindow.webContents.send('from-main', { msg: 'Hello from Main' });
+});
