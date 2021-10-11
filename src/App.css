@@ -1,3 +1,15 @@
 .navbar-brand {
     font-size: 1.5rem;
 }
+
+.form-floating-group input {
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.input-group > .form-floating {
+    position: relative;
+    flex: 1 1 auto;
+    width: 1%;
+    min-width: 0;
+}

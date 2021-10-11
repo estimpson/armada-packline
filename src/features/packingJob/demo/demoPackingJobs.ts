@@ -1,16 +1,23 @@
-import { IJob } from '../Job';
+import { DemoParts } from '../../part/demo/demoParts';
+import { IPackingJob } from '../packingJobSlice';
 
-export const DemoJobs: IJob[] = [
+const partList = DemoParts;
+
+export interface IDemoPackingJob extends IPackingJob {
+    step: string;
+}
+
+export const DemoJobs: IDemoPackingJob[] = [
     { step: '1: Choose a part' },
     {
         step: '2: Display Special Instructions & Require Acknowledment (if present)',
-        part: '1',
+        part: DemoParts[0],
         instructions:
             'Place a thin strip of blue tape along bottom edge of box',
     },
     {
         step: "3.1 [part requires 'Final Inspection']: Enter Piece Weight",
-        part: '1',
+        part: DemoParts[0],
         instructions:
             'Place a thin strip of blue tape along bottom edge of box',
 
@@ -18,45 +25,45 @@ export const DemoJobs: IJob[] = [
     },
     {
         step: "4.1.1 [part requires 'Final Inspection']: Verify piece weight",
-        part: '1',
+        part: DemoParts[0],
         instructions:
             'Place a thin strip of blue tape along bottom edge of box',
         acknowledged: true,
         quantity: 20,
         pieceWeight: 0.012357,
-        valid: false,
+        validPieceWeight: false,
     },
     {
         step: "5.1.1 [part requires 'Final Inspection']: Enter Deflash Operator and Machine",
-        part: '1',
+        part: DemoParts[0],
         instructions:
             'Place a thin strip of blue tape along bottom edge of box',
         acknowledged: true,
         quantity: 20,
         pieceWeight: 0.012357,
-        valid: true,
+        validPieceWeight: true,
     },
     {
         step: "6.1.1 [part requires 'Final Inspection']: Open Job",
-        part: '1',
+        part: DemoParts[0],
         instructions:
             'Place a thin strip of blue tape along bottom edge of box',
         acknowledged: true,
         quantity: 20,
         pieceWeight: 0.012357,
-        valid: true,
+        validPieceWeight: true,
         operator: 'JK',
         machine: 'D1',
     },
     {
         step: '7: Enter Lot Quantity',
-        part: '1',
+        part: DemoParts[0],
         instructions:
             'Place a thin strip of blue tape along bottom edge of box',
         acknowledged: true,
         quantity: 20,
         pieceWeight: 0.012357,
-        valid: true,
+        validPieceWeight: true,
         operator: 'JK',
         machine: 'D1',
         jobInProgress: true,
@@ -64,13 +71,13 @@ export const DemoJobs: IJob[] = [
     },
     {
         step: '8: Generate Inventory',
-        part: 'XXX',
+        part: DemoParts[0],
         instructions:
             'Place a thin strip of blue tape along bottom edge of box',
         acknowledged: true,
         quantity: 20,
         pieceWeight: 0.012357,
-        valid: true,
+        validPieceWeight: true,
         operator: 'JK',
         machine: 'D1',
         jobInProgress: true,
@@ -80,13 +87,13 @@ export const DemoJobs: IJob[] = [
     },
     {
         step: '9: Review Inventory',
-        part: 'XXX',
+        part: DemoParts[0],
         instructions:
             'Place a thin strip of blue tape along bottom edge of box',
         acknowledged: true,
         quantity: 20,
         pieceWeight: 0.012357,
-        valid: true,
+        validPieceWeight: true,
         operator: 'JK',
         machine: 'D1',
         jobInProgress: true,
@@ -118,13 +125,13 @@ export const DemoJobs: IJob[] = [
     },
     {
         step: '10: Print Labels',
-        part: 'XXX',
+        part: DemoParts[0],
         instructions:
             'Place a thin strip of blue tape along bottom edge of box',
         acknowledged: true,
         quantity: 20,
         pieceWeight: 0.012357,
-        valid: true,
+        validPieceWeight: true,
         operator: 'JK',
         machine: 'D1',
         jobInProgress: true,

@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Col, Container, Row } from '../bootstrap';
 import { RunJob } from './RunJob';
-import { DemoJobs } from '../data/demo/DemoJobs';
-import { IJob } from '../data/Job';
+import {
+    DemoJobs,
+    IDemoPackingJob,
+} from '../features/packingJob/demo/demoPackingJobs';
 
 export default function JobsDemo() {
-    const [jobs, SetJobs] = useState<IJob[]>([]);
+    const [jobs, SetJobs] = useState<IDemoPackingJob[]>([]);
 
     useEffect(() => {
         SetJobs(DemoJobs);
@@ -28,19 +30,7 @@ export default function JobsDemo() {
                         <RunJob
                             key={job.step}
                             step={job.step}
-                            part={job.part}
-                            instructions={job.instructions}
-                            acknowledged={job.acknowledged}
-                            quantity={job.quantity}
-                            pieceWeight={job.pieceWeight}
-                            valid={job.valid}
-                            operator={job.operator}
-                            machine={job.machine}
-                            jobInProgress={job.jobInProgress}
-                            standardPack={job.standardPack}
-                            boxes={job.boxes}
-                            partialBoxQuantity={job.partialBoxQuantity}
-                            objectList={job.objectList}
+                            packingJob={job}
                         />
                     );
                 })}

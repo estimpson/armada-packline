@@ -1,4 +1,4 @@
-import { IPart } from '../Part';
+import { IPart } from '../partSlice';
 
 export const DemoParts: IPart[] = [
     {

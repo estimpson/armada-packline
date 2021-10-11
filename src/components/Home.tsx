@@ -1,52 +1,85 @@
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { Button, Card, Col, Container, Form, Row } from '../bootstrap';
-import { DemoParts } from '../data/demo/DemoParts';
-import { IPart } from '../data/Part';
 import {
     IIdentity,
     loginAsync,
     selectIdentity,
 } from '../features/identity/identitySlice';
+import { getPartList, IPart, selectPartList } from '../features/part/partSlice';
+import {
+    generateInventory,
+    IPackingJob,
+    selectPackingJob,
+    setAcknowledged,
+    setBoxes,
+    setMachine,
+    setOperator,
+    setPart as setPackingJobPart,
+    setPartialBoxQuantity,
+    setPieceWeight,
+    setPieceWeightQuantity,
+    startJob,
+    stopJob,
+} from '../features/packingJob/packingJobSlice';
 import { RunJob } from './RunJob';
 
 export default function Home() {
+    const dispatch = useAppDispatch();
+
     const [user, setUser] = useState('');
     const [password, setPassword] = useState('');
 
     // dependent data sets
-    const [partList, setPartList] = useState<IPart[]>([]);
-
-    // job state
-    const [partCode, setPartCode] = useState<string | undefined>(undefined);
-    const [part, setPart] = useState<IPart | undefined>(undefined);
-    const [acknowledgedSpecialInstructions, setAacknowlgedSpecialInstructions] =
-        useState(false);
+    const partList: IPart[] = useAppSelector(selectPartList);
+    const packingJob: IPackingJob = useAppSelector(selectPackingJob);
 
     useEffect(() => {
-        setPartList(DemoParts);
-    }, [partList]);
+        dispatch(getPartList());
+    }, [dispatch, partList]);
 
-    useEffect(() => {
-        setAacknowlgedSpecialInstructions(false);
-        if (partCode) {
-            let part = partList.find((part) => {
-                return part.partCode === partCode;
-            });
-            if (part) {
-                setPart(part);
-                return;
-            }
-        }
-        setPart(undefined);
-    }, [partCode, partList]);
+    // handlers for setting state in the store
+    function setPart(part: IPart | undefined): void {
+        dispatch(setPackingJobPart(part));
+    }
+    function acknowledgementHandler(acknowledged: boolean): void {
+        dispatch(setAcknowledged(acknowledged));
+    }
+    function pieceWeightQuantityHandler(
+        pieceWeightQuantity: number | undefined,
+    ): void {
+        dispatch(setPieceWeightQuantity(pieceWeightQuantity));
+    }
+    function pieceWeightHandler(pieceweight: number | undefined): void {
+        dispatch(setPieceWeight(pieceweight));
+    }
+    function operatorHandler(operator: string): void {
+        dispatch(setOperator(operator));
+    }
+    function machineHandler(machine: string): void {
+        dispatch(setMachine(machine));
+    }
+    function startJobHandler(): void {
+        dispatch(startJob());
+    }
+    function stopJobHandler(): void {
+        dispatch(stopJob());
+    }
+    function boxesHandler(boxes: number): void {
+        dispatch(setBoxes(boxes));
+    }
+    function partialBoxQuantityHandler(partialBoxQuantity: number): void {
+        dispatch(setPartialBoxQuantity(partialBoxQuantity));
+    }
+    function generateInventoryHandler(): void {
+        dispatch(generateInventory());
+    }
 
     const identity: IIdentity = useAppSelector(selectIdentity);
-    const dispatch = useAppDispatch();
 
     return (
         <>
-            <Container>
+            <Container className="col-md-8 col-lg-6">
                 <Row>
                     <Col sm="8">
                         <p className="fs-1">Fx Pack Line</p>
@@ -55,15 +88,22 @@ export default function Home() {
                 {identity?.userName ? (
                     <>
                         <RunJob
-                            partList={partList}
-                            part={partCode}
-                            partSetter={setPartCode}
-                            instructions={part?.specialInstructions}
-                            acknowledged={acknowledgedSpecialInstructions}
-                            acknowledgeHandler={
-                                setAacknowlgedSpecialInstructions
+                            packingJob={packingJob}
+                            partChangeHandler={setPart}
+                            acknowledgementHandler={acknowledgementHandler}
+                            pieceWeightQuantityHandler={
+                                pieceWeightQuantityHandler
                             }
-                            standardPack={part?.standardPack}
+                            pieceWeightHandler={pieceWeightHandler}
+                            operatorHandler={operatorHandler}
+                            machineHandler={machineHandler}
+                            startJobHandler={startJobHandler}
+                            stopJobHandler={stopJobHandler}
+                            boxesHandler={boxesHandler}
+                            partialBoxQuantityHandler={
+                                partialBoxQuantityHandler
+                            }
+                            generateInventoryHandler={generateInventoryHandler}
                         />
                     </>
                 ) : (
