@@ -24,7 +24,6 @@ export function SelectPart(props: {
                 className="mb-3"
             >
                 <Form.Select
-                    id="floatingInput-part"
                     value={props.part?.partCode}
                     onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
                         const target = event.target;

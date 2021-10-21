@@ -82,21 +82,27 @@ export function LotQuantity(props: {
                                         plaintext
                                         readOnly
                                         value={`${
-                                            props.boxes &&
-                                            `${props.boxes} boxes @ ${
-                                                props.part.standardPack
-                                            }${
-                                                props.boxes &&
-                                                props.partialBoxQuantity &&
-                                                ' + '
-                                            }${
-                                                props.partialBoxQuantity &&
-                                                `${props.partialBoxQuantity} partial`
-                                            } = ${
-                                                (props.boxes ?? 0) *
-                                                    props.part.standardPack +
-                                                (props.partialBoxQuantity ?? 0)
-                                            }`
+                                            props.boxes
+                                                ? `${props.boxes} box${
+                                                      props.boxes > 1
+                                                          ? 'es'
+                                                          : ''
+                                                  } @ ${
+                                                      props.part.standardPack
+                                                  }${
+                                                      props.partialBoxQuantity
+                                                          ? ' + '
+                                                          : ''
+                                                  }`
+                                                : ''
+                                        }${
+                                            props.partialBoxQuantity
+                                                ? `${props.partialBoxQuantity} partial`
+                                                : ''
+                                        } = ${
+                                            (props.boxes || 0) *
+                                                props.part.standardPack +
+                                            (props.partialBoxQuantity || 0)
                                         }`}
                                     />
                                 </Col>

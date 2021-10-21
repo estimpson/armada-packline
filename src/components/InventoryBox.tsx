@@ -1,21 +1,25 @@
+import React, { useState } from 'react';
 import { Button, Card, FloatingLabel, Form } from '../bootstrap';
+import { IPackingObject } from '../features/packingJob/packingJobSlice';
 import { IPart } from '../features/part/partSlice';
 
 export function InventoryBox(props: {
-    serial: number;
     part: IPart;
-    quantity: number;
-    partial: boolean;
+    object: IPackingObject;
+    deleteBoxHandler?: (serial: number) => void;
+    combinePartialBoxHandler?: (scanData: string) => void;
 }) {
+    const [scanData, setScanData] = useState<string>('');
+
     return (
         <Card>
             <Card.Body>
-                <Card.Title>{`S${props.serial}${
-                    props.partial ? ' [Partial]' : ''
-                }`}</Card.Title>
+                <Card.Title>{`S${props.object.serial}${
+                    props.object.partial ? ' [Partial]' : ''
+                }${props.object.printed ? ' -- Printed' : ''}`}</Card.Title>
                 <Form>
                     <FloatingLabel
-                        controlId="floatingInput"
+                        controlId="floatingInput-part"
                         label="Part"
                         className="mb-3"
                     >
@@ -26,19 +30,45 @@ export function InventoryBox(props: {
                         label="Quantity"
                         className="mb-3"
                     >
-                        <Form.Control value={props.quantity} />
+                        <Form.Control readOnly value={props.object.quantity} />
                     </FloatingLabel>
-                    {props.partial && (
+                    {props.object.partial && (
                         <FloatingLabel
-                            controlId="floatingInput"
+                            controlId="floatingInput-combinescan"
                             label="Scan partial S3521477 (qty 35) to combine"
                             className="mb-3"
                         >
-                            <Form.Control />
+                            <Form.Control
+                                autoComplete={'off'}
+                                onChange={(
+                                    event: React.ChangeEvent<HTMLInputElement>,
+                                ) => {
+                                    setScanData(event.target.value);
+                                }}
+                                onKeyUp={(
+                                    event: React.KeyboardEvent<HTMLInputElement>,
+                                ) => {
+                                    if (event.key === 'Enter') {
+                                        props.combinePartialBoxHandler &&
+                                            props.combinePartialBoxHandler(
+                                                scanData,
+                                            );
+                                        setScanData('');
+                                    }
+                                }}
+                                value={scanData}
+                            />
                         </FloatingLabel>
                     )}
                 </Form>
-                <Button>Delete Box</Button>
+                <Button
+                    onClick={() => {
+                        props.deleteBoxHandler &&
+                            props.deleteBoxHandler(props.object.serial);
+                    }}
+                >
+                    Delete Box
+                </Button>
             </Card.Body>
         </Card>
     );

@@ -27,7 +27,6 @@ export function VerifyPieceWeight(props: {
                     className="mb-3"
                 >
                     <Form.Control
-                        id="floatingInput-pieceWeightQuantity"
                         type="number"
                         value={props.quantity || 0}
                         onChange={(
@@ -53,7 +52,6 @@ export function VerifyPieceWeight(props: {
                             className="mb-3"
                         >
                             <Form.Control
-                                id="floatingInput-pieceWeight"
                                 type="number"
                                 value={props.pieceWeight || 0}
                                 onChange={(

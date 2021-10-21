@@ -22,7 +22,6 @@ export function DeflashDetails(props: {
                     }
                 >
                     <Form.Control
-                        id="floatingInput-operator"
                         value={props.operator || ''}
                         onChange={(
                             event: React.ChangeEvent<HTMLInputElement>,
@@ -47,7 +46,6 @@ export function DeflashDetails(props: {
                         }
                     >
                         <Form.Control
-                            id="floatingInput-machine"
                             value={props.machine || ''}
                             onChange={(
                                 event: React.ChangeEvent<HTMLInputElement>,

@@ -1,8 +1,8 @@
-import { Button, Card, Col, Row } from '../bootstrap';
 import { IPackingJob } from '../features/packingJob/packingJobSlice';
 import { IPart } from '../features/part/partSlice';
 import { BeginJobSummary } from './BeginJobSummary';
-import { InventoryBox } from './InventoryBox';
+import { CompleteJob } from './CompleteJob';
+import { JobInventory } from './JobInventory';
 import { LotQuantity } from './LotQuantity';
 import { LotQuantitySummary } from './LotQuantitySummary';
 import { StartNewJob } from './StartNewJob';
@@ -22,6 +22,11 @@ export function RunJob(props: {
     partialBoxQuantityHandler?: (partialBoxQuantity: number) => void;
     stopJobHandler?: () => void;
     generateInventoryHandler?: () => void;
+    resetInventoryHandler?: () => void;
+    deleteBoxHandler?: (serial: number) => void;
+    printLabelsHandler?: () => void;
+    combinePartialBoxHandler?: (scanData: string) => void;
+    completeJobHandler?: () => void;
 }) {
     return (
         <>
@@ -55,6 +60,7 @@ export function RunJob(props: {
                     validPieceWeight={props.packingJob.validPieceWeight}
                     operator={props.packingJob.operator}
                     machine={props.packingJob.machine}
+                    objectList={props.packingJob.objectList}
                     stopJobHandler={props.stopJobHandler}
                 />
             )}
@@ -81,22 +87,25 @@ export function RunJob(props: {
                                 props.packingJob.partialBoxQuantity
                             }
                         />
-                        <Card.Body>
-                            <Card.Title>Inventory</Card.Title>
-                            <Row xs={1} md={2} className="g-4">
-                                {props.packingJob.objectList.map((object) => (
-                                    <Col>
-                                        <InventoryBox
-                                            serial={object.serial}
-                                            part={props.packingJob.part!}
-                                            quantity={object.quantity}
-                                            partial={object.partial}
-                                        />
-                                    </Col>
-                                ))}
-                            </Row>
-                            <Button>Print Labels</Button>
-                        </Card.Body>
+                        <JobInventory
+                            part={props.packingJob.part!}
+                            objectList={props.packingJob.objectList}
+                            deleteBoxHandler={props.deleteBoxHandler}
+                            resetInventoryHandler={props.resetInventoryHandler}
+                            printLabelsHandler={props.printLabelsHandler}
+                            combinePartialBoxHandler={
+                                props.combinePartialBoxHandler
+                            }
+                        />
+                        {props.packingJob.objectList.filter(
+                            (object) => !object.printed,
+                        ).length ? (
+                            <></>
+                        ) : (
+                            <CompleteJob
+                                completeJobHandler={props.completeJobHandler}
+                            />
+                        )}
                     </>
                 ))}
         </>

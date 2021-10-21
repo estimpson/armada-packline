@@ -8,8 +8,13 @@ import {
 } from '../features/identity/identitySlice';
 import { getPartList, IPart, selectPartList } from '../features/part/partSlice';
 import {
+    combinePartialBox,
+    completeJob,
+    deleteBox,
     generateInventory,
     IPackingJob,
+    printLabels,
+    resetInventory,
     selectPackingJob,
     setAcknowledged,
     setBoxes,
@@ -74,6 +79,21 @@ export default function Home() {
     function generateInventoryHandler(): void {
         dispatch(generateInventory());
     }
+    function resetInventoryHandler(): void {
+        dispatch(resetInventory());
+    }
+    function deleteBoxHandler(serial: number): void {
+        dispatch(deleteBox(serial));
+    }
+    function printLabelsHandler(): void {
+        dispatch(printLabels());
+    }
+    function combinePartialBoxHandler(scanData: string): void {
+        dispatch(combinePartialBox(scanData));
+    }
+    function completeJobHandler(): void {
+        dispatch(completeJob());
+    }
 
     const identity: IIdentity = useAppSelector(selectIdentity);
 
@@ -104,6 +124,11 @@ export default function Home() {
                                 partialBoxQuantityHandler
                             }
                             generateInventoryHandler={generateInventoryHandler}
+                            resetInventoryHandler={resetInventoryHandler}
+                            deleteBoxHandler={deleteBoxHandler}
+                            printLabelsHandler={printLabelsHandler}
+                            combinePartialBoxHandler={combinePartialBoxHandler}
+                            completeJobHandler={completeJobHandler}
                         />
                     </>
                 ) : (

@@ -10,6 +10,7 @@ export function BeginJobSummary(props: {
     validPieceWeight?: boolean;
     operator?: string;
     machine?: string;
+    objectList?: any[];
     stopJobHandler?: () => void;
 }) {
     return (
@@ -66,6 +67,7 @@ export function BeginJobSummary(props: {
                     </Col>
                 </Form.Group>
                 <Button
+                    disabled={!!props.objectList?.length}
                     onClick={() => {
                         if (props.stopJobHandler) props.stopJobHandler();
                     }}
