@@ -1,0 +1,32 @@
+using api.FxDatabase;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace api.Controllers
+{
+    [ApiController]
+    [Route("[controller]")]
+    public class PacklineController : ControllerBase
+    {
+        private readonly ILogger<PacklineJob> _logger;
+        private readonly FxContext _fxContext;
+
+        public PacklineController(ILogger<PacklineController> logger, FxContext fxContext)
+        {
+            _logger = logger;
+            _fxContext = fxContext;
+        }
+
+        [HttpGet("Parts")]
+        public IEnumerable<PackLinePart> GetParts()
+        {
+            return _fxContext.PacklineParts.FromSqlInterpolated(
+                $@"
+execute FXPL.usp_Q_PacklineParts"
+            ).ToArray();
+        }
+    }
+}

@@ -1,9 +1,12 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using api.FxDatabase;
+
 
 namespace api
 {
@@ -30,6 +33,12 @@ namespace api
             });
 
             services.AddControllers().AddMvcOptions(options => options.Filters.Add(new SigningKeyAuthorizationFilter(Configuration)));
+
+            services.AddDbContext<FxContext>(opt =>
+            {
+                opt.UseSqlServer(Configuration.GetConnectionString("FxConnection"));
+            });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "api", Version = "v1" });
