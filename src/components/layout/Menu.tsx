@@ -19,7 +19,7 @@ export function MainMenu(prop: { closeAction?: () => void }) {
     return (
         <Container
             fluid
-            className="bg-dark flex-grow-0 flex-row flex-nowrap p-0"
+            className="bg-dark flex-grow-0 d-flex flex-row flex-nowrap p-0"
         >
             <Navbar
                 bg="dark"
