@@ -12,53 +12,49 @@ export function DeflashDetails(props: {
 }) {
     return (
         <>
-            <Form.Group as={Row} className="mb-3">
+            <FloatingLabel
+                controlId="floatingInput-operator"
+                className="mb-3"
+                label={
+                    props.part.deflashMethod === 'MACHINE'
+                        ? 'Deflash Operator'
+                        : 'Tear Trim Operator'
+                }
+            >
+                <Form.Control
+                    value={props.operator || ''}
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                        const target = event.target;
+                        const value = target.value;
+                        if (props.operatorHandler) {
+                            props.operatorHandler(value);
+                        }
+                    }}
+                />
+            </FloatingLabel>
+            {props.operator && (
                 <FloatingLabel
-                    controlId="floatingInput-operator"
+                    controlId="floatingInput-machine"
+                    className="mb-3"
                     label={
                         props.part.deflashMethod === 'MACHINE'
-                            ? 'Deflash Operator'
-                            : 'Tear Trim Operator'
+                            ? 'Deflash Machine'
+                            : 'Tear Trim Machine'
                     }
                 >
                     <Form.Control
-                        value={props.operator || ''}
+                        value={props.machine || ''}
                         onChange={(
                             event: React.ChangeEvent<HTMLInputElement>,
                         ) => {
                             const target = event.target;
                             const value = target.value;
-                            if (props.operatorHandler) {
-                                props.operatorHandler(value);
+                            if (props.machineHandler) {
+                                props.machineHandler(value);
                             }
                         }}
                     />
                 </FloatingLabel>
-            </Form.Group>
-            {props.operator && (
-                <Form.Group as={Row} className="mb-3">
-                    <FloatingLabel
-                        controlId="floatingInput-machine"
-                        label={
-                            props.part.deflashMethod === 'MACHINE'
-                                ? 'Deflash Machine'
-                                : 'Tear Trim Machine'
-                        }
-                    >
-                        <Form.Control
-                            value={props.machine || ''}
-                            onChange={(
-                                event: React.ChangeEvent<HTMLInputElement>,
-                            ) => {
-                                const target = event.target;
-                                const value = target.value;
-                                if (props.machineHandler) {
-                                    props.machineHandler(value);
-                                }
-                            }}
-                        />
-                    </FloatingLabel>
-                </Form.Group>
             )}
         </>
     );

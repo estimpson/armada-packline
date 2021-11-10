@@ -17,46 +17,44 @@ export function SelectPart(props: {
     }, [dispatch, partList]);
 
     return (
-        <Form.Group as={Row}>
-            <FloatingLabel
-                controlId="floatingInput-part"
-                label="Select Part"
-                className="mb-3"
+        <FloatingLabel
+            controlId="floatingInput-part"
+            label="Select Part"
+            className="mb-3"
+        >
+            <Form.Select
+                value={props.part?.partCode}
+                onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
+                    const target = event.target;
+                    const value = target.value;
+                    const part = partList.find(
+                        (part) => part.partCode === value,
+                    );
+                    if (props.partSetter) {
+                        props.partSetter(part);
+                    }
+                }}
             >
-                <Form.Select
-                    value={props.part?.partCode}
-                    onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
-                        const target = event.target;
-                        const value = target.value;
-                        const part = partList.find(
-                            (part) => part.partCode === value,
+                <option value="">[None selected]</option>
+                {partList ? (
+                    partList.map((part) => {
+                        return (
+                            <option
+                                value={part.partCode}
+                                key={part.partCode}
+                            >{`${part.partCode} - ${part.partDescription} # ${
+                                part.unitWeight
+                            } +/- ${
+                                part.unitWeight * part.weightTolerance
+                            }`}</option>
                         );
-                        if (props.partSetter) {
-                            props.partSetter(part);
-                        }
-                    }}
-                >
-                    <option value="">[None selected]</option>
-                    {partList ? (
-                        partList.map((part) => {
-                            return (
-                                <option
-                                    value={part.partCode}
-                                    key={part.partCode}
-                                >{`${part.partCode} - ${
-                                    part.partDescription
-                                } # ${part.unitWeight} +/- ${
-                                    part.unitWeight * part.weightTolerance
-                                }`}</option>
-                            );
-                        })
-                    ) : (
-                        <>
-                            <option value="!">Loading</option>
-                        </>
-                    )}
-                </Form.Select>
-            </FloatingLabel>
-        </Form.Group>
+                    })
+                ) : (
+                    <>
+                        <option value="!">Loading</option>
+                    </>
+                )}
+            </Form.Select>
+        </FloatingLabel>
     );
 }

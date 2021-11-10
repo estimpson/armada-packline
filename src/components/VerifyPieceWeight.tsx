@@ -20,54 +20,44 @@ export function VerifyPieceWeight(props: {
         Math.abs(pieceWeightError) <= props.weightTolerance;
     return (
         <>
-            <Form.Group as={Row} className="mb-3">
-                <FloatingLabel
-                    controlId="floatingInput-pieceWeightQuantity"
-                    label="Piece Weight Quantity"
-                    className="mb-3"
-                >
-                    <Form.Control
-                        type="number"
-                        value={props.quantity || 0}
-                        onChange={(
-                            event: React.ChangeEvent<HTMLInputElement>,
-                        ) => {
-                            const target = event.target;
-                            const value = target.value;
-                            if (props.pieceWeightQuantityHandler) {
-                                props.pieceWeightQuantityHandler(
-                                    parseFloat(value),
-                                );
-                            }
-                        }}
-                    />
-                </FloatingLabel>
-            </Form.Group>
+            <FloatingLabel
+                controlId="floatingInput-pieceWeightQuantity"
+                label="Piece Weight Quantity"
+                className="mb-3"
+            >
+                <Form.Control
+                    type="number"
+                    value={props.quantity || 0}
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                        const target = event.target;
+                        const value = target.value;
+                        if (props.pieceWeightQuantityHandler) {
+                            props.pieceWeightQuantityHandler(parseFloat(value));
+                        }
+                    }}
+                />
+            </FloatingLabel>
             {props.quantity && (
                 <>
-                    <Form.Group as={Row} className="mb-1">
-                        <FloatingLabel
-                            controlId="floatingInput-pieceWeight"
-                            label="Piece Weight Pounds"
-                            className="mb-3"
-                        >
-                            <Form.Control
-                                type="number"
-                                value={props.pieceWeight || 0}
-                                onChange={(
-                                    event: React.ChangeEvent<HTMLInputElement>,
-                                ) => {
-                                    const target = event.target;
-                                    const value = target.value;
-                                    if (props.pieceWeightHandler) {
-                                        props.pieceWeightHandler(
-                                            parseFloat(value),
-                                        );
-                                    }
-                                }}
-                            />
-                        </FloatingLabel>
-                    </Form.Group>
+                    <FloatingLabel
+                        controlId="floatingInput-pieceWeight"
+                        label="Piece Weight Pounds"
+                        className="mb-3"
+                    >
+                        <Form.Control
+                            type="number"
+                            value={props.pieceWeight || 0}
+                            onChange={(
+                                event: React.ChangeEvent<HTMLInputElement>,
+                            ) => {
+                                const target = event.target;
+                                const value = target.value;
+                                if (props.pieceWeightHandler) {
+                                    props.pieceWeightHandler(parseFloat(value));
+                                }
+                            }}
+                        />
+                    </FloatingLabel>
                     {pieceWeightError || pieceWeightError === 0 ? (
                         valid ? (
                             <Form.Group as={Row} className="mb-3">
