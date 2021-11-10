@@ -61,14 +61,6 @@ export function InventoryBox(props: {
                         </FloatingLabel>
                     )}
                 </Form>
-                <Button
-                    onClick={() => {
-                        props.deleteBoxHandler &&
-                            props.deleteBoxHandler(props.object.serial);
-                    }}
-                >
-                    Delete Box
-                </Button>
             </Card.Body>
         </Card>
     );
