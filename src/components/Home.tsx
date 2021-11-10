@@ -36,6 +36,7 @@ import {
     stopJob,
 } from '../features/packingJob/packingJobSlice';
 import { RunJob } from './RunJob';
+import { IMachine } from '../features/machine/machineSlice';
 
 export default function Home() {
     const dispatch = useAppDispatch();
@@ -69,7 +70,7 @@ export default function Home() {
     function operatorHandler(operator: string): void {
         dispatch(setOperator(operator));
     }
-    function machineHandler(machine: string): void {
+    function machineHandler(machine: IMachine | undefined): void {
         dispatch(setMachine(machine));
     }
     function startJobHandler(): void {

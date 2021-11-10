@@ -1,4 +1,5 @@
 import { Card, Form } from '../bootstrap';
+import { IMachine } from '../features/machine/machineSlice';
 import { IPart } from '../features/part/partSlice';
 import { DeflashDetails } from './DeflashDetails';
 import { OpenJob } from './OpenJob';
@@ -20,10 +21,10 @@ export function StartNewJob(props: {
 
     validPieceWeight?: boolean;
     operator?: string;
-    machine?: string;
+    machine?: IMachine;
 
     operatorHandler?: (operator: string) => void;
-    machineHandler?: (machine: string) => void;
+    machineHandler?: (machine: IMachine | undefined) => void;
 
     jobInProgress?: boolean;
     startJobHandler?: () => void;

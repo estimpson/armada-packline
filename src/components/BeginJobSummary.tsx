@@ -1,4 +1,5 @@
 import { Button, Card, Col, Form, Row } from '../bootstrap';
+import { IMachine } from '../features/machine/machineSlice';
 import { IPart } from '../features/part/partSlice';
 
 export function BeginJobSummary(props: {
@@ -9,7 +10,7 @@ export function BeginJobSummary(props: {
     pieceWeight?: number;
     validPieceWeight?: boolean;
     operator?: string;
-    machine?: string;
+    machine?: IMachine;
     objectList?: any[];
     stopJobHandler?: () => void;
 }) {
@@ -49,7 +50,7 @@ export function BeginJobSummary(props: {
                         <Form.Control
                             plaintext
                             readOnly
-                            value={`By ${props.operator} @ ${props.machine}`}
+                            value={`By ${props.operator} @ ${props.machine?.machineCode}`}
                         />
                     </Col>
                 </Form.Group>

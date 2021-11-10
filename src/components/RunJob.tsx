@@ -1,3 +1,4 @@
+import { IMachine } from '../features/machine/machineSlice';
 import { IPackingJob } from '../features/packingJob/packingJobSlice';
 import { IPart } from '../features/part/partSlice';
 import { BeginJobSummary } from './BeginJobSummary';
@@ -16,7 +17,7 @@ export function RunJob(props: {
     pieceWeightQuantityHandler?: (pieceWeight: number | undefined) => void;
     pieceWeightHandler?: (pieceWeight: number | undefined) => void;
     operatorHandler?: (operator: string) => void;
-    machineHandler?: (machine: string) => void;
+    machineHandler?: (machine: IMachine | undefined) => void;
     startJobHandler?: () => void;
     boxesHandler?: (boxes: number) => void;
     partialBoxQuantityHandler?: (partialBoxQuantity: number) => void;

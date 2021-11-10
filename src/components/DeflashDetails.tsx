@@ -1,5 +1,7 @@
-import { FloatingLabel, Form, Row } from '../bootstrap';
+import { FloatingLabel, Form } from '../bootstrap';
+import { IMachine } from '../features/machine/machineSlice';
 import { IPart } from '../features/part/partSlice';
+import { SelectMachine } from './SelectMachine';
 
 export function DeflashDetails(props: {
     part: IPart;
@@ -7,8 +9,8 @@ export function DeflashDetails(props: {
     operator?: string;
     operatorHandler?: (operator: string) => void;
 
-    machine?: string;
-    machineHandler?: (machine: string) => void;
+    machine?: IMachine;
+    machineHandler?: (machine: IMachine | undefined) => void;
 }) {
     return (
         <>
@@ -33,28 +35,15 @@ export function DeflashDetails(props: {
                 />
             </FloatingLabel>
             {props.operator && (
-                <FloatingLabel
-                    controlId="floatingInput-machine"
-                    className="mb-3"
+                <SelectMachine
                     label={
                         props.part.deflashMethod === 'MACHINE'
                             ? 'Deflash Machine'
                             : 'Tear Trim Machine'
                     }
-                >
-                    <Form.Control
-                        value={props.machine || ''}
-                        onChange={(
-                            event: React.ChangeEvent<HTMLInputElement>,
-                        ) => {
-                            const target = event.target;
-                            const value = target.value;
-                            if (props.machineHandler) {
-                                props.machineHandler(value);
-                            }
-                        }}
-                    />
-                </FloatingLabel>
+                    machine={props.machine}
+                    machineSetter={props.machineHandler}
+                />
             )}
         </>
     );

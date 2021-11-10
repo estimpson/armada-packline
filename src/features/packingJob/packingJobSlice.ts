@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
+import { IMachine } from '../machine/machineSlice';
 import { IPart } from '../part/partSlice';
 import { dummyAction } from './packingJobAPI';
 
@@ -38,7 +39,7 @@ export interface IPackingJob {
     pieceWeight?: number;
     validPieceWeight?: boolean;
     operator?: string;
-    machine?: string;
+    machine?: IMachine;
     jobInProgress?: boolean;
     standardPack?: number;
     boxes?: number;
@@ -165,7 +166,7 @@ export const packingJobSlice = createSlice({
         setOperator: (state, action: PayloadAction<string>) => {
             state.value.operator = action.payload;
         },
-        setMachine: (state, action: PayloadAction<string>) => {
+        setMachine: (state, action: PayloadAction<IMachine | undefined>) => {
             state.value.machine = action.payload;
         },
         startJob: (state) => {

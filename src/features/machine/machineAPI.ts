@@ -1,38 +1,26 @@
 import axios from 'axios';
-import { DemoParts } from './demo/demoParts';
-import { IPart } from './partSlice';
+import { DemoMachines } from './demo/demoMachines';
+import { IMachine } from './machineSlice';
 
 // data structure returned by web API
-interface IPartAPI {
-    partCode: string;
-    partDescription: string;
-    unitWeight?: number;
-    weightTolerance: number;
-    standardPack: number;
-    defaultPackaging?: string;
-    specialInstructions?: string;
-    requiresFinalInspection: boolean;
-    deflashMethod?: 'MACHINE' | 'TEARTRIM';
+interface IMachineAPI {
+    machineCode: string;
+    machineDescription: string;
 }
 
-export function retrieveParts(
+export function retrieveMachines(
     setError?: React.Dispatch<React.SetStateAction<string>>,
 ) {
     return new Promise<{
-        data: IPart[];
+        data: IMachine[];
     }>((resolve) => {
         if (process.env['REACT_APP_API'] === 'Enabled') {
             return axios
-                .get<IPartAPI[]>(`https://localhost:5000/Packline/Parts`)
+                .get<IMachineAPI[]>(`https://localhost:5000/Packline/Machines`)
                 .then((response) => {
                     // mapping of api datastructure to internal datastructure
                     return resolve({
-                        data: response.data.map((apiPart) => {
-                            return {
-                                unitWeight: apiPart.unitWeight || 0,
-                                ...apiPart,
-                            };
-                        }),
+                        data: response.data,
                     });
                 })
                 .catch((ex) => {
@@ -48,7 +36,7 @@ export function retrieveParts(
 
         // fallback to demo data
         return resolve({
-            data: DemoParts,
+            data: DemoMachines,
         });
     });
 }
