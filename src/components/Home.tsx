@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
-import { Button, Card, Col, Container, Form, Row } from '../bootstrap';
+import {
+    Button,
+    Card,
+    Col,
+    Container,
+    Form,
+    Row,
+    FloatingLabel,
+} from '../bootstrap';
 import {
     IIdentity,
     loginAsync,
@@ -137,39 +145,31 @@ export default function Home() {
                         <Card>
                             <Card.Body>
                                 <Form>
-                                    <Form.Group
-                                        as={Row}
+                                    <FloatingLabel
+                                        controlId="floatingInput-user"
+                                        label="User"
                                         className="mb-3"
-                                        controlId="formUser"
                                     >
-                                        <Form.Label column sm="6" md="4" lg="2">
-                                            User:
-                                        </Form.Label>
-                                        <Col sm="12" md="8" lg="4">
-                                            <Form.Control
-                                                onChange={(e) =>
-                                                    setUser(e.target.value)
-                                                }
-                                            />
-                                        </Col>
-                                    </Form.Group>
-                                    <Form.Group
-                                        as={Row}
+                                        <Form.Control
+                                            placeholder="user"
+                                            onChange={(e) =>
+                                                setUser(e.target.value)
+                                            }
+                                        />
+                                    </FloatingLabel>
+                                    <FloatingLabel
+                                        controlId="floatingInput-password"
+                                        label="Password"
                                         className="mb-3"
-                                        controlId="formPassword"
                                     >
-                                        <Form.Label column sm="6" md="4" lg="2">
-                                            Password:
-                                        </Form.Label>
-                                        <Col sm="12" md="8" lg="4">
-                                            <Form.Control
-                                                type="password"
-                                                onChange={(e) =>
-                                                    setPassword(e.target.value)
-                                                }
-                                            />
-                                        </Col>
-                                    </Form.Group>
+                                        <Form.Control
+                                            type="password"
+                                            placeholder="password"
+                                            onChange={(e) =>
+                                                setPassword(e.target.value)
+                                            }
+                                        />
+                                    </FloatingLabel>
                                     <Form.Group>
                                         <Button
                                             onClick={() =>
