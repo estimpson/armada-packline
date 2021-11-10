@@ -1,6 +1,7 @@
 import identityReducer from '../features/identity/identitySlice';
 import applicationErrorReducer from '../features/applicationError/applicationErrorSlice';
 import localApiDetailsReducer from '../features/localApi/localApiSlice';
+import machineReducer from '../features/machine/machineSlice';
 import partReducer from '../features/part/partSlice';
 import packingJobReducer from '../features/packingJob/packingJobSlice';
 
@@ -25,13 +26,14 @@ const reducers = combineReducers({
     identity: identityReducer,
     applicationError: applicationErrorReducer,
     localApiDetails: localApiDetailsReducer,
+    machineList: machineReducer,
     partList: partReducer,
     packingJob: packingJobReducer,
 });
 const persistConfig = {
     key: 'root',
     storage,
-    blacklist: ['applicationError, partList'],
+    blacklist: ['applicationError, localApiDetails, machineList, partList'],
 };
 const persistedReducer = persistReducer(persistConfig, reducers);
 

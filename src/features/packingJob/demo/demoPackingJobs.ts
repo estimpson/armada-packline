@@ -1,7 +1,6 @@
+import { DemoMachines } from '../../machine/demo/demoMachines';
 import { DemoParts } from '../../part/demo/demoParts';
 import { IPackingJob } from '../packingJobSlice';
-
-const partList = DemoParts;
 
 export interface IDemoPackingJob extends IPackingJob {
     step: string;
@@ -53,7 +52,7 @@ export const DemoJobs: IDemoPackingJob[] = [
         pieceWeight: 0.012357,
         validPieceWeight: true,
         operator: 'JK',
-        machine: 'D1',
+        machine: DemoMachines[3],
     },
     {
         step: '7: Enter Lot Quantity',
@@ -65,7 +64,7 @@ export const DemoJobs: IDemoPackingJob[] = [
         pieceWeight: 0.012357,
         validPieceWeight: true,
         operator: 'JK',
-        machine: 'D1',
+        machine: DemoMachines[3],
         jobInProgress: true,
         standardPack: 100,
     },
@@ -79,7 +78,7 @@ export const DemoJobs: IDemoPackingJob[] = [
         pieceWeight: 0.012357,
         validPieceWeight: true,
         operator: 'JK',
-        machine: 'D1',
+        machine: DemoMachines[3],
         jobInProgress: true,
         standardPack: 100,
         boxes: 3,
@@ -95,7 +94,7 @@ export const DemoJobs: IDemoPackingJob[] = [
         pieceWeight: 0.012357,
         validPieceWeight: true,
         operator: 'JK',
-        machine: 'D1',
+        machine: DemoMachines[3],
         jobInProgress: true,
         standardPack: 100,
         boxes: 3,
@@ -137,7 +136,7 @@ export const DemoJobs: IDemoPackingJob[] = [
         pieceWeight: 0.012357,
         validPieceWeight: true,
         operator: 'JK',
-        machine: 'D1',
+        machine: DemoMachines[3],
         jobInProgress: true,
         standardPack: 100,
         boxes: 3,
