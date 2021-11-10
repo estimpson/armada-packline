@@ -33,7 +33,7 @@ export function LotQuantity(props: {
                                 label="Boxes"
                             >
                                 <Form.Control
-                                    value={props.boxes}
+                                    value={props.boxes ?? ''}
                                     onChange={(
                                         event: React.ChangeEvent<HTMLInputElement>,
                                     ) => {
@@ -51,26 +51,25 @@ export function LotQuantity(props: {
                             </InputGroup.Text>
                         </InputGroup>
                     </Form.Group>
-                    <Form.Group as={Row} className="mb-3">
-                        <FloatingLabel
-                            controlId="floatingInput-partialboxequantity"
-                            label="Partial Box"
-                        >
-                            <Form.Control
-                                value={props.partialBoxQuantity}
-                                onChange={(
-                                    event: React.ChangeEvent<HTMLInputElement>,
-                                ) => {
-                                    const target = event.target;
-                                    const value =
-                                        parseInt(target.value) ?? undefined;
-                                    if (props.partialBoxQuantityHandler) {
-                                        props.partialBoxQuantityHandler(value);
-                                    }
-                                }}
-                            />
-                        </FloatingLabel>
-                    </Form.Group>
+                    <FloatingLabel
+                        controlId="floatingInput-partialboxequantity"
+                        className="mb-3"
+                        label="Partial Box"
+                    >
+                        <Form.Control
+                            value={props.partialBoxQuantity ?? ''}
+                            onChange={(
+                                event: React.ChangeEvent<HTMLInputElement>,
+                            ) => {
+                                const target = event.target;
+                                const value =
+                                    parseInt(target.value) ?? undefined;
+                                if (props.partialBoxQuantityHandler) {
+                                    props.partialBoxQuantityHandler(value);
+                                }
+                            }}
+                        />
+                    </FloatingLabel>
                     {props.boxes || props.partialBoxQuantity ? (
                         <>
                             <Form.Group as={Row} className="mb-3">
