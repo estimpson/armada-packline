@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { IPartPackaging } from '../partPackaging/partPackagingSlice';
 import { DemoParts } from './demo/demoParts';
 import { IPart } from './partSlice';
 
@@ -13,6 +14,7 @@ interface IPartAPI {
     specialInstructions?: string;
     requiresFinalInspection: boolean;
     deflashMethod?: 'MACHINE' | 'TEARTRIM';
+    packagingList: IPartPackaging[];
 }
 
 export function retrieveParts(

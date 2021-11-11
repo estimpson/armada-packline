@@ -1,8 +1,10 @@
 import { Card, Col, FloatingLabel, Form, Row } from '../bootstrap';
 import { IPart } from '../features/part/partSlice';
+import { IPartPackaging } from '../features/partPackaging/partPackagingSlice';
 
 export function LotQuantitySummary(props: {
     part: IPart;
+    packaging: IPartPackaging;
 
     boxes?: number;
 
@@ -21,7 +23,7 @@ export function LotQuantitySummary(props: {
                             <Form.Control
                                 plaintext
                                 readOnly
-                                value={`${props.boxes} @ ${props.part.standardPack}`}
+                                value={`${props.boxes} @ ${props.packaging.standardPack}`}
                             />
                         </Col>
                     </Form.Group>
@@ -54,7 +56,7 @@ export function LotQuantitySummary(props: {
                                 props.boxes
                                     ? `${props.boxes} box${
                                           props.boxes > 1 ? 'es' : ''
-                                      } @ ${props.part.standardPack}${
+                                      } @ ${props.packaging.standardPack}${
                                           props.partialBoxQuantity ? ' + ' : ''
                                       }`
                                     : ''
@@ -63,7 +65,8 @@ export function LotQuantitySummary(props: {
                                     ? `${props.partialBoxQuantity} partial`
                                     : ''
                             } = ${
-                                (props.boxes || 0) * props.part.standardPack +
+                                (props.boxes || 0) *
+                                    props.packaging.standardPack +
                                 (props.partialBoxQuantity || 0)
                             }`}
                         />

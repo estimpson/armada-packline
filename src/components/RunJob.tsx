@@ -1,6 +1,7 @@
 import { IMachine } from '../features/machine/machineSlice';
 import { IPackingJob } from '../features/packingJob/packingJobSlice';
 import { IPart } from '../features/part/partSlice';
+import { IPartPackaging } from '../features/partPackaging/partPackagingSlice';
 import { BeginJobSummary } from './BeginJobSummary';
 import { CompleteJob } from './CompleteJob';
 import { JobInventory } from './JobInventory';
@@ -13,6 +14,7 @@ export function RunJob(props: {
     packingJob: IPackingJob;
 
     partChangeHandler?: (part: IPart | undefined) => void;
+    packagingSetter?: (partPackaging: IPartPackaging | undefined) => void;
     acknowledgementHandler?: (acknowledged: boolean) => void;
     pieceWeightQuantityHandler?: (pieceWeight: number | undefined) => void;
     pieceWeightHandler?: (pieceWeight: number | undefined) => void;
@@ -35,7 +37,9 @@ export function RunJob(props: {
             {!props.packingJob.jobInProgress ? (
                 <StartNewJob
                     part={props.packingJob.part}
+                    packaging={props.packingJob.packaging}
                     partSetter={props.partChangeHandler}
+                    packagingSetter={props.packagingSetter}
                     acknowledged={props.packingJob.acknowledged}
                     acknowledgementHandler={props.acknowledgementHandler}
                     quantity={props.packingJob.quantity}
@@ -53,8 +57,7 @@ export function RunJob(props: {
                 />
             ) : (
                 <BeginJobSummary
-                    part={props.packingJob.part}
-                    instructions={props.packingJob.instructions}
+                    part={props.packingJob.part!}
                     acknowledged={props.packingJob.acknowledged}
                     quantity={props.packingJob.quantity}
                     pieceWeight={props.packingJob.pieceWeight}
@@ -65,10 +68,12 @@ export function RunJob(props: {
                     stopJobHandler={props.stopJobHandler}
                 />
             )}
-            {props.packingJob.jobInProgress &&
+            {props.packingJob.packaging &&
+                props.packingJob.jobInProgress &&
                 (!props.packingJob.objectList?.length ? (
                     <LotQuantity
                         part={props.packingJob.part!}
+                        packaging={props.packingJob.packaging!}
                         boxes={props.packingJob.boxes}
                         boxesHandler={props.boxesHandler}
                         partialBoxQuantity={props.packingJob.partialBoxQuantity}
@@ -83,6 +88,7 @@ export function RunJob(props: {
                     <>
                         <LotQuantitySummary
                             part={props.packingJob.part!}
+                            packaging={props.packingJob.packaging!}
                             boxes={props.packingJob.boxes}
                             partialBoxQuantity={
                                 props.packingJob.partialBoxQuantity

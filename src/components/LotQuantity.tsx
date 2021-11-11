@@ -8,9 +8,11 @@ import {
     Row,
 } from '../bootstrap';
 import { IPart } from '../features/part/partSlice';
+import { IPartPackaging } from '../features/partPackaging/partPackagingSlice';
 
 export function LotQuantity(props: {
     part: IPart;
+    packaging: IPartPackaging;
 
     boxes?: number;
     boxesHandler?: (boxes: number) => void;
@@ -47,7 +49,7 @@ export function LotQuantity(props: {
                                 />
                             </FloatingLabel>
                             <InputGroup.Text>
-                                @ {props.part.standardPack}
+                                @ {props.packaging.standardPack}
                             </InputGroup.Text>
                         </InputGroup>
                     </Form.Group>
@@ -87,7 +89,8 @@ export function LotQuantity(props: {
                                                           ? 'es'
                                                           : ''
                                                   } @ ${
-                                                      props.part.standardPack
+                                                      props.packaging
+                                                          .standardPack
                                                   }${
                                                       props.partialBoxQuantity
                                                           ? ' + '
@@ -100,7 +103,7 @@ export function LotQuantity(props: {
                                                 : ''
                                         } = ${
                                             (props.boxes || 0) *
-                                                props.part.standardPack +
+                                                props.packaging.standardPack +
                                             (props.partialBoxQuantity || 0)
                                         }`}
                                     />

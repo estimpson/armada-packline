@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
 import { IMachine } from '../machine/machineSlice';
 import { IPart } from '../part/partSlice';
+import { IPartPackaging } from '../partPackaging/partPackagingSlice';
 import { dummyAction } from './packingJobAPI';
 
 function clamp(
@@ -33,7 +34,7 @@ export interface IPackingObject {
 
 export interface IPackingJob {
     part?: IPart;
-    instructions?: string;
+    packaging?: IPartPackaging;
     acknowledged?: boolean;
     quantity?: number;
     pieceWeight?: number;
@@ -41,7 +42,6 @@ export interface IPackingJob {
     operator?: string;
     machine?: IMachine;
     jobInProgress?: boolean;
-    standardPack?: number;
     boxes?: number;
     partialBoxQuantity?: number;
     objectList?: IPackingObject[];
@@ -83,11 +83,6 @@ export const packingJobSlice = createSlice({
             state = initialState;
         },
         setPart: (state, action: PayloadAction<IPart | undefined>) => {
-            // Redux Toolkit allows us to write "mutating" logic in reducers. It
-            // doesn't actually mutate the state because it uses the Immer library,
-            // which detects changes to a "draft state" and produces a brand new
-            // immutable state based off those changes
-
             // pre-modification state validation
             if (state.value.objectList)
                 throw new Error(
@@ -100,18 +95,9 @@ export const packingJobSlice = createSlice({
                         'Stop job first.',
                 );
 
-            // simplified state modification when part details may have changed by
-            if (state.value.part?.partCode === action.payload?.partCode) {
-                state.value.acknowledged =
-                    state.value.acknowledged &&
-                    state.value.instructions ===
-                        action.payload?.specialInstructions;
-                state.value.part = action.payload;
-                return;
-            }
-
             // part has changed, reset all other properties
             state.value.part = action.payload;
+            state.value.packaging = undefined;
             state.value.acknowledged = false;
             state.value.pieceWeight = undefined;
             state.value.quantity = undefined;
@@ -119,6 +105,31 @@ export const packingJobSlice = createSlice({
             state.value.partialBoxQuantity = undefined;
             state.value.operator = undefined;
             state.value.machine = undefined;
+
+            if (action.payload?.packagingList.length === 1) {
+                state.value.packaging = action.payload?.packagingList[0];
+            }
+        },
+        setPackaging: (
+            state,
+            action: PayloadAction<IPartPackaging | undefined>,
+        ) => {
+            // pre-modification state validation
+            if (state.value.objectList)
+                throw new Error(
+                    'Changing packaging on a job forbidden when that job has associated' +
+                        ' inventory.  Delete all inventory first or start a new job.',
+                );
+            if (state.value.jobInProgress)
+                throw new Error(
+                    'Changing packaging on a job forbidden when that job has started.  ' +
+                        'Stop job first.',
+                );
+
+            state.value.packaging = action.payload;
+            state.value.acknowledged = false;
+            state.value.boxes = undefined;
+            state.value.partialBoxQuantity = undefined;
         },
         setAcknowledged: (state, action: PayloadAction<boolean>) => {
             state.value.acknowledged = action.payload;
@@ -194,7 +205,7 @@ export const packingJobSlice = createSlice({
             for (let i = 0; i < (state.value.boxes || 0); i++) {
                 state.value.objectList.push({
                     serial: 1234567 + i,
-                    quantity: state.value.part!.standardPack,
+                    quantity: state.value.packaging!.standardPack,
                     partial: false,
                     printed: false,
                 });
@@ -216,13 +227,15 @@ export const packingJobSlice = createSlice({
                 (object) => object.serial !== action.payload,
             );
             state.value.boxes = state.value.objectList!.filter(
-                (object) => object.quantity === state.value.part!.standardPack,
+                (object) =>
+                    object.quantity === state.value.packaging!.standardPack,
             ).length;
             state.value.boxes = state.value.boxes
                 ? state.value.boxes
                 : undefined;
             state.value.partialBoxQuantity = state.value.objectList!.find(
-                (object) => object.quantity !== state.value.part!.standardPack,
+                (object) =>
+                    object.quantity !== state.value.packaging!.standardPack,
             )?.quantity;
         },
         printLabels: (state) => {
@@ -238,7 +251,7 @@ export const packingJobSlice = createSlice({
                     new Array<IPackingCombinedObject>(0);
                 if (action.payload === 'S3521477') {
                     let quantityToUse = clamp(
-                        state.value.part!.standardPack -
+                        state.value.packaging!.standardPack -
                             state.value.partialBoxQuantity,
                         0,
                         35,
@@ -282,6 +295,7 @@ export const packingJobSlice = createSlice({
 export const {
     newJob,
     setPart,
+    setPackaging,
     setAcknowledged,
     setPieceWeightQuantity,
     setPieceWeight,

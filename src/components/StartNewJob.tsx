@@ -1,15 +1,20 @@
 import { Card, Form } from '../bootstrap';
 import { IMachine } from '../features/machine/machineSlice';
 import { IPart } from '../features/part/partSlice';
+import { IPartPackaging } from '../features/partPackaging/partPackagingSlice';
 import { DeflashDetails } from './DeflashDetails';
 import { OpenJob } from './OpenJob';
 import { SelectPart } from './SelectPart';
+import { IListItem, ObjectSelect } from './shared/ObjectSelect';
 import { SpecialInstructions } from './SpecialInstructions';
 import { VerifyPieceWeight } from './VerifyPieceWeight';
 
 export function StartNewJob(props: {
     part?: IPart;
     partSetter?: (part: IPart | undefined) => void;
+
+    packaging?: IPartPackaging;
+    packagingSetter?: (partPackaging: IPartPackaging | undefined) => void;
 
     acknowledged?: boolean;
     acknowledgementHandler?: (acknowledged: boolean) => void;
@@ -39,20 +44,43 @@ export function StartNewJob(props: {
                             part={props.part}
                             partSetter={props.partSetter}
                         />
-                        {props.part && props.part.specialInstructions && (
-                            <SpecialInstructions
-                                instructions={
-                                    props.part.specialInstructions || ''
-                                }
-                                acknowledged={props.acknowledged || false}
-                                acknowledgementHandler={
-                                    props.acknowledgementHandler
-                                }
-                            />
-                        )}
+                        <ObjectSelect
+                            valueList={
+                                (props.part &&
+                                    props.part.packagingList &&
+                                    props.part.packagingList.map(
+                                        (partPackaging) => {
+                                            return {
+                                                displayValue:
+                                                    partPackaging.packageCode,
+                                                selectListValue: `${partPackaging.packageCode} - ${partPackaging.standardPack}`,
+                                                value: partPackaging,
+                                            };
+                                        },
+                                    )) ||
+                                new Array<IListItem<IPartPackaging>>()
+                            }
+                            label="Select Packaging"
+                            currentValue={props.packaging}
+                            setter={props.packagingSetter}
+                        />
+                        {props.packaging &&
+                            props.packaging.specialInstructions && (
+                                <SpecialInstructions
+                                    instructions={
+                                        props.packaging.specialInstructions ||
+                                        ''
+                                    }
+                                    acknowledged={props.acknowledged || false}
+                                    acknowledgementHandler={
+                                        props.acknowledgementHandler
+                                    }
+                                />
+                            )}
                         {props.part &&
                             props.part.requiresFinalInspection &&
-                            (!props.part.specialInstructions ||
+                            props.packaging &&
+                            (!props.packaging.specialInstructions ||
                                 props.acknowledged) && (
                                 <VerifyPieceWeight
                                     standardPieceWeight={props.part.unitWeight}
@@ -69,7 +97,8 @@ export function StartNewJob(props: {
                             )}
                         {props.part &&
                             props.part.requiresFinalInspection &&
-                            (!props.part.specialInstructions ||
+                            props.packaging &&
+                            (!props.packaging.specialInstructions ||
                                 props.acknowledged) &&
                             props.validPieceWeight && (
                                 <DeflashDetails
@@ -81,9 +110,10 @@ export function StartNewJob(props: {
                                 />
                             )}
                         {props.part &&
+                            props.packaging &&
                             (!props.part.requiresFinalInspection ||
                                 ((props.acknowledged ||
-                                    !props.part.specialInstructions) &&
+                                    !props.packaging.specialInstructions) &&
                                     props.validPieceWeight &&
                                     props.operator &&
                                     props.machine)) && (

@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
+import { IPartPackaging } from '../partPackaging/partPackagingSlice';
 import { retrieveParts } from './partAPI';
 
 export interface IPart {
@@ -7,10 +8,9 @@ export interface IPart {
     partDescription: string;
     unitWeight: number;
     weightTolerance: number;
-    standardPack: number;
-    specialInstructions?: string;
     requiresFinalInspection: boolean;
     deflashMethod?: 'MACHINE' | 'TEARTRIM';
+    packagingList: IPartPackaging[];
 }
 
 export interface IPartListState {

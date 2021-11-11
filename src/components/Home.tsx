@@ -28,6 +28,7 @@ import {
     setBoxes,
     setMachine,
     setOperator,
+    setPackaging,
     setPart as setPackingJobPart,
     setPartialBoxQuantity,
     setPieceWeight,
@@ -37,6 +38,7 @@ import {
 } from '../features/packingJob/packingJobSlice';
 import { RunJob } from './RunJob';
 import { IMachine } from '../features/machine/machineSlice';
+import { IPartPackaging } from '../features/partPackaging/partPackagingSlice';
 
 export default function Home() {
     const dispatch = useAppDispatch();
@@ -55,6 +57,9 @@ export default function Home() {
     // handlers for setting state in the store
     function setPart(part: IPart | undefined): void {
         dispatch(setPackingJobPart(part));
+    }
+    function packagingSetter(partPackaging: IPartPackaging | undefined): void {
+        dispatch(setPackaging(partPackaging));
     }
     function acknowledgementHandler(acknowledged: boolean): void {
         dispatch(setAcknowledged(acknowledged));
@@ -119,6 +124,7 @@ export default function Home() {
                         <RunJob
                             packingJob={packingJob}
                             partChangeHandler={setPart}
+                            packagingSetter={packagingSetter}
                             acknowledgementHandler={acknowledgementHandler}
                             pieceWeightQuantityHandler={
                                 pieceWeightQuantityHandler

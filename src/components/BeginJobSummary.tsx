@@ -1,10 +1,11 @@
 import { Button, Card, Col, Form, Row } from '../bootstrap';
 import { IMachine } from '../features/machine/machineSlice';
 import { IPart } from '../features/part/partSlice';
+import { IPartPackaging } from '../features/partPackaging/partPackagingSlice';
 
 export function BeginJobSummary(props: {
     part?: IPart;
-    instructions?: string;
+    packaging?: IPartPackaging;
     acknowledged?: boolean;
     quantity?: number;
     pieceWeight?: number;
@@ -63,7 +64,7 @@ export function BeginJobSummary(props: {
                             className="px-3 text-white bg-warning"
                             plaintext
                             readOnly
-                            value={props.part?.specialInstructions}
+                            value={props.packaging?.specialInstructions}
                         />
                     </Col>
                 </Form.Group>
