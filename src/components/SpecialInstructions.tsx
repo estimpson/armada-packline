@@ -1,16 +1,23 @@
+import { useAppDispatch } from '../app/hooks';
 import { Col, Form, Row } from '../bootstrap';
+import {
+    IPackingJob,
+    setAcknowledged,
+} from '../features/packingJob/packingJobSlice';
 
-export function SpecialInstructions(props: {
-    instructions: string;
-    acknowledged: boolean;
-    acknowledgementHandler?: (acknowledged: boolean) => void;
-}) {
+export function SpecialInstructions(props: { packingJob: IPackingJob }) {
+    const dispatch = useAppDispatch();
+
+    function acknowledgementHandler(acknowledged: boolean): void {
+        if (!props.packingJob.demoJob) dispatch(setAcknowledged(acknowledged));
+    }
+
     return (
         <>
             <Form.Group
                 as={Row}
                 className={
-                    props.acknowledged
+                    props.packingJob.acknowledged
                         ? 'mb-1 text-white bg-warning'
                         : 'mb-1 text-white bg-danger'
                 }
@@ -24,8 +31,13 @@ export function SpecialInstructions(props: {
                         rows={3}
                         plaintext
                         readOnly
-                        value={props.instructions}
-                        className={props.acknowledged ? '' : 'text-white'}
+                        value={
+                            props.packingJob.packaging?.specialInstructions ||
+                            ''
+                        }
+                        className={
+                            props.packingJob.acknowledged ? '' : 'text-white'
+                        }
                     />
                 </Col>
             </Form.Group>
@@ -34,15 +46,13 @@ export function SpecialInstructions(props: {
                 <Col sm="9">
                     <Form.Check
                         label="Acknowlege"
-                        checked={props.acknowledged}
+                        checked={props.packingJob.acknowledged}
                         onChange={(
                             event: React.ChangeEvent<HTMLInputElement>,
                         ) => {
                             const target = event.target;
                             const checked = target.checked;
-                            if (props.acknowledgementHandler) {
-                                props.acknowledgementHandler(checked);
-                            }
+                            acknowledgementHandler(checked);
                         }}
                     />
                 </Col>

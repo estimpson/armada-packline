@@ -1,48 +1,52 @@
+import { useAppDispatch } from '../app/hooks';
 import { FloatingLabel, Form } from '../bootstrap';
 import { IMachine } from '../features/machine/machineSlice';
-import { IPart } from '../features/part/partSlice';
+import {
+    IPackingJob,
+    setMachine,
+    setOperator,
+} from '../features/packingJob/packingJobSlice';
 import { SelectMachine } from './SelectMachine';
 
-export function DeflashDetails(props: {
-    part: IPart;
+export function DeflashDetails(props: { packingJob: IPackingJob }) {
+    const dispatch = useAppDispatch();
 
-    operator?: string;
-    operatorHandler?: (operator: string) => void;
+    function operatorHandler(operator: string): void {
+        if (!props.packingJob.demoJob) dispatch(setOperator(operator));
+    }
+    function machineHandler(machine: IMachine | undefined): void {
+        if (!props.packingJob.demoJob) dispatch(setMachine(machine));
+    }
 
-    machine?: IMachine;
-    machineHandler?: (machine: IMachine | undefined) => void;
-}) {
     return (
         <>
             <FloatingLabel
                 controlId="floatingInput-operator"
                 className="mb-3"
                 label={
-                    props.part.deflashMethod === 'MACHINE'
+                    props.packingJob.part!.deflashMethod === 'MACHINE'
                         ? 'Deflash Operator'
                         : 'Tear Trim Operator'
                 }
             >
                 <Form.Control
-                    value={props.operator || ''}
+                    value={props.packingJob.operator || ''}
                     onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                         const target = event.target;
                         const value = target.value;
-                        if (props.operatorHandler) {
-                            props.operatorHandler(value);
-                        }
+                        operatorHandler(value);
                     }}
                 />
             </FloatingLabel>
-            {props.operator && (
+            {props.packingJob.operator && (
                 <SelectMachine
                     label={
-                        props.part.deflashMethod === 'MACHINE'
+                        props.packingJob.part!.deflashMethod === 'MACHINE'
                             ? 'Deflash Machine'
                             : 'Tear Trim Machine'
                     }
-                    machine={props.machine}
-                    machineSetter={props.machineHandler}
+                    machine={props.packingJob.machine}
+                    machineSetter={machineHandler}
                 />
             )}
         </>

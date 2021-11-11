@@ -1,20 +1,12 @@
-import { Card, Col, FloatingLabel, Form, Row } from '../bootstrap';
-import { IPart } from '../features/part/partSlice';
-import { IPartPackaging } from '../features/partPackaging/partPackagingSlice';
+import { Card, Col, Form, Row } from '../bootstrap';
+import { IPackingJob } from '../features/packingJob/packingJobSlice';
 
-export function LotQuantitySummary(props: {
-    part: IPart;
-    packaging: IPartPackaging;
-
-    boxes?: number;
-
-    partialBoxQuantity?: number;
-}) {
+export function LotQuantitySummary(props: { packingJob: IPackingJob }) {
     return (
         <Card.Body>
             <Card.Title>Lot Quantity Summary</Card.Title>
             <Form>
-                {props.boxes && (
+                {props.packingJob.boxes && (
                     <Form.Group as={Row} className="mb-3">
                         <Form.Label column sm="3">
                             Boxes
@@ -23,13 +15,15 @@ export function LotQuantitySummary(props: {
                             <Form.Control
                                 plaintext
                                 readOnly
-                                value={`${props.boxes} @ ${props.packaging.standardPack}`}
+                                value={`${props.packingJob.boxes} @ ${
+                                    props.packingJob.packaging!.standardPack
+                                }`}
                             />
                         </Col>
                     </Form.Group>
                 )}
 
-                {props.partialBoxQuantity && (
+                {props.packingJob.partialBoxQuantity && (
                     <Form.Group as={Row} className="mb-3">
                         <Form.Label column sm="3">
                             Partial Box
@@ -38,7 +32,7 @@ export function LotQuantitySummary(props: {
                             <Form.Control
                                 plaintext
                                 readOnly
-                                value={props.partialBoxQuantity}
+                                value={props.packingJob.partialBoxQuantity}
                             />
                         </Col>
                     </Form.Group>
@@ -53,21 +47,26 @@ export function LotQuantitySummary(props: {
                             plaintext
                             readOnly
                             value={`${
-                                props.boxes
-                                    ? `${props.boxes} box${
-                                          props.boxes > 1 ? 'es' : ''
-                                      } @ ${props.packaging.standardPack}${
-                                          props.partialBoxQuantity ? ' + ' : ''
+                                props.packingJob.boxes
+                                    ? `${props.packingJob.boxes} box${
+                                          props.packingJob.boxes > 1 ? 'es' : ''
+                                      } @ ${
+                                          props.packingJob.packaging!
+                                              .standardPack
+                                      }${
+                                          props.packingJob.partialBoxQuantity
+                                              ? ' + '
+                                              : ''
                                       }`
                                     : ''
                             }${
-                                props.partialBoxQuantity
-                                    ? `${props.partialBoxQuantity} partial`
+                                props.packingJob.partialBoxQuantity
+                                    ? `${props.packingJob.partialBoxQuantity} partial`
                                     : ''
                             } = ${
-                                (props.boxes || 0) *
-                                    props.packaging.standardPack +
-                                (props.partialBoxQuantity || 0)
+                                (props.packingJob.boxes || 0) *
+                                    props.packingJob.packaging!.standardPack +
+                                (props.packingJob.partialBoxQuantity || 0)
                             }`}
                         />
                     </Col>

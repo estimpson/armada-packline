@@ -1,3 +1,4 @@
+import { useAppDispatch } from '../app/hooks';
 import {
     Button,
     Card,
@@ -7,21 +8,27 @@ import {
     InputGroup,
     Row,
 } from '../bootstrap';
-import { IPart } from '../features/part/partSlice';
-import { IPartPackaging } from '../features/partPackaging/partPackagingSlice';
+import {
+    generateInventory,
+    IPackingJob,
+    setBoxes,
+    setPartialBoxQuantity,
+} from '../features/packingJob/packingJobSlice';
 
-export function LotQuantity(props: {
-    part: IPart;
-    packaging: IPartPackaging;
+export function LotQuantity(props: { packingJob: IPackingJob }) {
+    const dispatch = useAppDispatch();
 
-    boxes?: number;
-    boxesHandler?: (boxes: number) => void;
+    function boxesHandler(boxes: number): void {
+        if (!props.packingJob.demoJob) dispatch(setBoxes(boxes));
+    }
+    function partialBoxQuantityHandler(partialBoxQuantity: number): void {
+        if (!props.packingJob.demoJob)
+            dispatch(setPartialBoxQuantity(partialBoxQuantity));
+    }
+    function generateInventoryHandler(): void {
+        if (!props.packingJob.demoJob) dispatch(generateInventory());
+    }
 
-    partialBoxQuantity?: number;
-    partialBoxQuantityHandler?: (partialBoxQuantity: number) => void;
-
-    generateInventoryHandler?: () => void;
-}) {
     return (
         <Card className="mb-3">
             <Card.Body>
@@ -35,21 +42,19 @@ export function LotQuantity(props: {
                                 label="Boxes"
                             >
                                 <Form.Control
-                                    value={props.boxes ?? ''}
+                                    value={props.packingJob.boxes ?? ''}
                                     onChange={(
                                         event: React.ChangeEvent<HTMLInputElement>,
                                     ) => {
                                         const target = event.target;
                                         const value =
                                             parseInt(target.value) ?? undefined;
-                                        if (props.boxesHandler) {
-                                            props.boxesHandler(value);
-                                        }
+                                        boxesHandler(value);
                                     }}
                                 />
                             </FloatingLabel>
                             <InputGroup.Text>
-                                @ {props.packaging.standardPack}
+                                @ {props.packingJob.packaging!.standardPack}
                             </InputGroup.Text>
                         </InputGroup>
                     </Form.Group>
@@ -59,20 +64,19 @@ export function LotQuantity(props: {
                         label="Partial Box"
                     >
                         <Form.Control
-                            value={props.partialBoxQuantity ?? ''}
+                            value={props.packingJob.partialBoxQuantity ?? ''}
                             onChange={(
                                 event: React.ChangeEvent<HTMLInputElement>,
                             ) => {
                                 const target = event.target;
                                 const value =
                                     parseInt(target.value) ?? undefined;
-                                if (props.partialBoxQuantityHandler) {
-                                    props.partialBoxQuantityHandler(value);
-                                }
+                                partialBoxQuantityHandler(value);
                             }}
                         />
                     </FloatingLabel>
-                    {props.boxes || props.partialBoxQuantity ? (
+                    {props.packingJob.boxes ||
+                    props.packingJob.partialBoxQuantity ? (
                         <>
                             <Form.Group as={Row} className="mb-3">
                                 <Form.Label column sm="3">
@@ -83,28 +87,34 @@ export function LotQuantity(props: {
                                         plaintext
                                         readOnly
                                         value={`${
-                                            props.boxes
-                                                ? `${props.boxes} box${
-                                                      props.boxes > 1
+                                            props.packingJob.boxes
+                                                ? `${
+                                                      props.packingJob.boxes
+                                                  } box${
+                                                      props.packingJob.boxes > 1
                                                           ? 'es'
                                                           : ''
                                                   } @ ${
-                                                      props.packaging
+                                                      props.packingJob
+                                                          .packaging!
                                                           .standardPack
                                                   }${
-                                                      props.partialBoxQuantity
+                                                      props.packingJob
+                                                          .partialBoxQuantity
                                                           ? ' + '
                                                           : ''
                                                   }`
                                                 : ''
                                         }${
-                                            props.partialBoxQuantity
-                                                ? `${props.partialBoxQuantity} partial`
+                                            props.packingJob.partialBoxQuantity
+                                                ? `${props.packingJob.partialBoxQuantity} partial`
                                                 : ''
                                         } = ${
-                                            (props.boxes || 0) *
-                                                props.packaging.standardPack +
-                                            (props.partialBoxQuantity || 0)
+                                            (props.packingJob.boxes || 0) *
+                                                props.packingJob.packaging!
+                                                    .standardPack +
+                                            (props.packingJob
+                                                .partialBoxQuantity || 0)
                                         }`}
                                     />
                                 </Col>
@@ -114,13 +124,12 @@ export function LotQuantity(props: {
                         <></>
                     )}
 
-                    {props.boxes || props.partialBoxQuantity ? (
+                    {props.packingJob.boxes ||
+                    props.packingJob.partialBoxQuantity ? (
                         <>
                             <Button
                                 onClick={() => {
-                                    if (props.generateInventoryHandler) {
-                                        props.generateInventoryHandler();
-                                    }
+                                    generateInventoryHandler();
                                 }}
                             >
                                 Generate Inventory

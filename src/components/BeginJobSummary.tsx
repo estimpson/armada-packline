@@ -1,20 +1,14 @@
+import { useAppDispatch } from '../app/hooks';
 import { Button, Card, Col, Form, Row } from '../bootstrap';
-import { IMachine } from '../features/machine/machineSlice';
-import { IPart } from '../features/part/partSlice';
-import { IPartPackaging } from '../features/partPackaging/partPackagingSlice';
+import { IPackingJob, stopJob } from '../features/packingJob/packingJobSlice';
 
-export function BeginJobSummary(props: {
-    part?: IPart;
-    packaging?: IPartPackaging;
-    acknowledged?: boolean;
-    quantity?: number;
-    pieceWeight?: number;
-    validPieceWeight?: boolean;
-    operator?: string;
-    machine?: IMachine;
-    objectList?: any[];
-    stopJobHandler?: () => void;
-}) {
+export function BeginJobSummary(props: { packingJob: IPackingJob }) {
+    const dispatch = useAppDispatch();
+
+    function stopJobHandler(): void {
+        if (!props.packingJob.demoJob) dispatch(stopJob());
+    }
+
     return (
         <Card.Body>
             <Card.Title>Job In Progress</Card.Title>
@@ -27,7 +21,7 @@ export function BeginJobSummary(props: {
                         <Form.Control
                             plaintext
                             readOnly
-                            value={props.part?.partCode}
+                            value={props.packingJob.part!.partCode}
                         />
                     </Col>
                 </Form.Group>
@@ -39,7 +33,7 @@ export function BeginJobSummary(props: {
                         <Form.Control
                             plaintext
                             readOnly
-                            value={`${props.quantity} @ ${props.pieceWeight}`}
+                            value={`${props.packingJob.quantity} @ ${props.packingJob.pieceWeight}`}
                         />
                     </Col>
                 </Form.Group>
@@ -51,7 +45,7 @@ export function BeginJobSummary(props: {
                         <Form.Control
                             plaintext
                             readOnly
-                            value={`By ${props.operator} @ ${props.machine?.machineCode}`}
+                            value={`By ${props.packingJob.operator} @ ${props.packingJob.machine?.machineCode}`}
                         />
                     </Col>
                 </Form.Group>
@@ -64,14 +58,16 @@ export function BeginJobSummary(props: {
                             className="px-3 text-white bg-warning"
                             plaintext
                             readOnly
-                            value={props.packaging?.specialInstructions}
+                            value={
+                                props.packingJob.packaging!.specialInstructions
+                            }
                         />
                     </Col>
                 </Form.Group>
                 <Button
-                    disabled={!!props.objectList?.length}
+                    disabled={!!props.packingJob.objectList?.length}
                     onClick={() => {
-                        if (props.stopJobHandler) props.stopJobHandler();
+                        stopJobHandler();
                     }}
                 >
                     Edit Job

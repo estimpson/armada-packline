@@ -3,39 +3,41 @@ import { Accordion, Button, Col, FloatingLabel, Form, Row } from '../bootstrap';
 import {
     IPackingJob,
     overridePieceWeight,
-    selectPackingJob,
+    setPieceWeight,
     setPieceWeightDiscrepancyNote,
+    setPieceWeightQuantity,
 } from '../features/packingJob/packingJobSlice';
 
-export function VerifyPieceWeight(props: {
-    packingJob: IPackingJob;
-    standardPieceWeight?: number;
-    weightTolerance?: number;
-    quantity?: number;
-    pieceWeight?: number;
-
-    pieceWeightQuantityHandler?: (pieceWeight: number | undefined) => void;
-    pieceWeightHandler?: (pieceWeight: number | undefined) => void;
-}) {
+export function VerifyPieceWeight(props: { packingJob: IPackingJob }) {
     const dispatch = useAppDispatch();
 
-    const pieceWeightError =
-        props.standardPieceWeight &&
-        props.pieceWeight &&
-        props.weightTolerance &&
-        (props.pieceWeight - props.standardPieceWeight) /
-            props.standardPieceWeight;
-    const valid =
-        (pieceWeightError || pieceWeightError === 0) &&
-        props.weightTolerance &&
-        Math.abs(pieceWeightError) <= props.weightTolerance;
-
+    function pieceWeightQuantityHandler(
+        pieceWeightQuantity: number | undefined,
+    ): void {
+        if (!props.packingJob.demoJob)
+            dispatch(setPieceWeightQuantity(pieceWeightQuantity));
+    }
+    function pieceWeightHandler(pieceweight: number | undefined): void {
+        if (!props.packingJob.demoJob) dispatch(setPieceWeight(pieceweight));
+    }
     function pieceWeightDiscrepancyNoteHandler(note: string): void {
-        dispatch(setPieceWeightDiscrepancyNote(note));
+        if (!props.packingJob.demoJob)
+            dispatch(setPieceWeightDiscrepancyNote(note));
     }
     function pieceWeightOverrideHandler(): void {
-        dispatch(overridePieceWeight());
+        if (!props.packingJob.demoJob) dispatch(overridePieceWeight());
     }
+
+    const pieceWeightError =
+        props.packingJob.part!.unitWeight &&
+        props.packingJob.pieceWeight &&
+        props.packingJob.part!.weightTolerance &&
+        (props.packingJob.pieceWeight - props.packingJob.part!.unitWeight) /
+            props.packingJob.part!.unitWeight;
+    const valid =
+        (pieceWeightError || pieceWeightError === 0) &&
+        props.packingJob.part!.weightTolerance &&
+        Math.abs(pieceWeightError) <= props.packingJob.part!.weightTolerance;
 
     return (
         <>
@@ -46,13 +48,11 @@ export function VerifyPieceWeight(props: {
             >
                 <Form.Control
                     type="number"
-                    value={props.quantity || 0}
+                    value={props.packingJob.quantity || 0}
                     onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                         const target = event.target;
                         const value = target.value;
-                        if (props.pieceWeightQuantityHandler) {
-                            props.pieceWeightQuantityHandler(parseFloat(value));
-                        }
+                        pieceWeightQuantityHandler(parseFloat(value));
                     }}
                     onFocus={(event: React.FocusEvent<HTMLInputElement>) => {
                         const target = event.target;
@@ -60,7 +60,7 @@ export function VerifyPieceWeight(props: {
                     }}
                 />
             </FloatingLabel>
-            {props.quantity && (
+            {props.packingJob.quantity && (
                 <>
                     <FloatingLabel
                         controlId="floatingInput-pieceWeight"
@@ -69,15 +69,13 @@ export function VerifyPieceWeight(props: {
                     >
                         <Form.Control
                             type="number"
-                            value={props.pieceWeight || 0}
+                            value={props.packingJob.pieceWeight || 0}
                             onChange={(
                                 event: React.ChangeEvent<HTMLInputElement>,
                             ) => {
                                 const target = event.target;
                                 const value = target.value;
-                                if (props.pieceWeightHandler) {
-                                    props.pieceWeightHandler(parseFloat(value));
-                                }
+                                pieceWeightHandler(parseFloat(value));
                             }}
                             onFocus={(
                                 event: React.FocusEvent<HTMLInputElement>,
@@ -113,7 +111,8 @@ export function VerifyPieceWeight(props: {
                                         <p>
                                             Piece weight exceeds tolerance [+/-
                                             {(
-                                                props.weightTolerance! * 100
+                                                props.packingJob.part!
+                                                    .weightTolerance! * 100
                                             ).toFixed(2)}
                                             %]
                                         </p>

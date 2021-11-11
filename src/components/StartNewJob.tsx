@@ -1,6 +1,11 @@
+import { useAppDispatch } from '../app/hooks';
 import { Card, Form } from '../bootstrap';
 import { IMachine } from '../features/machine/machineSlice';
-import { IPackingJob } from '../features/packingJob/packingJobSlice';
+import {
+    IPackingJob,
+    setPackaging,
+    setPart,
+} from '../features/packingJob/packingJobSlice';
 import { IPart } from '../features/part/partSlice';
 import { IPartPackaging } from '../features/partPackaging/partPackagingSlice';
 import { DeflashDetails } from './DeflashDetails';
@@ -10,32 +15,16 @@ import { IListItem, ObjectSelect } from './shared/ObjectSelect';
 import { SpecialInstructions } from './SpecialInstructions';
 import { VerifyPieceWeight } from './VerifyPieceWeight';
 
-export function StartNewJob(props: {
-    packingJob: IPackingJob;
-    part?: IPart;
-    partSetter?: (part: IPart | undefined) => void;
+export function StartNewJob(props: { packingJob: IPackingJob }) {
+    const dispatch = useAppDispatch();
 
-    packaging?: IPartPackaging;
-    packagingSetter?: (partPackaging: IPartPackaging | undefined) => void;
+    function partHandler(part: IPart | undefined): void {
+        if (!props.packingJob.demoJob) dispatch(setPart(part));
+    }
+    function packagingHandler(packaging: IPartPackaging | undefined): void {
+        if (!props.packingJob.demoJob) dispatch(setPackaging(packaging));
+    }
 
-    acknowledged?: boolean;
-    acknowledgementHandler?: (acknowledged: boolean) => void;
-
-    quantity?: number;
-    pieceWeight?: number;
-    pieceWeightQuantityHandler?: (pieceWeight: number | undefined) => void;
-    pieceWeightHandler?: (pieceWeight: number | undefined) => void;
-
-    validPieceWeight?: boolean;
-    operator?: string;
-    machine?: IMachine;
-
-    operatorHandler?: (operator: string) => void;
-    machineHandler?: (machine: IMachine | undefined) => void;
-
-    jobInProgress?: boolean;
-    startJobHandler?: () => void;
-}) {
     return (
         <>
             <Card className="mb-3">
@@ -43,14 +32,14 @@ export function StartNewJob(props: {
                     <Card.Title>Begin New Job</Card.Title>
                     <Form>
                         <SelectPart
-                            part={props.part}
-                            partSetter={props.partSetter}
+                            part={props.packingJob.part}
+                            partSetter={partHandler}
                         />
                         <ObjectSelect
                             valueList={
-                                (props.part &&
-                                    props.part.packagingList &&
-                                    props.part.packagingList.map(
+                                (props.packingJob.part &&
+                                    props.packingJob.part.packagingList &&
+                                    props.packingJob.part.packagingList.map(
                                         (partPackaging) => {
                                             return {
                                                 displayValue:
@@ -63,68 +52,44 @@ export function StartNewJob(props: {
                                 new Array<IListItem<IPartPackaging>>()
                             }
                             label="Select Packaging"
-                            currentValue={props.packaging}
-                            setter={props.packagingSetter}
+                            currentValue={props.packingJob.packaging}
+                            setter={packagingHandler}
                         />
-                        {props.packaging &&
-                            props.packaging.specialInstructions && (
+                        {props.packingJob.packaging &&
+                            props.packingJob.packaging.specialInstructions && (
                                 <SpecialInstructions
-                                    instructions={
-                                        props.packaging.specialInstructions ||
-                                        ''
-                                    }
-                                    acknowledged={props.acknowledged || false}
-                                    acknowledgementHandler={
-                                        props.acknowledgementHandler
-                                    }
+                                    packingJob={props.packingJob}
                                 />
                             )}
-                        {props.part &&
-                            props.part.requiresFinalInspection &&
-                            props.packaging &&
-                            (!props.packaging.specialInstructions ||
-                                props.acknowledged) && (
+                        {props.packingJob.part &&
+                            props.packingJob.part.requiresFinalInspection &&
+                            props.packingJob.packaging &&
+                            (!props.packingJob.packaging.specialInstructions ||
+                                props.packingJob.acknowledged) && (
                                 <VerifyPieceWeight
                                     packingJob={props.packingJob}
-                                    standardPieceWeight={props.part.unitWeight}
-                                    weightTolerance={props.part.weightTolerance}
-                                    quantity={props.quantity}
-                                    pieceWeight={props.pieceWeight}
-                                    pieceWeightQuantityHandler={
-                                        props.pieceWeightQuantityHandler
-                                    }
-                                    pieceWeightHandler={
-                                        props.pieceWeightHandler
-                                    }
                                 />
                             )}
-                        {props.part &&
-                            props.part.requiresFinalInspection &&
-                            props.packaging &&
-                            (!props.packaging.specialInstructions ||
-                                props.acknowledged) &&
-                            (props.validPieceWeight ||
+                        {props.packingJob.part &&
+                            props.packingJob.part.requiresFinalInspection &&
+                            props.packingJob.packaging &&
+                            (!props.packingJob.packaging.specialInstructions ||
+                                props.packingJob.acknowledged) &&
+                            (props.packingJob.validPieceWeight ||
                                 props.packingJob.overridePieceWeight) && (
-                                <DeflashDetails
-                                    part={props.part}
-                                    operator={props.operator}
-                                    machine={props.machine}
-                                    operatorHandler={props.operatorHandler}
-                                    machineHandler={props.machineHandler}
-                                />
+                                <DeflashDetails packingJob={props.packingJob} />
                             )}
-                        {props.part &&
-                            props.packaging &&
-                            (!props.part.requiresFinalInspection ||
-                                ((props.acknowledged ||
-                                    !props.packaging.specialInstructions) &&
-                                    (props.validPieceWeight ||
+                        {props.packingJob.part &&
+                            props.packingJob.packaging &&
+                            (!props.packingJob.part.requiresFinalInspection ||
+                                ((props.packingJob.acknowledged ||
+                                    !props.packingJob.packaging
+                                        .specialInstructions) &&
+                                    (props.packingJob.validPieceWeight ||
                                         props.packingJob.overridePieceWeight) &&
-                                    props.operator &&
-                                    props.machine)) && (
-                                <OpenJob
-                                    startJobHandler={props.startJobHandler}
-                                />
+                                    props.packingJob.operator &&
+                                    props.packingJob.machine)) && (
+                                <OpenJob packingJob={props.packingJob} />
                             )}
                     </Form>
                 </Card.Body>

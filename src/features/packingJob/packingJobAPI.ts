@@ -11,7 +11,7 @@ export function dummyAction(
         data: IPackingJob;
     }>((resolve) => {
         // perform some asynchronous task to generate the required data
-        const dummy: IPackingJob = {};
+        const dummy: IPackingJob = { demoJob: false };
 
         // return the resolved data when the task completes
         return resolve({

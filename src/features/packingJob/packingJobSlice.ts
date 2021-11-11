@@ -26,6 +26,7 @@ export interface IPackingCombinedObject {
 
 export interface IPackingObject {
     serial: number;
+    part: IPart;
     quantity: number;
     partial: boolean;
     printed: boolean;
@@ -33,6 +34,7 @@ export interface IPackingObject {
 }
 
 export interface IPackingJob {
+    demoJob: boolean;
     part?: IPart;
     packaging?: IPartPackaging;
     acknowledged?: boolean;
@@ -55,7 +57,7 @@ export interface IPackagingJobState {
 }
 
 const initialState: IPackagingJobState = {
-    value: {},
+    value: { demoJob: false },
     status: 'idle',
 };
 
@@ -219,6 +221,7 @@ export const packingJobSlice = createSlice({
             for (let i = 0; i < (state.value.boxes || 0); i++) {
                 state.value.objectList.push({
                     serial: 1234567 + i,
+                    part: state.value.part!,
                     quantity: state.value.packaging!.standardPack,
                     partial: false,
                     printed: false,
@@ -227,6 +230,7 @@ export const packingJobSlice = createSlice({
             if (state.value.partialBoxQuantity) {
                 state.value.objectList.push({
                     serial: 1234567 + (state.value.boxes || 0),
+                    part: state.value.part!,
                     quantity: state.value.partialBoxQuantity,
                     partial: true,
                     printed: false,

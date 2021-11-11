@@ -54,61 +54,6 @@ export default function Home() {
         dispatch(getPartList());
     }, [dispatch, partList]);
 
-    // handlers for setting state in the store
-    function setPart(part: IPart | undefined): void {
-        dispatch(setPackingJobPart(part));
-    }
-    function packagingSetter(partPackaging: IPartPackaging | undefined): void {
-        dispatch(setPackaging(partPackaging));
-    }
-    function acknowledgementHandler(acknowledged: boolean): void {
-        dispatch(setAcknowledged(acknowledged));
-    }
-    function pieceWeightQuantityHandler(
-        pieceWeightQuantity: number | undefined,
-    ): void {
-        dispatch(setPieceWeightQuantity(pieceWeightQuantity));
-    }
-    function pieceWeightHandler(pieceweight: number | undefined): void {
-        dispatch(setPieceWeight(pieceweight));
-    }
-    function operatorHandler(operator: string): void {
-        dispatch(setOperator(operator));
-    }
-    function machineHandler(machine: IMachine | undefined): void {
-        dispatch(setMachine(machine));
-    }
-    function startJobHandler(): void {
-        dispatch(startJob());
-    }
-    function stopJobHandler(): void {
-        dispatch(stopJob());
-    }
-    function boxesHandler(boxes: number): void {
-        dispatch(setBoxes(boxes));
-    }
-    function partialBoxQuantityHandler(partialBoxQuantity: number): void {
-        dispatch(setPartialBoxQuantity(partialBoxQuantity));
-    }
-    function generateInventoryHandler(): void {
-        dispatch(generateInventory());
-    }
-    function resetInventoryHandler(): void {
-        dispatch(resetInventory());
-    }
-    function deleteBoxHandler(serial: number): void {
-        dispatch(deleteBox(serial));
-    }
-    function printLabelsHandler(): void {
-        dispatch(printLabels());
-    }
-    function combinePartialBoxHandler(scanData: string): void {
-        dispatch(combinePartialBox(scanData));
-    }
-    function completeJobHandler(): void {
-        dispatch(completeJob());
-    }
-
     const identity: IIdentity = useAppSelector(selectIdentity);
 
     return (
@@ -121,30 +66,7 @@ export default function Home() {
                 </Row>
                 {identity?.userName ? (
                     <>
-                        <RunJob
-                            packingJob={packingJob}
-                            partChangeHandler={setPart}
-                            packagingSetter={packagingSetter}
-                            acknowledgementHandler={acknowledgementHandler}
-                            pieceWeightQuantityHandler={
-                                pieceWeightQuantityHandler
-                            }
-                            pieceWeightHandler={pieceWeightHandler}
-                            operatorHandler={operatorHandler}
-                            machineHandler={machineHandler}
-                            startJobHandler={startJobHandler}
-                            stopJobHandler={stopJobHandler}
-                            boxesHandler={boxesHandler}
-                            partialBoxQuantityHandler={
-                                partialBoxQuantityHandler
-                            }
-                            generateInventoryHandler={generateInventoryHandler}
-                            resetInventoryHandler={resetInventoryHandler}
-                            deleteBoxHandler={deleteBoxHandler}
-                            printLabelsHandler={printLabelsHandler}
-                            combinePartialBoxHandler={combinePartialBoxHandler}
-                            completeJobHandler={completeJobHandler}
-                        />
+                        <RunJob packingJob={packingJob} />
                     </>
                 ) : (
                     <>
