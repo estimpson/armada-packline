@@ -36,6 +36,7 @@ export function RunJob(props: {
             {props.step && <p className="fs-5">{props.step}</p>}
             {!props.packingJob.jobInProgress ? (
                 <StartNewJob
+                    packingJob={props.packingJob}
                     part={props.packingJob.part}
                     packaging={props.packingJob.packaging}
                     partSetter={props.partChangeHandler}

@@ -1,5 +1,6 @@
 import { Card, Form } from '../bootstrap';
 import { IMachine } from '../features/machine/machineSlice';
+import { IPackingJob } from '../features/packingJob/packingJobSlice';
 import { IPart } from '../features/part/partSlice';
 import { IPartPackaging } from '../features/partPackaging/partPackagingSlice';
 import { DeflashDetails } from './DeflashDetails';
@@ -10,6 +11,7 @@ import { SpecialInstructions } from './SpecialInstructions';
 import { VerifyPieceWeight } from './VerifyPieceWeight';
 
 export function StartNewJob(props: {
+    packingJob: IPackingJob;
     part?: IPart;
     partSetter?: (part: IPart | undefined) => void;
 
@@ -83,6 +85,7 @@ export function StartNewJob(props: {
                             (!props.packaging.specialInstructions ||
                                 props.acknowledged) && (
                                 <VerifyPieceWeight
+                                    packingJob={props.packingJob}
                                     standardPieceWeight={props.part.unitWeight}
                                     weightTolerance={props.part.weightTolerance}
                                     quantity={props.quantity}
@@ -100,7 +103,8 @@ export function StartNewJob(props: {
                             props.packaging &&
                             (!props.packaging.specialInstructions ||
                                 props.acknowledged) &&
-                            props.validPieceWeight && (
+                            (props.validPieceWeight ||
+                                props.packingJob.overridePieceWeight) && (
                                 <DeflashDetails
                                     part={props.part}
                                     operator={props.operator}
@@ -114,7 +118,8 @@ export function StartNewJob(props: {
                             (!props.part.requiresFinalInspection ||
                                 ((props.acknowledged ||
                                     !props.packaging.specialInstructions) &&
-                                    props.validPieceWeight &&
+                                    (props.validPieceWeight ||
+                                        props.packingJob.overridePieceWeight) &&
                                     props.operator &&
                                     props.machine)) && (
                                 <OpenJob

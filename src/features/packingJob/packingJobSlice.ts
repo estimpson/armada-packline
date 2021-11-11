@@ -39,6 +39,8 @@ export interface IPackingJob {
     quantity?: number;
     pieceWeight?: number;
     validPieceWeight?: boolean;
+    pieceWeightDiscrepancyNote?: string;
+    overridePieceWeight?: boolean;
     operator?: string;
     machine?: IMachine;
     jobInProgress?: boolean;
@@ -173,6 +175,18 @@ export const packingJobSlice = createSlice({
                 Math.abs(pieceWeightError) <= state.value.part.weightTolerance;
 
             state.value.validPieceWeight = valid;
+            state.value.pieceWeightDiscrepancyNote = '';
+            state.value.overridePieceWeight = false;
+        },
+        setPieceWeightDiscrepancyNote: (
+            state,
+            action: PayloadAction<string>,
+        ) => {
+            state.value.pieceWeightDiscrepancyNote = action.payload;
+            state.value.overridePieceWeight = false;
+        },
+        overridePieceWeight: (state) => {
+            state.value.overridePieceWeight = true;
         },
         setOperator: (state, action: PayloadAction<string>) => {
             state.value.operator = action.payload;
@@ -299,6 +313,8 @@ export const {
     setAcknowledged,
     setPieceWeightQuantity,
     setPieceWeight,
+    setPieceWeightDiscrepancyNote,
+    overridePieceWeight,
     setOperator,
     setMachine,
     startJob,

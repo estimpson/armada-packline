@@ -1,13 +1,24 @@
-import { Col, FloatingLabel, Form, Row } from '../bootstrap';
+import { useAppDispatch, useAppSelector } from '../app/hooks';
+import { Accordion, Button, Col, FloatingLabel, Form, Row } from '../bootstrap';
+import {
+    IPackingJob,
+    overridePieceWeight,
+    selectPackingJob,
+    setPieceWeightDiscrepancyNote,
+} from '../features/packingJob/packingJobSlice';
 
 export function VerifyPieceWeight(props: {
+    packingJob: IPackingJob;
     standardPieceWeight?: number;
     weightTolerance?: number;
     quantity?: number;
     pieceWeight?: number;
+
     pieceWeightQuantityHandler?: (pieceWeight: number | undefined) => void;
     pieceWeightHandler?: (pieceWeight: number | undefined) => void;
 }) {
+    const dispatch = useAppDispatch();
+
     const pieceWeightError =
         props.standardPieceWeight &&
         props.pieceWeight &&
@@ -18,6 +29,14 @@ export function VerifyPieceWeight(props: {
         (pieceWeightError || pieceWeightError === 0) &&
         props.weightTolerance &&
         Math.abs(pieceWeightError) <= props.weightTolerance;
+
+    function pieceWeightDiscrepancyNoteHandler(note: string): void {
+        dispatch(setPieceWeightDiscrepancyNote(note));
+    }
+    function pieceWeightOverrideHandler(): void {
+        dispatch(overridePieceWeight());
+    }
+
     return (
         <>
             <FloatingLabel
@@ -34,6 +53,10 @@ export function VerifyPieceWeight(props: {
                         if (props.pieceWeightQuantityHandler) {
                             props.pieceWeightQuantityHandler(parseFloat(value));
                         }
+                    }}
+                    onFocus={(event: React.FocusEvent<HTMLInputElement>) => {
+                        const target = event.target;
+                        target.select();
                     }}
                 />
             </FloatingLabel>
@@ -55,6 +78,12 @@ export function VerifyPieceWeight(props: {
                                 if (props.pieceWeightHandler) {
                                     props.pieceWeightHandler(parseFloat(value));
                                 }
+                            }}
+                            onFocus={(
+                                event: React.FocusEvent<HTMLInputElement>,
+                            ) => {
+                                const target = event.target;
+                                target.select();
                             }}
                         />
                     </FloatingLabel>
@@ -88,14 +117,89 @@ export function VerifyPieceWeight(props: {
                                             ).toFixed(2)}
                                             %]
                                         </p>
+                                        {props.packingJob
+                                            .overridePieceWeight && (
+                                            <p>
+                                                Discrepancy reason:{' '}
+                                                {
+                                                    props.packingJob
+                                                        .pieceWeightDiscrepancyNote
+                                                }
+                                            </p>
+                                        )}
                                     </Col>
                                 </Form.Group>
-                                <p className="fst-italics text-white bg-warning px-2">
-                                    What do we want to do at this point if the
-                                    piece weight is out of tolerance? Should we
-                                    add a "notify quality inspector" button and
-                                    let them proceed to label or not?
-                                </p>
+                                {!props.packingJob.overridePieceWeight && (
+                                    <>
+                                        <Accordion>
+                                            <Accordion.Item eventKey="0">
+                                                <Accordion.Header>
+                                                    View recent weight
+                                                    measurements
+                                                </Accordion.Header>
+                                                <Accordion.Body>
+                                                    <ol>
+                                                        <li>1.23</li>
+                                                        <li>.123</li>
+                                                        <li>12.3</li>
+                                                        <li>123</li>
+                                                    </ol>
+                                                </Accordion.Body>
+                                            </Accordion.Item>
+                                        </Accordion>
+                                        <Accordion>
+                                            <Accordion.Item eventKey="0">
+                                                <Accordion.Header>
+                                                    Accept measurement with
+                                                    notes
+                                                </Accordion.Header>
+                                                <Accordion.Body>
+                                                    <Form.Group
+                                                        as={Row}
+                                                        className="mb-3 text-white bg-warning"
+                                                    >
+                                                        <Form.Label
+                                                            column
+                                                            sm="3"
+                                                        >
+                                                            Discrepancy Note
+                                                        </Form.Label>
+                                                        <Col sm="9">
+                                                            <Form.Control
+                                                                as="textarea"
+                                                                rows={3}
+                                                                value={
+                                                                    props
+                                                                        .packingJob
+                                                                        .pieceWeightDiscrepancyNote
+                                                                }
+                                                                className="text-dark my-2"
+                                                                onChange={(
+                                                                    event: React.ChangeEvent<HTMLInputElement>,
+                                                                ) => {
+                                                                    const target =
+                                                                        event.target;
+                                                                    const value =
+                                                                        target.value;
+                                                                    pieceWeightDiscrepancyNoteHandler(
+                                                                        value,
+                                                                    );
+                                                                }}
+                                                            />
+                                                        </Col>
+                                                    </Form.Group>
+                                                    <Button
+                                                        onClick={() => {
+                                                            pieceWeightOverrideHandler();
+                                                        }}
+                                                    >
+                                                        Store Note and Continue
+                                                    </Button>
+                                                </Accordion.Body>
+                                            </Accordion.Item>
+                                        </Accordion>
+                                    </>
+                                )}
                             </>
                         )
                     ) : (
