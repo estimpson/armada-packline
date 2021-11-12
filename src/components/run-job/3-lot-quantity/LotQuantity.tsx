@@ -1,4 +1,4 @@
-import { useAppDispatch } from '../app/hooks';
+import { useAppDispatch } from '../../../app/hooks';
 import {
     Button,
     Card,
@@ -7,13 +7,13 @@ import {
     Form,
     InputGroup,
     Row,
-} from '../bootstrap';
+} from '../../../bootstrap';
 import {
     generateInventory,
     IPackingJob,
     setBoxes,
     setPartialBoxQuantity,
-} from '../features/packingJob/packingJobSlice';
+} from '../../../features/packingJob/packingJobSlice';
 
 export function LotQuantity(props: { packingJob: IPackingJob }) {
     const dispatch = useAppDispatch();

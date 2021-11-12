@@ -1,9 +1,9 @@
-import { useAppDispatch } from '../app/hooks';
-import { Col, Form, Row } from '../bootstrap';
+import { useAppDispatch } from '../../../app/hooks';
+import { Col, Form, Row } from '../../../bootstrap';
 import {
     IPackingJob,
     setAcknowledged,
-} from '../features/packingJob/packingJobSlice';
+} from '../../../features/packingJob/packingJobSlice';
 
 export function SpecialInstructions(props: { packingJob: IPackingJob }) {
     const dispatch = useAppDispatch();

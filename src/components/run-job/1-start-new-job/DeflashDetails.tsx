@@ -1,15 +1,27 @@
-import { useAppDispatch } from '../app/hooks';
-import { FloatingLabel, Form } from '../bootstrap';
-import { IMachine } from '../features/machine/machineSlice';
+import { useEffect } from 'react';
+import { useAppDispatch, useAppSelector } from '../../../app/hooks';
+import { FloatingLabel, Form } from '../../../bootstrap';
+import {
+    getMachineList,
+    IMachine,
+    selectMachineList,
+} from '../../../features/machine/machineSlice';
 import {
     IPackingJob,
     setMachine,
     setOperator,
-} from '../features/packingJob/packingJobSlice';
-import { SelectMachine } from './SelectMachine';
+} from '../../../features/packingJob/packingJobSlice';
+import { IListItem, ObjectSelect } from '../../shared/ObjectSelect';
 
 export function DeflashDetails(props: { packingJob: IPackingJob }) {
     const dispatch = useAppDispatch();
+
+    // dependent data sets
+    const machineList: IMachine[] = useAppSelector(selectMachineList);
+
+    useEffect(() => {
+        dispatch(getMachineList());
+    }, [dispatch, machineList]);
 
     function operatorHandler(operator: string): void {
         if (!props.packingJob.demoJob) dispatch(setOperator(operator));
@@ -39,14 +51,23 @@ export function DeflashDetails(props: { packingJob: IPackingJob }) {
                 />
             </FloatingLabel>
             {props.packingJob.operator && (
-                <SelectMachine
+                <ObjectSelect
+                    valueList={
+                        machineList.map((machine) => {
+                            return {
+                                displayValue: machine.machineCode,
+                                selectListValue: `${machine.machineCode} - ${machine.machineDescription}`,
+                                value: machine,
+                            };
+                        }) || new Array<IListItem<IMachine>>()
+                    }
                     label={
                         props.packingJob.part!.deflashMethod === 'MACHINE'
                             ? 'Deflash Machine'
                             : 'Tear Trim Machine'
                     }
-                    machine={props.packingJob.machine}
-                    machineSetter={machineHandler}
+                    currentValue={props.packingJob.machine?.machineCode}
+                    setter={machineHandler}
                 />
             )}
         </>

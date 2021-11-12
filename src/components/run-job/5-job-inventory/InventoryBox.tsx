@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Card, FloatingLabel, Form } from '../bootstrap';
-import { IPackingObject } from '../features/packingJob/packingJobSlice';
+import { Card, FloatingLabel, Form } from '../../../bootstrap';
+import { IPackingObject } from '../../../features/packingJob/packingJobSlice';
 
 export function InventoryBox(props: {
     object: IPackingObject;

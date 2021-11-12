@@ -1,5 +1,5 @@
-import { Card, Col, Form, Row } from '../bootstrap';
-import { IPackingJob } from '../features/packingJob/packingJobSlice';
+import { Card, Col, Form, Row } from '../../../bootstrap';
+import { IPackingJob } from '../../../features/packingJob/packingJobSlice';
 
 export function LotQuantitySummary(props: { packingJob: IPackingJob }) {
     return (

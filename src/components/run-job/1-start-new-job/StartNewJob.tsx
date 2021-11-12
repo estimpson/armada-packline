@@ -1,22 +1,32 @@
-import { useAppDispatch } from '../app/hooks';
-import { Card, Form } from '../bootstrap';
-import { IMachine } from '../features/machine/machineSlice';
+import { useAppDispatch, useAppSelector } from '../../../app/hooks';
+import { Card, Form } from '../../../bootstrap';
 import {
     IPackingJob,
     setPackaging,
     setPart,
-} from '../features/packingJob/packingJobSlice';
-import { IPart } from '../features/part/partSlice';
-import { IPartPackaging } from '../features/partPackaging/partPackagingSlice';
+} from '../../../features/packingJob/packingJobSlice';
+import {
+    getPartList,
+    IPart,
+    selectPartList,
+} from '../../../features/part/partSlice';
+import { IPartPackaging } from '../../../features/partPackaging/partPackagingSlice';
 import { DeflashDetails } from './DeflashDetails';
 import { OpenJob } from './OpenJob';
-import { SelectPart } from './SelectPart';
-import { IListItem, ObjectSelect } from './shared/ObjectSelect';
+import { IListItem, ObjectSelect } from '../../shared/ObjectSelect';
 import { SpecialInstructions } from './SpecialInstructions';
 import { VerifyPieceWeight } from './VerifyPieceWeight';
+import { useEffect } from 'react';
 
 export function StartNewJob(props: { packingJob: IPackingJob }) {
     const dispatch = useAppDispatch();
+
+    // dependent data sets
+    const partList: IPart[] = useAppSelector(selectPartList);
+
+    useEffect(() => {
+        dispatch(getPartList());
+    }, [dispatch, partList]);
 
     function partHandler(part: IPart | undefined): void {
         if (!props.packingJob.demoJob) dispatch(setPart(part));
@@ -31,9 +41,24 @@ export function StartNewJob(props: { packingJob: IPackingJob }) {
                 <Card.Body>
                     <Card.Title>Begin New Job</Card.Title>
                     <Form>
-                        <SelectPart
-                            part={props.packingJob.part}
-                            partSetter={partHandler}
+                        <ObjectSelect
+                            valueList={
+                                partList.map((part) => {
+                                    return {
+                                        displayValue: part.partCode,
+                                        selectListValue: `${part.partCode} - ${
+                                            part.partDescription
+                                        } # ${part.unitWeight} +/- ${
+                                            part.unitWeight *
+                                            part.weightTolerance
+                                        }`,
+                                        value: part,
+                                    };
+                                }) || new Array<IListItem<IPart>>()
+                            }
+                            label="Select Part"
+                            currentValue={props.packingJob.part?.partCode}
+                            setter={partHandler}
                         />
                         <ObjectSelect
                             valueList={
@@ -52,7 +77,9 @@ export function StartNewJob(props: { packingJob: IPackingJob }) {
                                 new Array<IListItem<IPartPackaging>>()
                             }
                             label="Select Packaging"
-                            currentValue={props.packingJob.packaging}
+                            currentValue={
+                                props.packingJob.packaging?.packageCode
+                            }
                             setter={packagingHandler}
                         />
                         {props.packingJob.packaging &&

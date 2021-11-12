@@ -9,7 +9,7 @@ export interface IListItem<Type> {
 export function ObjectSelect<Type>(props: {
     valueList: Array<IListItem<Type>>;
     label: string;
-    currentValue?: Type;
+    currentValue?: string;
     setter?: (newValue: Type | undefined) => void;
 }) {
     return (
@@ -21,7 +21,8 @@ export function ObjectSelect<Type>(props: {
             <Form.Select
                 value={
                     props.valueList.find(
-                        (listItem) => listItem.value === props.currentValue,
+                        (listItem) =>
+                            listItem.displayValue === props.currentValue,
                     )?.displayValue ?? ''
                 }
                 onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {

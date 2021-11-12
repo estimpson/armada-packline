@@ -1,6 +1,6 @@
-import { useAppDispatch } from '../app/hooks';
-import { Button } from '../bootstrap';
-import { IPackingJob, startJob } from '../features/packingJob/packingJobSlice';
+import { useAppDispatch } from '../../../app/hooks';
+import { Button } from '../../../bootstrap';
+import { IPackingJob, startJob } from '../../../features/packingJob/packingJobSlice';
 
 export function OpenJob(props: { packingJob: IPackingJob }) {
     const dispatch = useAppDispatch();

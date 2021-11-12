@@ -16,29 +16,10 @@ import {
 } from '../features/identity/identitySlice';
 import { getPartList, IPart, selectPartList } from '../features/part/partSlice';
 import {
-    combinePartialBox,
-    completeJob,
-    deleteBox,
-    generateInventory,
     IPackingJob,
-    printLabels,
-    resetInventory,
     selectPackingJob,
-    setAcknowledged,
-    setBoxes,
-    setMachine,
-    setOperator,
-    setPackaging,
-    setPart as setPackingJobPart,
-    setPartialBoxQuantity,
-    setPieceWeight,
-    setPieceWeightQuantity,
-    startJob,
-    stopJob,
 } from '../features/packingJob/packingJobSlice';
-import { RunJob } from './RunJob';
-import { IMachine } from '../features/machine/machineSlice';
-import { IPartPackaging } from '../features/partPackaging/partPackagingSlice';
+import { RunJob } from './run-job/RunJob';
 
 export default function Home() {
     const dispatch = useAppDispatch();

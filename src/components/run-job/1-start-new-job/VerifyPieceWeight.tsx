@@ -1,12 +1,12 @@
-import { useAppDispatch, useAppSelector } from '../app/hooks';
-import { Accordion, Button, Col, FloatingLabel, Form, Row } from '../bootstrap';
+import { useAppDispatch, useAppSelector } from '../../../app/hooks';
+import { Accordion, Button, Col, FloatingLabel, Form, Row } from '../../../bootstrap';
 import {
     IPackingJob,
     overridePieceWeight,
     setPieceWeight,
     setPieceWeightDiscrepancyNote,
     setPieceWeightQuantity,
-} from '../features/packingJob/packingJobSlice';
+} from '../../../features/packingJob/packingJobSlice';
 
 export function VerifyPieceWeight(props: { packingJob: IPackingJob }) {
     const dispatch = useAppDispatch();

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Col, Container, Row } from '../bootstrap';
-import { RunJob } from './RunJob';
+import { RunJob } from './run-job/RunJob';
 import {
     DemoJobs,
     IDemoPackingJob,

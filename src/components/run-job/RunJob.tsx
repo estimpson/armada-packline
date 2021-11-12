@@ -1,13 +1,10 @@
-import { IMachine } from '../features/machine/machineSlice';
-import { IPackingJob } from '../features/packingJob/packingJobSlice';
-import { IPart } from '../features/part/partSlice';
-import { IPartPackaging } from '../features/partPackaging/partPackagingSlice';
-import { BeginJobSummary } from './BeginJobSummary';
-import { CompleteJob } from './CompleteJob';
-import { JobInventory } from './JobInventory';
-import { LotQuantity } from './LotQuantity';
-import { LotQuantitySummary } from './LotQuantitySummary';
-import { StartNewJob } from './StartNewJob';
+import { IPackingJob } from '../../features/packingJob/packingJobSlice';
+import { BeginJobSummary } from './2-begin-job-summary/BeginJobSummary';
+import { CompleteJob } from './6-complete-job/CompleteJob';
+import { JobInventory } from './5-job-inventory/JobInventory';
+import { LotQuantity } from './3-lot-quantity/LotQuantity';
+import { LotQuantitySummary } from './4-lot-quantity-summary/LotQuantitySummary';
+import { StartNewJob } from './1-start-new-job/StartNewJob';
 
 export function RunJob(props: { step?: string; packingJob: IPackingJob }) {
     return (

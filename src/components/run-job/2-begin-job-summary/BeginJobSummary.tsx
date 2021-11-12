@@ -1,6 +1,6 @@
-import { useAppDispatch } from '../app/hooks';
-import { Button, Card, Col, Form, Row } from '../bootstrap';
-import { IPackingJob, stopJob } from '../features/packingJob/packingJobSlice';
+import { useAppDispatch } from '../../../app/hooks';
+import { Button, Card, Col, Form, Row } from '../../../bootstrap';
+import { IPackingJob, stopJob } from '../../../features/packingJob/packingJobSlice';
 
 export function BeginJobSummary(props: { packingJob: IPackingJob }) {
     const dispatch = useAppDispatch();
@@ -13,8 +13,8 @@ export function BeginJobSummary(props: { packingJob: IPackingJob }) {
         <Card.Body>
             <Card.Title>Job In Progress</Card.Title>
             <Form>
-                <Form.Group as={Row}>
-                    <Form.Label column sm="3" className="mb-3">
+                <Form.Group as={Row} className="mb-3">
+                    <Form.Label column sm="3">
                         Part Number
                     </Form.Label>
                     <Col sm="9">
@@ -25,20 +25,29 @@ export function BeginJobSummary(props: { packingJob: IPackingJob }) {
                         />
                     </Col>
                 </Form.Group>
-                <Form.Group as={Row}>
-                    <Form.Label column sm="3" className="mb-3">
+                <Form.Group as={Row} className="mb-3">
+                    <Form.Label column sm="3">
                         Weighed
                     </Form.Label>
                     <Col sm="9">
                         <Form.Control
                             plaintext
                             readOnly
-                            value={`${props.packingJob.quantity} @ ${props.packingJob.pieceWeight}`}
+                            className={`${
+                                props.packingJob.overridePieceWeight &&
+                                'px-3 text-white bg-warning'
+                            }`}
+                            value={`${
+                                props.packingJob.quantity
+                            } @ ${props.packingJob.pieceWeight?.toFixed(2)}${[
+                                props.packingJob.overridePieceWeight &&
+                                    ` !! ${props.packingJob.pieceWeightDiscrepancyNote} !!`,
+                            ]}`}
                         />
                     </Col>
                 </Form.Group>
-                <Form.Group as={Row}>
-                    <Form.Label column sm="3" className="mb-3">
+                <Form.Group as={Row} className="mb-3">
+                    <Form.Label column sm="3">
                         Deflashed
                     </Form.Label>
                     <Col sm="9">
@@ -49,8 +58,8 @@ export function BeginJobSummary(props: { packingJob: IPackingJob }) {
                         />
                     </Col>
                 </Form.Group>
-                <Form.Group as={Row}>
-                    <Form.Label column sm="3" className="mb-3">
+                <Form.Group as={Row} className="mb-3">
+                    <Form.Label column sm="3">
                         Special Instructions
                     </Form.Label>
                     <Col sm="9">

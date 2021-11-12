@@ -1,9 +1,9 @@
-import { useAppDispatch } from '../app/hooks';
-import { Button } from '../bootstrap';
+import { useAppDispatch } from '../../../app/hooks';
+import { Button } from '../../../bootstrap';
 import {
     completeJob,
     IPackingJob,
-} from '../features/packingJob/packingJobSlice';
+} from '../../../features/packingJob/packingJobSlice';
 
 export function CompleteJob(props: { packingJob: IPackingJob }) {
     const dispatch = useAppDispatch();
@@ -14,7 +14,6 @@ export function CompleteJob(props: { packingJob: IPackingJob }) {
 
     return (
         <>
-            {' '}
             <Button
                 onClick={() => {
                     completeJobHandler();
