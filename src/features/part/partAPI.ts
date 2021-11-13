@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { ILocalApiState } from '../localApi/localApiSlice';
 import { IPartPackaging } from '../partPackaging/partPackagingSlice';
 import { DemoParts } from './demo/demoParts';
 import { IPart } from './partSlice';
@@ -18,14 +19,24 @@ interface IPartAPI {
 }
 
 export function retrieveParts(
+    localApi: ILocalApiState,
     setError?: React.Dispatch<React.SetStateAction<string>>,
 ) {
     return new Promise<{
         data: IPart[];
     }>((resolve) => {
         if (process.env['REACT_APP_API'] === 'Enabled') {
+            const headers = {
+                headers: {
+                    'x-signing-key': localApi.signingKey,
+                },
+            };
+
             return axios
-                .get<IPartAPI[]>(`https://localhost:5000/Packline/Parts`)
+                .get<IPartAPI[]>(
+                    `https://localhost:5000/Packline/PartsWithPack`,
+                    headers,
+                )
                 .then((response) => {
                     // mapping of api datastructure to internal datastructure
                     return resolve({

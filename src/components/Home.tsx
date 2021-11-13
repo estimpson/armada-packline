@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import {
     Button,
@@ -14,7 +14,6 @@ import {
     loginAsync,
     selectIdentity,
 } from '../features/identity/identitySlice';
-import { getPartList, IPart, selectPartList } from '../features/part/partSlice';
 import {
     IPackingJob,
     selectPackingJob,
@@ -28,12 +27,7 @@ export default function Home() {
     const [password, setPassword] = useState('');
 
     // dependent data sets
-    const partList: IPart[] = useAppSelector(selectPartList);
     const packingJob: IPackingJob = useAppSelector(selectPackingJob);
-
-    useEffect(() => {
-        dispatch(getPartList());
-    }, [dispatch, partList]);
 
     const identity: IIdentity = useAppSelector(selectIdentity);
 

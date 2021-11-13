@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
+import { ILocalApiState } from '../localApi/localApiSlice';
 import { IPartPackaging } from '../partPackaging/partPackagingSlice';
 import { retrieveParts } from './partAPI';
 
@@ -28,11 +29,17 @@ const initialState: IPartListState = {
 // will call the thunk with the `dispatch` function as the first argument. Async
 // code can then be executed and other actions can be dispatched. Thunks are
 // typically used to make async requests.
-export const getPartList = createAsyncThunk('part/getList', async () => {
-    const response = await retrieveParts();
+export const getPartList = createAsyncThunk(
+    'part/getList',
+    async (dummy: {} = {}, { getState }) => {
+        const { localApiDetails } = getState() as {
+            localApiDetails: ILocalApiState;
+        };
+        const response = await retrieveParts(localApiDetails);
 
-    return response.data;
-});
+        return response.data;
+    },
+);
 
 export const partSlice = createSlice({
     name: 'part',
@@ -53,6 +60,7 @@ export const partSlice = createSlice({
     },
 });
 
+// eslint-disable-next-line no-empty-pattern
 export const {} = partSlice.actions;
 
 // The function below is called a selector and allows us to select a value from

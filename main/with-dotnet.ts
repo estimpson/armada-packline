@@ -55,11 +55,11 @@ const initilizeApi = async () => {
                 exePath,
                 [
                     '--urls',
-                    `http://localhost:${apiDetails.port}`,
+                    `https://localhost:${apiDetails.port}`,
                     '--signingkey',
                     apiDetails.signingKey,
                 ],
-                {},
+                { windowsHide: false },
                 (error, stdout, stderr) => {
                     if (error) {
                         console.log(error);
@@ -84,7 +84,7 @@ const initilizeApi = async () => {
                 srcPath,
                 '--',
                 '--urls',
-                `http://localhost:${apiDetails.port}`,
+                `https://localhost:${apiDetails.port}`,
                 '--signingkey',
                 apiDetails.signingKey,
             ]);
@@ -95,7 +95,7 @@ const initilizeApi = async () => {
     if (dotnetProc === null || dotnetProc === undefined) {
         dialog.showErrorBox('Error', 'unable to start dotnet server');
     } else {
-        console.log(`Server running at http://localhost:${apiDetails.port}`);
+        console.log(`Server running at https://localhost:${apiDetails.port}`);
     }
     console.log('leaving initializeApi()');
 };

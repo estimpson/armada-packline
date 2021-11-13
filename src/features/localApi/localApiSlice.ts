@@ -6,7 +6,7 @@ export interface ILocalApiState {
     signingKey?: string;
 }
 
-const initialState: ILocalApiState = {};
+const initialState: ILocalApiState = { port: '5000', signingKey: 'devKey' };
 
 export const localApiSlice = createSlice({
     name: 'localApi',

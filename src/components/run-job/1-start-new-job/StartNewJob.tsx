@@ -25,8 +25,8 @@ export function StartNewJob(props: { packingJob: IPackingJob }) {
     const partList: IPart[] = useAppSelector(selectPartList);
 
     useEffect(() => {
-        dispatch(getPartList());
-    }, [dispatch, partList]);
+        dispatch(getPartList({}));
+    }, [dispatch]);
 
     function partHandler(part: IPart | undefined): void {
         if (!props.packingJob.demoJob) dispatch(setPart(part));

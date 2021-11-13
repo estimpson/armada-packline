@@ -7,7 +7,8 @@ namespace api.FxDatabase
         public FxContext(DbContextOptions<FxContext> options) : base(options)
         { }
 
-        public DbSet<PacklinePart> PacklineParts { get; set; }
+        public DbSet<ResultLogin> ResultLogins { get; set; }
+        public DbSet<XmlResult> XmlResults { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
