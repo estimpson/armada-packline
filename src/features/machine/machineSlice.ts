@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
+import { ILocalApiState } from '../localApi/localApiSlice';
 import { retrieveMachines } from './machineAPI';
 
 export interface IMachine {
@@ -22,11 +23,17 @@ const initialState: IMachineListState = {
 // will call the thunk with the `dispatch` function as the first argument. Async
 // code can then be executed and other actions can be dispatched. Thunks are
 // typically used to make async requests.
-export const getMachineList = createAsyncThunk('machine/getList', async () => {
-    const response = await retrieveMachines();
+export const getMachineList = createAsyncThunk(
+    'machine/getList',
+    async (dummy: {} = {}, { getState }) => {
+        const { localApiDetails } = getState() as {
+            localApiDetails: ILocalApiState;
+        };
+        const response = await retrieveMachines(localApiDetails);
 
-    return response.data;
-});
+        return response.data;
+    },
+);
 
 export const machineSlice = createSlice({
     name: 'machine',

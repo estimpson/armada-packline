@@ -20,8 +20,8 @@ export function DeflashDetails(props: { packingJob: IPackingJob }) {
     const machineList: IMachine[] = useAppSelector(selectMachineList);
 
     useEffect(() => {
-        dispatch(getMachineList());
-    }, [dispatch, machineList]);
+        dispatch(getMachineList({}));
+    }, [dispatch]);
 
     function operatorHandler(operator: string): void {
         if (!props.packingJob.demoJob) dispatch(setOperator(operator));

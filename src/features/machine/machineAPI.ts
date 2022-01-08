@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { ILocalApiState } from '../localApi/localApiSlice';
 import { DemoMachines } from './demo/demoMachines';
 import { IMachine } from './machineSlice';
 
@@ -9,14 +10,22 @@ interface IMachineAPI {
 }
 
 export function retrieveMachines(
+    localApi: ILocalApiState,
     setError?: React.Dispatch<React.SetStateAction<string>>,
 ) {
+    const queryString = `https://localhost:${localApi.port}/Packline/Machines`;
+    const headers = {
+        headers: {
+            'x-signing-key': localApi.signingKey,
+        },
+    };
+
     return new Promise<{
         data: IMachine[];
     }>((resolve) => {
         if (process.env['REACT_APP_API'] === 'Enabled') {
             return axios
-                .get<IMachineAPI[]>(`https://localhost:5000/Packline/Machines`)
+                .get<IMachineAPI[]>(queryString, headers)
                 .then((response) => {
                     // mapping of api datastructure to internal datastructure
                     return resolve({
