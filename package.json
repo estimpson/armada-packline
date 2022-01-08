@@ -1,9 +1,9 @@
 {
-    "name": "secure-electron-cra-dotnet",
+    "name": "fx-packline",
     "version": "0.1.0",
     "private": true,
-    "author": "John Doe",
-    "description": "Secure Electron-CRA app",
+    "author": "Eric Stimpson",
+    "description": "Armada - Pack Line",
     "main": "./buildMain/electron.js",
     "homepage": "./",
     "dependencies": {
@@ -17,6 +17,7 @@
         "bootstrap": "^5.1.1",
         "cross-spawn": "^7.0.3",
         "date-fns": "^2.24.0",
+        "electron-devtools-installer": "^3.2.0",
         "get-port": "^5.1.1",
         "react": "^17.0.2",
         "react-bootstrap": "^2.0.0-rc.0",
@@ -75,8 +76,9 @@
         "wait-on": "^6.0.0"
     },
     "build": {
-        "appId": "com.electon.myapp",
-        "productName": "My Electron App",
+        "appId": "com.fx.armada.pack-line",
+        "includePdb": "true",
+        "productName": "Fx Pack Line",
         "files": [
             "build/**/*",
             "node_modules/**/*"
@@ -90,6 +92,7 @@
         },
         "win": {
             "asarUnpack": "dotnet-win",
+            "icon": "./build/favicon.png",
             "files": [
                 "node_modules/**",
                 "buildMain/**",
