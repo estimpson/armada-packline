@@ -15,7 +15,6 @@ export function validateLogin(
     password: string,
     setError?: React.Dispatch<React.SetStateAction<string>>,
 ) {
-    // let localApi = store.getState()?.localApiDetails;
     const queryString = `https://localhost:${localApi.port}/Packline/Login?user=${user}&password=${password}`;
     const headers = {
         headers: {

@@ -22,21 +22,19 @@ export function retrieveParts(
     localApi: ILocalApiState,
     setError?: React.Dispatch<React.SetStateAction<string>>,
 ) {
+    const queryString = `https://localhost:${localApi.port}/Packline/PartsWithPack`;
+    const headers = {
+        headers: {
+            'x-signing-key': localApi.signingKey,
+        },
+    };
+
     return new Promise<{
         data: IPart[];
     }>((resolve) => {
         if (process.env['REACT_APP_API'] === 'Enabled') {
-            const headers = {
-                headers: {
-                    'x-signing-key': localApi.signingKey,
-                },
-            };
-
             return axios
-                .get<IPartAPI[]>(
-                    `https://localhost:5000/Packline/PartsWithPack`,
-                    headers,
-                )
+                .get<IPartAPI[]>(queryString, headers)
                 .then((response) => {
                     // mapping of api datastructure to internal datastructure
                     return resolve({
