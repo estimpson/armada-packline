@@ -64,5 +64,19 @@ execute FXPL.usp_Q_PacklineParts"
 
             return parts;
         }
+
+        [HttpGet("Machines")]
+        public IEnumerable<Machine> GetMachines()
+        {
+            var result = _fxContext.XmlResults.FromSqlInterpolated(
+                $@"
+execute FXPL.usp_Q_Machines").ToArray()[0];
+
+            var deserializer = new XmlSerializer(typeof(List<Machine>), new XmlRootAttribute("MachineList"));
+            var machines = (List<Machine>)deserializer.Deserialize(
+                new StringReader($"<MachineList>{result.Result}</MachineList>"));
+
+            return machines;
+        }
     }
 }
