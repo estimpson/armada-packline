@@ -9,7 +9,7 @@ process.once('loaded', () => {
     contextBridge.exposeInMainWorld('electron', {
         send: (channel: string, data: any) => {
             // whitelist channels
-            let validChannels = ['get-api-details'];
+            let validChannels = ['get-api-details', 'app-close'];
             if (validChannels.includes(channel)) {
                 ipcRenderer.send(channel, data);
             }

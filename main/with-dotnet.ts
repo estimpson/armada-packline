@@ -19,11 +19,14 @@ const DOTNET_FOLDER = 'dotnet';
 const DOTNET_BASENAME = 'api';
 const isDev = !app.isPackaged;
 
-let dotnetProc = null as any;
-
 const apiDetails = {
     port: 0,
     signingKey: '',
+    exePath: '',
+    exeArgs: [''],
+    cwd: '',
+    log: '',
+    process: null as any,
 };
 
 const initilizeApi = async () => {
@@ -39,7 +42,7 @@ const initilizeApi = async () => {
         DOTNET_BASENAME + '.csproj',
     );
 
-    const exePath =
+    apiDetails.exePath =
         process.platform === 'win32'
             ? path.join(
                   __dirname.replace('app.asar', 'app.asar.unpacked'),
@@ -48,18 +51,27 @@ const initilizeApi = async () => {
                   DOTNET_BASENAME + '.exe',
               )
             : path.join(__dirname, DOTNET_DIST_FOLDER, DOTNET_BASENAME);
+    apiDetails.exeArgs = [
+        '--urls',
+        `https://localhost:${apiDetails.port}`,
+        '--signingkey',
+        apiDetails.signingKey,
+    ];
+    apiDetails.cwd = path.join(
+        __dirname.replace('app.asar', 'app.asar.unpacked'),
+        '..',
+        DOTNET_DIST_FOLDER,
+    );
 
     if (__dirname.indexOf('app.asar') > 0) {
-        if (fs.existsSync(exePath)) {
-            dotnetProc = childProcess.execFile(
-                exePath,
-                [
-                    '--urls',
-                    `https://localhost:${apiDetails.port}`,
-                    '--signingkey',
-                    apiDetails.signingKey,
-                ],
-                { windowsHide: false },
+        if (fs.existsSync(apiDetails.exePath)) {
+            apiDetails.process = childProcess.execFile(
+                apiDetails.exePath,
+                apiDetails.exeArgs,
+                {
+                    windowsHide: false,
+                    cwd: apiDetails.cwd,
+                },
                 (error, stdout, stderr) => {
                     if (error) {
                         console.log(error);
@@ -67,18 +79,21 @@ const initilizeApi = async () => {
                     }
                 },
             );
-            if (dotnetProc === undefined) {
+            if (apiDetails.process === undefined) {
+                apiDetails.log += 'dotnetProc is undefined\r\n';
                 dialog.showErrorBox('Error', 'dotnetProc is undefined');
-            } else if (dotnetProc === null) {
+            } else if (apiDetails.process === null) {
+                apiDetails.log += 'dotnetProc is null\r\n';
                 dialog.showErrorBox('Error', 'dotnetProc is null');
             }
         } else {
+            apiDetails.log += 'Packaged dotnet app not found\r\n';
             dialog.showErrorBox('Error', 'Packaged dotnet app not found');
         }
     } else {
         // dialog.showErrorBox("info", "unpackaged");
         if (fs.existsSync(srcPath)) {
-            dotnetProc = crossSpawn('dotnet', [
+            apiDetails.process = crossSpawn('dotnet', [
                 'run',
                 '-p',
                 srcPath,
@@ -89,14 +104,18 @@ const initilizeApi = async () => {
                 apiDetails.signingKey,
             ]);
         } else {
+            apiDetails.log += 'Unpackaged dotnet source not found\r\n';
             dialog.showErrorBox('Error', 'Unpackaged dotnet source not found');
         }
     }
-    if (dotnetProc === null || dotnetProc === undefined) {
+    if (apiDetails.process === null || apiDetails.process === undefined) {
+        apiDetails.log += 'unable to start dotnet server\r\n';
         dialog.showErrorBox('Error', 'unable to start dotnet server');
     } else {
+        apiDetails.log += `Server running at https://localhost:${apiDetails.port}\r\n`;
         console.log(`Server running at https://localhost:${apiDetails.port}`);
     }
+    apiDetails.log += 'leaving initializeApi()';
     console.log('leaving initializeApi()');
 };
 

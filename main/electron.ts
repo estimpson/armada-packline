@@ -97,3 +97,10 @@ ipcMain.on('to-main', (event, args) => {
     // Send results back to renderer process
     mainWindow.webContents.send('from-main', { msg: 'Hello from Main' });
 });
+
+// An example of ipc through contextBridge
+ipcMain.on('app-close', (event, args) => {
+    console.log("ipcMain.on('app-close')");
+
+    mainWindow.close();
+});
