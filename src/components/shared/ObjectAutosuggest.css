@@ -1,0 +1,15 @@
+.form-floating .rbt-input-main {
+    height: calc(3.5rem + 2px);
+    line-height: 1.25;
+    padding-top: 1.625rem;
+}
+
+/*
+ * This makes the conrtol always appear in the focused state.
+ * Javascript required to do the transform only when input
+ * has focus.
+ */
+.form-floating > label.xxx {
+    opacity: 0.65;
+    transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+}

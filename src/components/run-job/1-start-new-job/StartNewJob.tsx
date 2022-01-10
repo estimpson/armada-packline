@@ -17,6 +17,7 @@ import { IListItem, ObjectSelect } from '../../shared/ObjectSelect';
 import { SpecialInstructions } from './SpecialInstructions';
 import { VerifyPieceWeight } from './VerifyPieceWeight';
 import { useEffect } from 'react';
+import { ObjectAutosuggest } from '../../shared/ObjectAutosuggest';
 
 export function StartNewJob(props: { packingJob: IPackingJob }) {
     const dispatch = useAppDispatch();
@@ -41,17 +42,19 @@ export function StartNewJob(props: { packingJob: IPackingJob }) {
                 <Card.Body>
                     <Card.Title>Begin New Job</Card.Title>
                     <Form>
-                        <ObjectSelect
+                        <ObjectAutosuggest
                             valueList={
                                 partList.map((part) => {
                                     return {
                                         displayValue: part.partCode,
                                         selectListValue: `${part.partCode} - ${
                                             part.partDescription
-                                        } # ${part.unitWeight} +/- ${
+                                        } # ${part.unitWeight.toPrecision(
+                                            3,
+                                        )} +/- ${(
                                             part.unitWeight *
                                             part.weightTolerance
-                                        }`,
+                                        ).toPrecision(3)}`,
                                         value: part,
                                     };
                                 }) || new Array<IListItem<IPart>>()
