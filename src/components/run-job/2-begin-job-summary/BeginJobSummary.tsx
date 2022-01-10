@@ -1,6 +1,9 @@
 import { useAppDispatch } from '../../../app/hooks';
 import { Button, Card, Col, Form, Row } from '../../../bootstrap';
-import { IPackingJob, stopJob } from '../../../features/packingJob/packingJobSlice';
+import {
+    IPackingJob,
+    stopJob,
+} from '../../../features/packingJob/packingJobSlice';
 
 export function BeginJobSummary(props: { packingJob: IPackingJob }) {
     const dispatch = useAppDispatch();
@@ -27,6 +30,18 @@ export function BeginJobSummary(props: { packingJob: IPackingJob }) {
                 </Form.Group>
                 <Form.Group as={Row} className="mb-3">
                     <Form.Label column sm="3">
+                        Package Type
+                    </Form.Label>
+                    <Col sm="9">
+                        <Form.Control
+                            plaintext
+                            readOnly
+                            value={props.packingJob.packaging!.packageCode}
+                        />
+                    </Col>
+                </Form.Group>
+                <Form.Group as={Row} className="mb-3">
+                    <Form.Label column sm="3">
                         Weighed
                     </Form.Label>
                     <Col sm="9">
@@ -39,10 +54,13 @@ export function BeginJobSummary(props: { packingJob: IPackingJob }) {
                             }`}
                             value={`${
                                 props.packingJob.quantity
-                            } @ ${props.packingJob.pieceWeight?.toFixed(2)}${[
-                                props.packingJob.overridePieceWeight &&
-                                    ` !! ${props.packingJob.pieceWeightDiscrepancyNote} !!`,
-                            ]}`}
+                            } @ ${props.packingJob.pieceWeight?.toPrecision(
+                                3,
+                            )}${
+                                props.packingJob.overridePieceWeight
+                                    ? ` !! ${props.packingJob.pieceWeightDiscrepancyNote} !!`
+                                    : ''
+                            }`}
                         />
                     </Col>
                 </Form.Group>
@@ -58,21 +76,24 @@ export function BeginJobSummary(props: { packingJob: IPackingJob }) {
                         />
                     </Col>
                 </Form.Group>
-                <Form.Group as={Row} className="mb-3">
-                    <Form.Label column sm="3">
-                        Special Instructions
-                    </Form.Label>
-                    <Col sm="9">
-                        <Form.Control
-                            className="px-3 text-white bg-warning"
-                            plaintext
-                            readOnly
-                            value={
-                                props.packingJob.packaging!.specialInstructions
-                            }
-                        />
-                    </Col>
-                </Form.Group>
+                {props.packingJob.packaging!.specialInstructions && (
+                    <Form.Group as={Row} className="mb-3">
+                        <Form.Label column sm="3">
+                            Special Instructions
+                        </Form.Label>
+                        <Col sm="9">
+                            <Form.Control
+                                className="px-3 text-white bg-warning"
+                                plaintext
+                                readOnly
+                                value={
+                                    props.packingJob.packaging!
+                                        .specialInstructions
+                                }
+                            />
+                        </Col>
+                    </Form.Group>
+                )}
                 <Button
                     disabled={!!props.packingJob.objectList?.length}
                     onClick={() => {
