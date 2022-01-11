@@ -21,6 +21,7 @@ import {
     REGISTER,
     REHYDRATE,
 } from 'redux-persist';
+import partialBoxReducer from '../features/partialBox/partialBoxListSlice';
 
 const reducers = combineReducers({
     identity: identityReducer,
@@ -29,11 +30,14 @@ const reducers = combineReducers({
     machineList: machineReducer,
     partList: partReducer,
     packingJob: packingJobReducer,
+    partialBoxList: partialBoxReducer,
 });
 const persistConfig = {
     key: 'root',
     storage,
-    blacklist: ['applicationError, localApiDetails, machineList, partList'],
+    blacklist: [
+        'applicationError, localApiDetails, machineList, partList, partialBoxListReducer',
+    ],
 };
 const persistedReducer = persistReducer(persistConfig, reducers);
 

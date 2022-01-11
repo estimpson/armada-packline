@@ -14,6 +14,7 @@ import {
     setBoxes,
     setPartialBoxQuantity,
 } from '../../../features/packingJob/packingJobSlice';
+import { PartialBoxList } from './PartialBoxList';
 
 export function LotQuantity(props: { packingJob: IPackingJob }) {
     const dispatch = useAppDispatch();
@@ -123,6 +124,9 @@ export function LotQuantity(props: { packingJob: IPackingJob }) {
                     ) : (
                         <></>
                     )}
+                    <PartialBoxList
+                        partCode={props.packingJob.part!.partCode}
+                    />
 
                     {props.packingJob.boxes ||
                     props.packingJob.partialBoxQuantity ? (

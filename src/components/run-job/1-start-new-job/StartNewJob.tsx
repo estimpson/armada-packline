@@ -111,12 +111,12 @@ export function StartNewJob(props: { packingJob: IPackingJob }) {
                             )}
                         {props.packingJob.part &&
                             props.packingJob.packaging &&
+                            (props.packingJob.acknowledged ||
+                                !props.packingJob.packaging
+                                    .specialInstructions) &&
                             (!props.packingJob.part.requiresFinalInspection ||
-                                ((props.packingJob.acknowledged ||
-                                    !props.packingJob.packaging
-                                        .specialInstructions) &&
-                                    (props.packingJob.validPieceWeight ||
-                                        props.packingJob.overridePieceWeight) &&
+                                ((props.packingJob.validPieceWeight ||
+                                    props.packingJob.overridePieceWeight) &&
                                     props.packingJob.operator &&
                                     props.packingJob.machine)) && (
                                 <OpenJob packingJob={props.packingJob} />
