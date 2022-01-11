@@ -78,5 +78,21 @@ execute FXPL.usp_Q_Machines").ToArray()[0];
 
             return machines;
         }
+
+        [HttpGet("Partials")]
+        public IEnumerable<Partial> GetPartials([FromQuery] string partCode = "")
+        {
+            var result = _fxContext.XmlResults.FromSqlInterpolated(
+                $@"
+execute FXPL.usp_Q_Partials_byPart
+    @PartCode = {partCode}
+").ToArray()[0];
+
+            var deserializer = new XmlSerializer(typeof(List<Partial>), new XmlRootAttribute("PartialList"));
+            var partials = (List<Partial>) deserializer.Deserialize(
+                new StringReader($"<PartialList>{result.Result}</PartialList>"));
+
+            return partials;
+        }
     }
 }
