@@ -1,5 +1,6 @@
 import { Card, Col, Form, Row } from '../../../bootstrap';
 import { IPackingJob } from '../../../features/packingJob/packingJobSlice';
+import { PartialBoxList } from '../3-lot-quantity/PartialBoxList';
 
 export function LotQuantitySummary(props: { packingJob: IPackingJob }) {
     return (
@@ -71,6 +72,23 @@ export function LotQuantitySummary(props: { packingJob: IPackingJob }) {
                         />
                     </Col>
                 </Form.Group>
+                <Form.Group as={Row} className="mb-3">
+                    <Form.Label column sm="3">
+                        Shelf Inventory
+                    </Form.Label>
+                    <Col sm="9">
+                        <Form.Control
+                            plaintext
+                            readOnly
+                            value={
+                                props.packingJob.shelfInventoryFlag
+                                    ? 'Yes'
+                                    : 'No'
+                            }
+                        />
+                    </Col>
+                </Form.Group>
+                <PartialBoxList partCode={props.packingJob.part!.partCode} />
             </Form>
         </Card.Body>
     );

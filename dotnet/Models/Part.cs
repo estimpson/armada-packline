@@ -21,6 +21,8 @@ namespace api.Models
         public Boolean RequiresFinalInspection { get; set; }
         [XmlAttribute]
         public string DeflashMethod { get; set; }
+        [XmlAttribute]
+        public Boolean ShelfInventory { get; set; }
         [XmlArray]
         public Packaging[] PackagingList { get; set; }
     }

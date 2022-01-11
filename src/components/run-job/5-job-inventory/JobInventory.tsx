@@ -50,23 +50,27 @@ export function JobInventory(props: { packingJob: IPackingJob }) {
                         </Col>
                     ))}
                 </Row>
-                <Form.Group as={Row} className="my-3">
-                    <Form.Label column sm="3" className="mb-3">
-                        Special Instructions
-                    </Form.Label>
-                    <Col sm="9">
-                        <Form.Control
-                            className="px-3 text-white bg-warning"
-                            plaintext
-                            readOnly
-                            value={
-                                props.packingJob.packaging!.specialInstructions
-                            }
-                        />
-                    </Col>
-                </Form.Group>
+                {props.packingJob.packaging!.specialInstructions && (
+                    <Form.Group as={Row} className="mb-3">
+                        <Form.Label column sm="3">
+                            Special Instructions
+                        </Form.Label>
+                        <Col sm="9">
+                            <Form.Control
+                                className="px-3 text-white bg-warning"
+                                plaintext
+                                readOnly
+                                value={
+                                    props.packingJob.packaging!
+                                        .specialInstructions
+                                }
+                            />
+                        </Col>
+                    </Form.Group>
+                )}
                 <Button
                     className="my-3"
+                    disabled={!props.packingJob.objectList?.length}
                     onClick={() => {
                         printLabelsHandler();
                     }}

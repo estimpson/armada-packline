@@ -124,6 +124,22 @@ export function LotQuantity(props: { packingJob: IPackingJob }) {
                     ) : (
                         <></>
                     )}
+                    <Form.Group as={Row} className="mb-3">
+                        <Form.Label column sm="3">
+                            Shelf Inventory
+                        </Form.Label>
+                        <Col sm="9">
+                            <Form.Control
+                                plaintext
+                                readOnly
+                                value={
+                                    props.packingJob.shelfInventoryFlag
+                                        ? 'Yes'
+                                        : 'No'
+                                }
+                            />
+                        </Col>
+                    </Form.Group>
                     <PartialBoxList
                         partCode={props.packingJob.part!.partCode}
                     />

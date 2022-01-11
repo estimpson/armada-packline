@@ -49,6 +49,8 @@ export interface IPackingJob {
     boxes?: number;
     partialBoxQuantity?: number;
     objectList?: IPackingObject[];
+    jobIsDoneFlag?: boolean;
+    shelfInventoryFlag?: boolean;
 }
 
 export interface IPackagingJobState {
@@ -288,6 +290,18 @@ export const packingJobSlice = createSlice({
                 }
             }
         },
+        setJobIsDoneFlag: (
+            state,
+            action: PayloadAction<boolean | undefined>,
+        ) => {
+            state.value.jobIsDoneFlag = action.payload;
+        },
+        setShelfInventoryFlag: (
+            state,
+            action: PayloadAction<boolean | undefined>,
+        ) => {
+            state.value.shelfInventoryFlag = action.payload;
+        },
         completeJob: (state) => {
             state.value = initialState.value;
         },
@@ -330,6 +344,8 @@ export const {
     deleteBox,
     printLabels,
     combinePartialBox,
+    setJobIsDoneFlag,
+    setShelfInventoryFlag,
     completeJob,
 } = packingJobSlice.actions;
 
