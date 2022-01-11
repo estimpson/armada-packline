@@ -30,6 +30,14 @@ export function CompleteJob(props: { packingJob: IPackingJob }) {
                     <Form>
                         <FloatingLabel label="Is Job Done?" className="mb-3">
                             <Form.Select
+                                value={
+                                    props.packingJob.jobIsDoneFlag
+                                        ? 'Yes'
+                                        : props.packingJob.jobIsDoneFlag ===
+                                          false
+                                        ? 'No'
+                                        : ''
+                                }
                                 onChange={(
                                     event: React.ChangeEvent<HTMLSelectElement>,
                                 ) => {
@@ -44,13 +52,21 @@ export function CompleteJob(props: { packingJob: IPackingJob }) {
                                     jobIsDoneHandler(flag);
                                 }}
                             >
-                                <option>Choose option...</option>
+                                <option value="">Choose option...</option>
                                 <option value="Yes">Yes</option>
                                 <option value="No">No</option>
                             </Form.Select>
                         </FloatingLabel>
                         <FloatingLabel label="Shelf Inventory" className="mb-3">
                             <Form.Select
+                                value={
+                                    props.packingJob.shelfInventoryFlag
+                                        ? 'Yes'
+                                        : props.packingJob
+                                              .shelfInventoryFlag === false
+                                        ? 'No'
+                                        : ''
+                                }
                                 onChange={(
                                     event: React.ChangeEvent<HTMLSelectElement>,
                                 ) => {
@@ -65,7 +81,7 @@ export function CompleteJob(props: { packingJob: IPackingJob }) {
                                     shelfInventoryHandler(flag);
                                 }}
                             >
-                                <option>Choose option...</option>
+                                <option value="">Choose option...</option>
                                 <option value="Yes">Yes</option>
                                 <option value="No">No</option>
                             </Form.Select>
