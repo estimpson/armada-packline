@@ -101,7 +101,7 @@ export default function TableGrid(props: ITableGridProps) {
                     )}
                     {props.columns.map((column) => {
                         return (
-                            <th>
+                            <th key={column.columnName}>
                                 {column.columnHeader
                                     ? column.columnHeader
                                     : column.columnName}
@@ -114,7 +114,7 @@ export default function TableGrid(props: ITableGridProps) {
             <tbody>
                 {props.data &&
                     props.data.map((row, rowIndex) => (
-                        <tr>
+                        <tr key={rowIndex}>
                             {props.singleRowSelect && (
                                 <td className="text-center">
                                     <FontAwesomeIcon
@@ -172,7 +172,7 @@ export default function TableGrid(props: ITableGridProps) {
                                 </td>
                             )}
                             {props.columns.map((column) => (
-                                <td>
+                                <td key={column.columnName}>
                                     {rowIndex === rowEditIndex &&
                                     !column.readonly ? (
                                         <FormControl
