@@ -19,7 +19,7 @@ export function PartialBoxList(props: { partCode: string }) {
     return (
         <>
             <h6>Available Partials</h6>
-            {partialBoxes ? (
+            {partialBoxes.length ? (
                 <TableGrid
                     columns={[
                         {
