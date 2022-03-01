@@ -49,7 +49,7 @@ export const getPartialBoxListAsync = createAsyncThunk(
 // A function that accepts an initial state, an object full of reducer functions,
 // and a "slice name", and automatically generates action creators and action types
 // that correspond to the reducers and state.
-export const prototypeListSlice = createSlice({
+export const partialBoxListSlice = createSlice({
     name: 'partialBox',
     initialState,
     reducers: {
@@ -73,7 +73,7 @@ export const prototypeListSlice = createSlice({
     },
 });
 
-export const { reset } = prototypeListSlice.actions;
+export const { reset } = partialBoxListSlice.actions;
 
 // The function below is called a selector and allows us to select a value from
 // the state. Selectors can also be defined inline where they're used instead of
@@ -82,4 +82,4 @@ export const { reset } = prototypeListSlice.actions;
 export const selectPartialBoxList = (state: RootState): IPartialBox[] =>
     state.partialBoxList.value;
 
-export default prototypeListSlice.reducer;
+export default partialBoxListSlice.reducer;
