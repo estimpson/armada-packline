@@ -51,17 +51,22 @@ const initilizeApi = async () => {
                   DOTNET_BASENAME + '.exe',
               )
             : path.join(__dirname, DOTNET_DIST_FOLDER, DOTNET_BASENAME);
+    console.log(`EXE path: ${apiDetails.exePath}`);
+
     apiDetails.exeArgs = [
         '--urls',
         `https://localhost:${apiDetails.port}`,
         '--signingkey',
         apiDetails.signingKey,
     ];
+    console.log(`EXE args: ${apiDetails.exeArgs}`);
+
     apiDetails.cwd = path.join(
         __dirname.replace('app.asar', 'app.asar.unpacked'),
         '..',
         DOTNET_DIST_FOLDER,
     );
+    console.log(`EXE cwd: ${apiDetails.cwd}`);
 
     if (__dirname.indexOf('app.asar') > 0) {
         if (fs.existsSync(apiDetails.exePath)) {
