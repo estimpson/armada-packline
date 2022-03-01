@@ -94,5 +94,46 @@ execute FXPL.usp_Q_Partials_byPart
 
             return partials;
         }
+
+        [HttpPost("OpenPackingJob")]
+        public PackingJob OpenPackingJob([FromHeader] string user, [FromBody] NewPackingJobInput newPackingJobInput)
+        {
+            var result = _fxContext.XmlResults.FromSqlInterpolated(
+                $@"
+execute FXPL.usp_CRUD_OpenPackingJob
+	@User = {user}
+,	@PartCode = {newPackingJobInput.PartCode}
+,	@PackagingCode = {newPackingJobInput.PackagingCode}
+,	@SpecialInstructions = {newPackingJobInput.SpecialInstructions}
+,	@PieceWeightQuantity = {newPackingJobInput.PieceWeightQuantity}
+,	@PieceWeight = {newPackingJobInput.PieceWeight}
+,	@PieceWeightTolerance = {newPackingJobInput.PieceWeightTolerance}
+,	@PieceWeightValid = {newPackingJobInput.PieceWeightValid}
+,	@PieceWeightDiscrepancyNote = {newPackingJobInput.PieceWeightDiscrepancyNote}
+,	@DeflashOperator = {newPackingJobInput.DeflashOperator}
+,	@DeflashMachine = {newPackingJobInput.DeflashMachine}
+").ToArray()[0];
+
+
+            var deserializer = new XmlSerializer(typeof(List<PackingJob>), new XmlRootAttribute("Result"));
+            var x = ((List<PackingJob>) deserializer.Deserialize(
+                new StringReader($"<Result>{result.Result}</Result>")));
+            var packingJob = ((List<PackingJob>)deserializer.Deserialize(
+                new StringReader($"<Result>{result.Result}</Result>"))).ToArray()[0];
+
+            return packingJob;
+        }
+
+        [HttpPost("CancelPackingJob")]
+        public IActionResult CancelPackingJob([FromHeader] string user, [FromBody] CancelPackingJob cancelPackingJob)
+        {
+            var result = _fxContext.XmlResults.FromSqlInterpolated(
+                $@"
+execute FXPL.usp_CRUD_CancelPackingJob
+    @User = {user}
+,   @PackingJobNumber = {cancelPackingJob.PackingJobNumber}").ToArray()[0];
+
+            return Ok();
+        }
     }
 }

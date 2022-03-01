@@ -1,15 +1,16 @@
 import { useAppDispatch } from '../../../app/hooks';
 import { Button, Card, Col, Form, Row } from '../../../bootstrap';
+import {} from '../../../features/packingJob/packingJobAPI';
 import {
+    cancelPackingJobAsync,
     IPackingJob,
-    stopJob,
 } from '../../../features/packingJob/packingJobSlice';
 
 export function BeginJobSummary(props: { packingJob: IPackingJob }) {
     const dispatch = useAppDispatch();
 
     function stopJobHandler(): void {
-        if (!props.packingJob.demoJob) dispatch(stopJob());
+        if (!props.packingJob.demoJob) dispatch(cancelPackingJobAsync());
     }
 
     return (
