@@ -1,95 +1,53 @@
 import { Card, Col, Form, Row } from '../../../bootstrap';
 import { IPackingJob } from '../../../features/packingJob/packingJobSlice';
-import { PartialBoxList } from '../3-lot-quantity/PartialBoxList';
+import { PartialBoxListSummary } from './PartialBoxListSummary';
 
 export function LotQuantitySummary(props: { packingJob: IPackingJob }) {
     return (
-        <Card.Body>
+        <Card.Body className="px-0">
             <Card.Title>Lot Quantity Summary</Card.Title>
-            <Form>
-                {props.packingJob.boxes && (
-                    <Form.Group as={Row} className="mb-3">
-                        <Form.Label column sm="3">
-                            Boxes
-                        </Form.Label>
-                        <Col sm="9">
-                            <Form.Control
-                                plaintext
-                                readOnly
-                                value={`${props.packingJob.boxes} @ ${
-                                    props.packingJob.packaging!.standardPack
-                                }`}
-                            />
-                        </Col>
-                    </Form.Group>
-                )}
-
-                {props.packingJob.partialBoxQuantity && (
-                    <Form.Group as={Row} className="mb-3">
-                        <Form.Label column sm="3">
-                            Partial Box
-                        </Form.Label>
-                        <Col sm="9">
-                            <Form.Control
-                                plaintext
-                                readOnly
-                                value={props.packingJob.partialBoxQuantity}
-                            />
-                        </Col>
-                    </Form.Group>
-                )}
-
-                <Form.Group as={Row} className="mb-3">
-                    <Form.Label column sm="3">
-                        Total Quantity
-                    </Form.Label>
-                    <Col sm="9">
-                        <Form.Control
-                            plaintext
-                            readOnly
-                            value={`${
-                                props.packingJob.boxes
-                                    ? `${props.packingJob.boxes} box${
-                                          props.packingJob.boxes > 1 ? 'es' : ''
-                                      } @ ${
-                                          props.packingJob.packaging!
-                                              .standardPack
-                                      }${
-                                          props.packingJob.partialBoxQuantity
-                                              ? ' + '
-                                              : ''
-                                      }`
-                                    : ''
-                            }${
-                                props.packingJob.partialBoxQuantity
-                                    ? `${props.packingJob.partialBoxQuantity} partial`
-                                    : ''
-                            } = ${
-                                (props.packingJob.boxes || 0) *
-                                    props.packingJob.packaging!.standardPack +
-                                (props.packingJob.partialBoxQuantity || 0)
-                            }`}
-                        />
-                    </Col>
-                </Form.Group>
-                <Form.Group as={Row} className="mb-3">
-                    <Form.Label column sm="3">
-                        Shelf Inventory
-                    </Form.Label>
-                    <Col sm="9">
-                        <Form.Control
-                            plaintext
-                            readOnly
-                            value={
-                                props.packingJob.shelfInventoryFlag
-                                    ? 'Yes'
-                                    : 'No'
-                            }
-                        />
-                    </Col>
-                </Form.Group>
-                <PartialBoxList partCode={props.packingJob.part!.partCode} />
-            </Form>
+            <p className="form-label">Boxes</p>
+            <p className="mb-1">
+                {`${
+                    props.packingJob.boxes
+                } @ ${props.packingJob.packaging!.standardPack.toLocaleString()} each`}
+            </p>
+            {props.packingJob.partialBoxQuantity && (
+                <>
+                    <p className="form-label">Partial Box</p>
+                    <p className="mb-1">
+                        {props.packingJob.partialBoxQuantity.toLocaleString()}
+                    </p>
+                </>
+            )}
+            <p className="form-label">Total Quantity</p>
+            <p className="mb-1">{`${
+                props.packingJob.boxes
+                    ? `${
+                          props.packingJob.boxes
+                      } @ ${props.packingJob.packaging!.standardPack.toLocaleString()}${
+                          props.packingJob.partialBoxQuantity ? ' + ' : ''
+                      }`
+                    : ''
+            }${
+                props.packingJob.partialBoxQuantity
+                    ? `${props.packingJob.partialBoxQuantity.toLocaleString()}`
+                    : ''
+            } = ${(
+                (props.packingJob.boxes || 0) *
+                    props.packingJob.packaging!.standardPack +
+                (props.packingJob.partialBoxQuantity || 0)
+            ).toLocaleString()} pieces`}</p>
+            <p className="form-label">Shelf Inventory</p>
+            <p className="mb-1">
+                {props.packingJob.shelfInventoryFlag ? 'Yes' : 'No'}
+            </p>
+            <p className="form-label">Partial Box(es)</p>
+            <p className="mb-1">
+                <PartialBoxListSummary
+                    partCode={props.packingJob.part!.partCode}
+                />
+            </p>
         </Card.Body>
     );
 }

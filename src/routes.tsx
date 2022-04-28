@@ -14,8 +14,9 @@ export function Routes() {
 
     return (
         <Switch>
-            <Route exact path={'/'} component={Home} />
-            {identity.userName ? validLoginRoutes.map((route) => route) : <></>}
+            <Route exact path={'/'} key="0" component={Home} />
+            <Route path={'/jobs-demo'} key="1" component={JobsDemo} />
+            {/* {identity.userName ? validLoginRoutes.map((route) => route) : <></>} */}
             {/* check if this is the problem with loading home when not logged in */}
             <Redirect to={'/'} />
         </Switch>

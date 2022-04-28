@@ -69,7 +69,7 @@ export default function App() {
                 <Container
                     typeof="main"
                     fluid
-                    className="flex-fill flex-grow-1 py-4 overflow-auto"
+                    className="flex-fill flex-grow-1 pe-0 overflow-auto"
                 >
                     <Routes />
                 </Container>
