@@ -6,11 +6,15 @@ import { Footer } from './components/layout/Footer';
 import { MainMenu } from './components/layout/Menu';
 import { Routes } from './routes';
 import { store } from './app/store';
-import { localApiInitialized } from './features/localApi/localApiSlice';
+import {
+    localApiInitialized,
+    selectApiDetails,
+} from './features/localApi/localApiSlice';
 import {
     applicationErrorOccurred,
     ApplicationErrorType,
 } from './features/applicationError/applicationErrorSlice';
+import { useAppSelector } from './app/hooks';
 export { default as logo } from './icon.png';
 
 declare const window: Window &
@@ -55,27 +59,33 @@ function closeApp() {
 }
 
 export default function App() {
-    return (
-        <Router>
-            <Container
-                fluid
-                className="d-flex flex-column p-0 vh-100 vw-100 overflow-hidden"
-            >
-                <MainMenu
-                    closeAction={() => {
-                        closeApp();
-                    }}
-                />
-                <Container
-                    typeof="main"
-                    fluid
-                    className="flex-fill flex-grow-1 pe-0 overflow-auto"
-                >
-                    <Routes />
-                </Container>
-                <Footer />
-            </Container>
-            <ApplicationError />
-        </Router>
-    );
+    const apiDetails = useAppSelector(selectApiDetails);
+
+    if (!!apiDetails.port) {
+        return (
+            <>
+                <Router>
+                    <Container
+                        fluid
+                        className="d-flex flex-column p-0 vh-100 vw-100 overflow-hidden"
+                    >
+                        <MainMenu
+                            closeAction={() => {
+                                closeApp();
+                            }}
+                        />
+                        <Container
+                            typeof="main"
+                            fluid
+                            className="flex-fill flex-grow-1 pe-0 overflow-auto"
+                        >
+                            <Routes />
+                        </Container>
+                        <Footer />
+                    </Container>
+                    <ApplicationError />
+                </Router>
+            </>
+        );
+    } else return <p>Waiting for server to load...</p>;
 }
