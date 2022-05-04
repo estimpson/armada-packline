@@ -36,7 +36,11 @@ const persistConfig = {
     key: 'root',
     storage,
     blacklist: [
-        'applicationError, localApiDetails, machineList, partList, partialBoxListReducer',
+        'applicationError',
+        'localApiDetails',
+        'machineList',
+        'partList',
+        'partialBoxList',
     ],
 };
 const persistedReducer = persistReducer(persistConfig, reducers);
