@@ -102,5 +102,10 @@
             ],
             "target": "nsis"
         }
+    },
+    "electronmon": {
+        "patterns": [
+            "!main/**"
+        ]
     }
 }
