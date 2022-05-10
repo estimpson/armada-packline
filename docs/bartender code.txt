@@ -1,0 +1,9 @@
+if FileExistss("C:\PF (x86)\Seagull\BarTender Suite\bartend.exe) then
+
+elseif FileExists("C:\PF (x86)\Seagull\BarTender Suite 2021\bartend.exe) then
+
+elseif FileExists("C:\PF\Seagull\BarTender Suite\bartend.exe) then
+
+elseif FileExists("C:\PF\Seagull\BarTender Suite 2021\bartend.exe) then
+
+runwaitArg = "/F=" + labelPath + "/?Serial=" + serial + "/?C=" + copies + "/P /X"
