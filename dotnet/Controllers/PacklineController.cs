@@ -1,16 +1,13 @@
 using System;
-using api.FxDatabase;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Xml;
 using System.Xml.Serialization;
+using api.FxDatabase;
 using api.Models;
-using Newtonsoft.Json;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace api.Controllers
 {
@@ -18,8 +15,8 @@ namespace api.Controllers
     [Route("[controller]")]
     public class PacklineController : ControllerBase
     {
-        private readonly ILogger<PacklineController> _logger;
         private readonly FxContext _fxContext;
+        private readonly ILogger<PacklineController> _logger;
 
         public PacklineController(ILogger<PacklineController> logger, FxContext fxContext)
         {
@@ -73,7 +70,7 @@ execute FXPL.usp_Q_PacklineParts"
 execute FXPL.usp_Q_Machines").ToArray()[0];
 
             var deserializer = new XmlSerializer(typeof(List<Machine>), new XmlRootAttribute("MachineList"));
-            var machines = (List<Machine>)deserializer.Deserialize(
+            var machines = (List<Machine>) deserializer.Deserialize(
                 new StringReader($"<MachineList>{result.Result}</MachineList>"));
 
             return machines;
@@ -96,32 +93,31 @@ execute FXPL.usp_Q_Partials_byPart
         }
 
         [HttpPost("OpenPackingJob")]
-        public PackingJob OpenPackingJob([FromHeader] string user, [FromBody] NewPackingJobInput newPackingJobInput)
+        public PackingJob OpenPackingJob([FromHeader] string user, [FromBody] NewPackingJobInput input)
         {
             var result = _fxContext.XmlResults.FromSqlInterpolated(
                 $@"
 execute FXPL.usp_CRUD_OpenPackingJob
 	@User = {user}
-,	@PartCode = {newPackingJobInput.PartCode}
-,	@PackagingCode = {newPackingJobInput.PackagingCode}
-,	@SpecialInstructions = {newPackingJobInput.SpecialInstructions}
-,	@PieceWeightQuantity = {newPackingJobInput.PieceWeightQuantity}
-,	@PieceWeight = {newPackingJobInput.PieceWeight}
-,	@PieceWeightTolerance = {newPackingJobInput.PieceWeightTolerance}
-,	@PieceWeightValid = {newPackingJobInput.PieceWeightValid}
-,	@PieceWeightDiscrepancyNote = {newPackingJobInput.PieceWeightDiscrepancyNote}
-,	@DeflashOperator = {newPackingJobInput.DeflashOperator}
-,	@DeflashMachine = {newPackingJobInput.DeflashMachine}
+,	@PartCode = {input.PartCode}
+,	@PackagingCode = {input.PackagingCode}
+,   @StandardPack = {input.StandardPack}
+,	@SpecialInstructions = {input.SpecialInstructions}
+,	@PieceWeightQuantity = {input.PieceWeightQuantity}
+,	@PieceWeight = {input.PieceWeight}
+,	@PieceWeightTolerance = {input.PieceWeightTolerance}
+,	@PieceWeightValid = {input.PieceWeightValid}
+,	@PieceWeightDiscrepancyNote = {input.PieceWeightDiscrepancyNote}
+,	@DeflashOperator = {input.DeflashOperator}
+,	@DeflashMachine = {input.DeflashMachine}
 ").ToArray()[0];
 
 
             var deserializer = new XmlSerializer(typeof(List<PackingJob>), new XmlRootAttribute("Result"));
-            var x = ((List<PackingJob>) deserializer.Deserialize(
-                new StringReader($"<Result>{result.Result}</Result>")));
-            var packingJob = ((List<PackingJob>)deserializer.Deserialize(
+            var packingJobs = ((List<PackingJob>) deserializer.Deserialize(
                 new StringReader($"<Result>{result.Result}</Result>"))).ToArray()[0];
 
-            return packingJob;
+            return packingJobs;
         }
 
         [HttpPost("CancelPackingJob")]
@@ -134,6 +130,73 @@ execute FXPL.usp_CRUD_CancelPackingJob
 ,   @PackingJobNumber = {cancelPackingJob.PackingJobNumber}").ToArray()[0];
 
             return Ok();
+        }
+
+        [HttpGet("PackingJob")]
+        public PackingJob GetPackingJob([FromQuery] string packingJobNumber = "")
+        {
+            var result = _fxContext.XmlResults.FromSqlInterpolated(
+                $@"
+execute FXPL.usp_Q_PackingJob_byJobNumber
+    @PackingJobNumber = {packingJobNumber}
+").ToArray()[0];
+
+            var deserializer = new XmlSerializer(typeof(List<PackingJob>), new XmlRootAttribute("Result"));
+            var packingJob = ((List<PackingJob>) deserializer.Deserialize(
+                new StringReader($"<Result>{result.Result}</Result>"))).ToArray()[0];
+
+            return packingJob;
+        }
+
+        [HttpPost("GeneratePreObjects")]
+        public IEnumerable<PackingJobObject> GeneratePreObjects([FromHeader] string user,
+            [FromBody] GeneratePreObjectsInput input)
+        {
+            var result = _fxContext.XmlResults.FromSqlInterpolated(
+                $@"
+execute FXPL.usp_CRUD_GeneratePreObjects
+    @User = {user}
+,   @PackingJobNumber = {input.PackingJobNumber}
+,   @Boxes = {input.Boxes}
+,   @PartialBoxQuantity = {input.PartialBoxQuantity}
+").ToArray()[0];
+
+            var deserializer = new XmlSerializer(typeof(List<PackingJobObject>), new XmlRootAttribute("Result"));
+            var packingJobObjects = (List<PackingJobObject>) deserializer.Deserialize(
+                new StringReader($"<Result>{result.Result}</Result>"));
+
+            return packingJobObjects;
+        }
+
+        [HttpPost("CancelPreObjects")]
+        public IActionResult CancelPreObjects([FromHeader] string user, [FromBody] CancelPreObjects input)
+        {
+            var result = _fxContext.XmlResults.FromSqlInterpolated(
+                $@"
+execute FXPL.usp_CRUD_CancelPreObjects
+    @User = {user}
+,   @PackingJobNumber = {input.PackingJobNumber}").ToArray()[0];
+
+            return Ok();
+        }
+
+        [HttpPost("CombinePreObject")]
+        public IEnumerable<PackingJobObject> CombinePreObject([FromHeader] string user,
+            [FromBody] CombinePreObjectInput input)
+        {
+            var result = _fxContext.XmlResults.FromSqlInterpolated(
+                $@"
+execute FXPL.usp_CRUD_CombinePreObject
+    @User = {user}
+,   @PackingJobNumber = {input.PackingJobNumber}
+,   @CombineSerial = {input.CombineSerial}
+").ToArray()[0];
+
+            var deserializer = new XmlSerializer(typeof(List<PackingJobObject>), new XmlRootAttribute("Result"));
+            var packingJobObjects = (List<PackingJobObject>) deserializer.Deserialize(
+                new StringReader($"<Result>{result.Result}</Result>"));
+
+            return packingJobObjects;
         }
     }
 }
