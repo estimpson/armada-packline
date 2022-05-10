@@ -26,7 +26,7 @@ export function MainMenu(prop: { closeAction?: () => void }) {
                 variant="dark"
                 expand="sm"
                 sticky="top"
-                className="w-100"
+                className="w-100 draggable"
             >
                 <Container>
                     <Navbar.Brand as={Link} to="/">

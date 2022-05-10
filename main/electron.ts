@@ -16,6 +16,7 @@ function createWindow() {
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
         },
+        frame: false,
     });
 
     // In production, set the initial browser path to the local bundle generated
