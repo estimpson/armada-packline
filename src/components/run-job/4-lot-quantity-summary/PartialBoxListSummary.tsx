@@ -1,21 +1,9 @@
-import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { useAppDispatch } from '../../../app/hooks';
-import {
-    getPartialBoxListAsync,
-    selectPartialBoxList,
-} from '../../../features/partialBox/partialBoxListSlice';
-import TableGrid from '../../shared/TableGrid';
-import { Card, Col, Form, Row } from '../../../bootstrap';
+import { selectPartialBoxList } from '../../../features/partialBox/partialBoxListSlice';
+import { Card, Col, Container, Row } from '../../../bootstrap';
 
 export function PartialBoxListSummary(props: { partCode: string }) {
-    const dispatch = useAppDispatch();
-
     const partialBoxes = useSelector(selectPartialBoxList);
-
-    useEffect(() => {
-        dispatch(getPartialBoxListAsync(props.partCode));
-    }, [dispatch, props.partCode]);
 
     return (
         <>
@@ -23,50 +11,76 @@ export function PartialBoxListSummary(props: { partCode: string }) {
                 <>
                     {partialBoxes.map((partialBox) => {
                         return (
-                            <>
-                                <Card>
-                                    <Card.Body className="p-2">
-                                        <p className="m-0 form-label">
-                                            Serial:
-                                        </p>
-                                        <p className="m-0">
-                                            {partialBox.serial}
-                                        </p>
-                                        <p className="m-0 form-label">Qty:</p>
-                                        <p className="m-0">
-                                            {partialBox.quantity.toLocaleString()}
-                                        </p>
-                                        <p className="m-0 form-label">Pkg:</p>
-                                        <p className="m-0">
-                                            {partialBox.packageType}
-                                        </p>
+                            <Card key={partialBox.serial.toString()}>
+                                <Card.Body className="p-2">
+                                    <Container className="m-0 p-0">
+                                        <Row>
+                                            <Col className="m-0 form-label">
+                                                Serial:
+                                            </Col>
+                                        </Row>
+                                        <Row>
+                                            <Col className="m-0">
+                                                {partialBox.serial}
+                                            </Col>
+                                        </Row>
+                                        <Row>
+                                            <Col className="m-0 form-label">
+                                                Qty:
+                                            </Col>
+                                        </Row>
+                                        <Row>
+                                            <Col className="m-0">
+                                                {partialBox.quantity.toLocaleString()}
+                                            </Col>
+                                        </Row>
+                                        <Row>
+                                            <Col className="m-0 form-label">
+                                                Pkg:
+                                            </Col>
+                                        </Row>
+                                        <Row>
+                                            <Col className="m-0">
+                                                {partialBox.packageType}
+                                            </Col>
+                                        </Row>
                                         {partialBox.notes && (
                                             <>
-                                                <p className="m-0 form-label">
-                                                    Notes:
-                                                </p>
-                                                <p className="m-0">
-                                                    {partialBox.notes}
-                                                </p>
+                                                <Row>
+                                                    <Col className="m-0 form-label">
+                                                        Notes:
+                                                    </Col>
+                                                </Row>
+                                                <Row>
+                                                    <Col className="m-0">
+                                                        {partialBox.notes}
+                                                    </Col>
+                                                </Row>
                                             </>
                                         )}
-                                        <p className="m-0 form-label">
-                                            LastDate:
-                                        </p>
-                                        <p className="m-0">
-                                            {new Date(
-                                                partialBox.lastDate,
-                                            ).toLocaleDateString()}
-                                        </p>
-                                    </Card.Body>
-                                </Card>
-                            </>
+                                        <Row>
+                                            <Col className="m-0 form-label">
+                                                LastDate:
+                                            </Col>
+                                        </Row>
+                                        <Row>
+                                            <Col className="m-0">
+                                                {new Date(
+                                                    partialBox.lastDate,
+                                                ).toLocaleDateString()}
+                                            </Col>
+                                        </Row>
+                                    </Container>
+                                </Card.Body>
+                            </Card>
                         );
                     })}
                 </>
             ) : (
                 <>
-                    <p>None available</p>
+                    <Row key="none">
+                        <Col>None available</Col>
+                    </Row>
                 </>
             )}
         </>

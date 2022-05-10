@@ -59,33 +59,29 @@ function closeApp() {
 }
 
 export default function App() {
-    const apiDetails = useAppSelector(selectApiDetails);
-
-    if (!!apiDetails.port) {
-        return (
-            <>
-                <Router>
+    return (
+        <>
+            <Router>
+                <Container
+                    fluid
+                    className="d-flex flex-column p-0 vh-100 vw-100 overflow-hidden"
+                >
+                    <MainMenu
+                        closeAction={() => {
+                            closeApp();
+                        }}
+                    />
                     <Container
+                        typeof="main"
                         fluid
-                        className="d-flex flex-column p-0 vh-100 vw-100 overflow-hidden"
+                        className="flex-fill flex-grow-1 pe-0 overflow-auto"
                     >
-                        <MainMenu
-                            closeAction={() => {
-                                closeApp();
-                            }}
-                        />
-                        <Container
-                            typeof="main"
-                            fluid
-                            className="flex-fill flex-grow-1 pe-0 overflow-auto"
-                        >
-                            <Routes />
-                        </Container>
-                        <Footer />
+                        <Routes />
                     </Container>
-                    <ApplicationError />
-                </Router>
-            </>
-        );
-    } else return <p>Waiting for server to load...</p>;
+                    <Footer />
+                </Container>
+                <ApplicationError />
+            </Router>
+        </>
+    );
 }
