@@ -33,5 +33,7 @@ namespace api.Models
         public string DeflashMachine { get; set; }
         [XmlAttribute]
         public int RowID { get; set; }
+        [XmlElement]
+        public List<PackingJobObject> Objects { get; set; }
     }
 }

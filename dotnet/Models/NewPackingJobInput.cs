@@ -11,6 +11,7 @@ namespace api.Models
     {
         public string PartCode { get; set; }
         public string PackagingCode { get; set; }
+        public decimal StandardPack { get; set; }
         public string SpecialInstructions { get; set; }
         public decimal PieceWeightQuantity { get; set; }
         public double PieceWeight { get; set; }
