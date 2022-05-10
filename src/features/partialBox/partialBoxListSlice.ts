@@ -1,5 +1,6 @@
 import { createAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
+import { IApplicationErrorState } from '../applicationError/applicationErrorSlice';
 import { ILocalApiState } from '../localApi/localApiSlice';
 import { retrievePartialBoxes } from './partialBoxListAPI';
 
@@ -26,19 +27,20 @@ const initialState: IPartialBoxListState = {
 // will call the thunk with the `dispatch` function as the first argument. Async
 // code can then be executed and other actions can be dispatched. Thunks are
 // typically used to make async requests.
-export const SetError = createAction(
+export const SetError = createAction<IApplicationErrorState>(
     'applicationError/applicationErrorOccurred',
 );
 
 export const getPartialBoxListAsync = createAsyncThunk(
     'partialBox/getList',
-    async (partCode: string, { getState }) => {
+    async (partCode: string, { dispatch, getState }) => {
         const { localApiDetails } = getState() as {
             localApiDetails: ILocalApiState;
         };
         const response = await retrievePartialBoxes(
             localApiDetails,
             partCode,
+            dispatch,
             SetError,
         );
 

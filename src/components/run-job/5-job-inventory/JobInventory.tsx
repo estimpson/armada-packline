@@ -5,7 +5,7 @@ import {
     deleteBox,
     IPackingJob,
     printLabels,
-    resetInventory,
+    resetPackingJobInventoryAsync,
 } from '../../../features/packingJob/packingJobSlice';
 import { InventoryBox } from './InventoryBox';
 
@@ -13,7 +13,8 @@ export function JobInventory(props: { packingJob: IPackingJob }) {
     const dispatch = useAppDispatch();
 
     function resetInventoryHandler(): void {
-        if (!props.packingJob.demoJob) dispatch(resetInventory());
+        if (!props.packingJob.demoJob)
+            dispatch(resetPackingJobInventoryAsync());
     }
     function deleteBoxHandler(serial: number): void {
         if (!props.packingJob.demoJob) dispatch(deleteBox(serial));

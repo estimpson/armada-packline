@@ -20,7 +20,7 @@ export function ApplicationError() {
             backdropClassName={'offcanvas-backdrop'}
         >
             <Offcanvas.Header className="text-light bg-danger" closeButton>
-                <Offcanvas.Title>Aztec Supplier Portal</Offcanvas.Title>
+                <Offcanvas.Title>Fx Pack Line</Offcanvas.Title>
             </Offcanvas.Header>
             <Offcanvas.Body className="danger">
                 <p className="danger text-danger">{applicationError.message}</p>

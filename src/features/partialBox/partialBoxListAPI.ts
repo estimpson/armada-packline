@@ -1,5 +1,13 @@
+import {
+    ActionCreatorWithPayload,
+    AnyAction,
+    ThunkDispatch,
+} from '@reduxjs/toolkit';
 import axios from 'axios';
-import React from 'react';
+import {
+    ApplicationErrorType,
+    IApplicationErrorState,
+} from '../applicationError/applicationErrorSlice';
 import { ILocalApiState } from '../localApi/localApiSlice';
 import { DemoPartialBoxes } from './demo/demoPartialBox';
 import { IPartialBox } from './partialBoxListSlice';
@@ -16,7 +24,8 @@ interface IPartialBoxAPI {
 export function retrievePartialBoxes(
     localApi: ILocalApiState,
     partCode: string,
-    setError?: React.Dispatch<React.SetStateAction<string>>,
+    dispatch: ThunkDispatch<unknown, unknown, AnyAction>,
+    setError?: ActionCreatorWithPayload<IApplicationErrorState, string>,
 ) {
     const queryString = `https://localhost:${localApi.port}/Packline/Partials?partCode=${partCode}`;
     const headers = {
@@ -51,8 +60,14 @@ export function retrievePartialBoxes(
                             ? 'A timeout has occurred'
                             : ex.response?.status === 404
                             ? 'Resource not found'
-                            : 'An unexpected error has occurred';
-                    setError && setError(error);
+                            : ex.message;
+                    setError &&
+                        dispatch(
+                            setError({
+                                type: ApplicationErrorType.Unknown,
+                                message: error,
+                            }),
+                        );
                 });
         }
 

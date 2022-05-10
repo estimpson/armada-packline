@@ -1,8 +1,15 @@
+import {
+    ActionCreatorWithPayload,
+    AnyAction,
+    ThunkDispatch,
+} from '@reduxjs/toolkit';
 import axios from 'axios';
-import React from 'react';
+import {
+    ApplicationErrorType,
+    IApplicationErrorState,
+} from '../applicationError/applicationErrorSlice';
 import { ILocalApiState } from '../localApi/localApiSlice';
 import { IIdentity } from './identitySlice';
-import { AxiosErrorHandler } from '../AxiosErrorHandler';
 
 interface IIdentityAPI {
     user: string;
@@ -13,7 +20,8 @@ export function validateLogin(
     localApi: ILocalApiState,
     user: string,
     password: string,
-    setError?: React.Dispatch<React.SetStateAction<string>>,
+    dispatch: ThunkDispatch<unknown, unknown, AnyAction>,
+    setError?: ActionCreatorWithPayload<IApplicationErrorState, string>,
 ) {
     const queryString = `https://localhost:${localApi.port}/Packline/Login?user=${user}&password=${password}`;
     const headers = {
@@ -42,8 +50,14 @@ export function validateLogin(
                             ? 'A timeout has occurred'
                             : ex.response?.status === 404
                             ? 'Resource not found'
-                            : 'An unexpected error has occurred';
-                    setError && setError(error);
+                            : ex.message;
+                    setError &&
+                        dispatch(
+                            setError({
+                                type: ApplicationErrorType.Unknown,
+                                message: error,
+                            }),
+                        );
                 });
         }
 

@@ -1,8 +1,6 @@
-import { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import { FloatingLabel, Form } from '../../../bootstrap';
 import {
-    getMachineList,
     IMachine,
     selectMachineList,
 } from '../../../features/machine/machineSlice';
@@ -18,10 +16,6 @@ export function DeflashDetails(props: { packingJob: IPackingJob }) {
 
     // dependent data sets
     const machineList: IMachine[] = useAppSelector(selectMachineList);
-
-    useEffect(() => {
-        dispatch(getMachineList({}));
-    }, [dispatch]);
 
     function operatorHandler(operator: string): void {
         if (!props.packingJob.demoJob) dispatch(setOperator(operator));

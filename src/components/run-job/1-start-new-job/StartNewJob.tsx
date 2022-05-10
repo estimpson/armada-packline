@@ -6,7 +6,7 @@ import {
     setPart,
 } from '../../../features/packingJob/packingJobSlice';
 import {
-    getPartList,
+    getPartListAsync,
     IPart,
     selectPartList,
 } from '../../../features/part/partSlice';
@@ -26,7 +26,7 @@ export function StartNewJob(props: { packingJob: IPackingJob }) {
     const partList: IPart[] = useAppSelector(selectPartList);
 
     useEffect(() => {
-        dispatch(getPartList({}));
+        dispatch(getPartListAsync());
     }, [dispatch]);
 
     function partHandler(part: IPart | undefined): void {

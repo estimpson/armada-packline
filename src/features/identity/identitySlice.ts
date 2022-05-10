@@ -1,5 +1,6 @@
 import { createAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
+import { IApplicationErrorState } from '../applicationError/applicationErrorSlice';
 import { ILocalApiState } from '../localApi/localApiSlice';
 import { validateLogin } from './identityAPI';
 
@@ -26,13 +27,16 @@ const initialState: IIdentityState = {
 // will call the thunk with the `dispatch` function as the first argument. Async
 // code can then be executed and other actions can be dispatched. Thunks are
 // typically used to make async requests.
-export const SetError = createAction(
+export const SetError = createAction<IApplicationErrorState>(
     'applicationError/applicationErrorOccurred',
 );
 
 export const loginAsync = createAsyncThunk(
     'identity/login',
-    async (loginInfo: { user: string; password: string }, { getState }) => {
+    async (
+        loginInfo: { user: string; password: string },
+        { dispatch, getState },
+    ) => {
         const { localApiDetails } = getState() as {
             localApiDetails: ILocalApiState;
         };
@@ -40,6 +44,7 @@ export const loginAsync = createAsyncThunk(
             localApiDetails,
             loginInfo.user,
             loginInfo.password,
+            dispatch,
             SetError,
         );
 

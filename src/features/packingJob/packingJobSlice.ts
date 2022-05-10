@@ -4,13 +4,21 @@ import {
     createSlice,
     PayloadAction,
 } from '@reduxjs/toolkit';
+import { AxiosError } from 'axios';
 import { RootState } from '../../app/store';
+import { IApplicationErrorState } from '../applicationError/applicationErrorSlice';
 import { IIdentityState } from '../identity/identitySlice';
 import { ILocalApiState } from '../localApi/localApiSlice';
-import { IMachine } from '../machine/machineSlice';
-import { IPart } from '../part/partSlice';
+import { IMachine, IMachineListState } from '../machine/machineSlice';
+import { IPart, IPartListState } from '../part/partSlice';
 import { IPartPackaging } from '../partPackaging/partPackagingSlice';
-import { cancelPackingJob, openPackingJob } from './packingJobAPI';
+import {
+    cancelPackingJob,
+    generatePackingJobInventory,
+    getPackingJob,
+    openPackingJob,
+    resetPackingJobInventory,
+} from './packingJobAPI';
 
 function clamp(
     target: number,
@@ -64,11 +72,13 @@ export interface IPackingJob {
 export interface IPackagingJobState {
     value: IPackingJob;
     status: 'idle' | 'loading' | 'failed';
+    error: string | null | undefined;
 }
 
 const initialState: IPackagingJobState = {
     value: { demoJob: false },
     status: 'idle',
+    error: null,
 };
 
 // The function below is called a thunk and allows us to perform async logic. It
@@ -76,24 +86,69 @@ const initialState: IPackagingJobState = {
 // will call the thunk with the `dispatch` function as the first argument. Async
 // code can then be executed and other actions can be dispatched. Thunks are
 // typically used to make async requests.
-export const SetError = createAction(
+export const SetError = createAction<IApplicationErrorState>(
     'applicationError/applicationErrorOccurred',
 );
 
-export const openPackingJobAsync = createAsyncThunk(
-    'packingJob/openPackingJob',
-    async (_dummy: void, { getState }) => {
+export const generatePackingJobInventoryAsync = createAsyncThunk(
+    'packingJob/generatePackingJobInventory',
+    async (_: void, { dispatch, getState }) => {
         const { localApiDetails, identity, packingJob } = getState() as {
             localApiDetails: ILocalApiState;
             identity: IIdentityState;
             packingJob: IPackagingJobState;
         };
 
-        // Action defined in packagingJob API
+        // Action defined in packingJobAPI
+        const response = await generatePackingJobInventory(
+            localApiDetails,
+            identity.value,
+            packingJob.value,
+            dispatch,
+            SetError,
+        );
+
+        return response.data;
+    },
+);
+
+export const resetPackingJobInventoryAsync = createAsyncThunk(
+    'packingJob/resetPackingJobInventory',
+    async (_: void, { dispatch, getState }) => {
+        const { localApiDetails, identity, packingJob } = getState() as {
+            localApiDetails: ILocalApiState;
+            identity: IIdentityState;
+            packingJob: IPackagingJobState;
+        };
+
+        // Action defined in packingJobAPI
+        const response = await resetPackingJobInventory(
+            localApiDetails,
+            identity.value,
+            packingJob.value,
+            dispatch,
+            SetError,
+        );
+
+        return;
+    },
+);
+
+export const openPackingJobAsync = createAsyncThunk(
+    'packingJob/openPackingJob',
+    async (_: void, { dispatch, getState }) => {
+        const { localApiDetails, identity, packingJob } = getState() as {
+            localApiDetails: ILocalApiState;
+            identity: IIdentityState;
+            packingJob: IPackagingJobState;
+        };
+
+        // Action defined in packingJobAPI
         const response = await openPackingJob(
             localApiDetails,
             identity.value,
             packingJob.value,
+            dispatch,
             SetError,
         );
 
@@ -103,22 +158,61 @@ export const openPackingJobAsync = createAsyncThunk(
 
 export const cancelPackingJobAsync = createAsyncThunk(
     'packingJob/cancelPackingJob',
-    async (_dummy: void, { getState }) => {
-        console.log(`Begin cancel packing job async`);
-
+    async (_: void, { dispatch, getState }) => {
         const { localApiDetails, identity, packingJob } = getState() as {
             localApiDetails: ILocalApiState;
             identity: IIdentityState;
             packingJob: IPackagingJobState;
         };
 
-        console.log(`State read`);
-
+        // Action defined in packingJobAPI
         await cancelPackingJob(
             localApiDetails,
             identity.value,
             packingJob.value,
+            dispatch,
+            SetError,
         );
+    },
+);
+
+interface ValidationErrors {
+    errorMessage: string;
+    field_errors: Record<string, string>;
+}
+
+export const getPackingJobAsync = createAsyncThunk<IPackingJob, void>(
+    'packingJob/getPackingJob',
+    async (_: void, { dispatch, getState, rejectWithValue }) => {
+        const { localApiDetails, identity, packingJob, partList, machineList } =
+            getState() as {
+                localApiDetails: ILocalApiState;
+                identity: IIdentityState;
+                packingJob: IPackagingJobState;
+                partList: IPartListState;
+                machineList: IMachineListState;
+            };
+
+        // Action definied in packingJobAPI
+        try {
+            const response = await getPackingJob(
+                localApiDetails,
+                identity.value,
+                packingJob.value,
+                partList.value,
+                machineList.value,
+                dispatch,
+                SetError,
+            );
+
+            return response.data;
+        } catch (err: any) {
+            let error: AxiosError<ValidationErrors> = err; // cast the error for access to response
+            if (!error.response) {
+                throw err;
+            }
+            return rejectWithValue(error.response.data);
+        }
     },
 );
 
@@ -257,30 +351,6 @@ export const packingJobSlice = createSlice({
                 state.value.partialBoxQuantity = undefined;
             }
         },
-        generateInventory: (state) => {
-            state.value.objectList = [];
-            for (let i = 0; i < (state.value.boxes || 0); i++) {
-                state.value.objectList.push({
-                    serial: 1234567 + i,
-                    part: state.value.part!,
-                    quantity: state.value.packaging!.standardPack,
-                    partial: false,
-                    printed: false,
-                });
-            }
-            if (state.value.partialBoxQuantity) {
-                state.value.objectList.push({
-                    serial: 1234567 + (state.value.boxes || 0),
-                    part: state.value.part!,
-                    quantity: state.value.partialBoxQuantity,
-                    partial: true,
-                    printed: false,
-                });
-            }
-        },
-        resetInventory: (state) => {
-            state.value.objectList = undefined;
-        },
         deleteBox: (state, action: PayloadAction<number>) => {
             state.value.objectList = state.value.objectList!.filter(
                 (object) => object.serial !== action.payload,
@@ -353,6 +423,28 @@ export const packingJobSlice = createSlice({
     // including actions generated by createAsyncThunk or in other slices.
     extraReducers: (builder) => {
         builder
+            .addCase(resetPackingJobInventoryAsync.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(
+                resetPackingJobInventoryAsync.fulfilled,
+                (state, _action) => {
+                    state.status = 'idle';
+                    state.value.objectList = undefined;
+                },
+            )
+
+            .addCase(generatePackingJobInventoryAsync.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(
+                generatePackingJobInventoryAsync.fulfilled,
+                (state, action) => {
+                    state.status = 'idle';
+                    state.value.objectList = action.payload;
+                },
+            )
+
             .addCase(openPackingJobAsync.pending, (state) => {
                 state.status = 'loading';
             })
@@ -363,13 +455,30 @@ export const packingJobSlice = createSlice({
             })
 
             .addCase(cancelPackingJobAsync.pending, (state) => {
-                console.log(`Async pending`);
                 state.status = 'loading';
             })
             .addCase(cancelPackingJobAsync.fulfilled, (state, _action) => {
                 state.status = 'idle';
                 state.value.packingJobNumber = undefined;
                 state.value.jobInProgress = false;
+            })
+
+            .addCase(getPackingJobAsync.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(getPackingJobAsync.fulfilled, (state, action) => {
+                state.status = 'idle';
+                state.value = action.payload;
+            })
+            .addCase(getPackingJobAsync.rejected, (state, action) => {
+                state.status = 'failed';
+                if (action.payload) {
+                    // Being that we passed in Validationerrors to rejectType in `createAsyncThunk`, the payload will be available here.
+                    // state.error = action.payload.errorMessage;
+                    console.log(action.payload);
+                } else {
+                    state.error = action.error.message;
+                }
             });
     },
 });
@@ -387,8 +496,6 @@ export const {
     setMachine,
     setBoxes,
     setPartialBoxQuantity,
-    generateInventory,
-    resetInventory,
     deleteBox,
     printLabels,
     combinePartialBox,

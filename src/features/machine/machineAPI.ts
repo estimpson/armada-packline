@@ -1,4 +1,13 @@
+import {
+    ActionCreatorWithPayload,
+    AnyAction,
+    ThunkDispatch,
+} from '@reduxjs/toolkit';
 import axios from 'axios';
+import {
+    ApplicationErrorType,
+    IApplicationErrorState,
+} from '../applicationError/applicationErrorSlice';
 import { ILocalApiState } from '../localApi/localApiSlice';
 import { DemoMachines } from './demo/demoMachines';
 import { IMachine } from './machineSlice';
@@ -11,7 +20,8 @@ interface IMachineAPI {
 
 export function retrieveMachines(
     localApi: ILocalApiState,
-    setError?: React.Dispatch<React.SetStateAction<string>>,
+    dispatch: ThunkDispatch<unknown, unknown, AnyAction>,
+    setError?: ActionCreatorWithPayload<IApplicationErrorState, string>,
 ) {
     const queryString = `https://localhost:${localApi.port}/Packline/Machines`;
     const headers = {
@@ -38,8 +48,14 @@ export function retrieveMachines(
                             ? 'A timeout has occurred'
                             : ex.response?.status === 404
                             ? 'Resource not found'
-                            : 'An unexpected error has occurred';
-                    setError && setError(error);
+                            : ex.message;
+                    setError &&
+                        dispatch(
+                            setError({
+                                type: ApplicationErrorType.Unknown,
+                                message: error,
+                            }),
+                        );
                 });
         }
 

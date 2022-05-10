@@ -1,4 +1,14 @@
+import {
+    ActionCreatorWithPayload,
+    AnyAction,
+    ThunkDispatch,
+} from '@reduxjs/toolkit';
 import axios from 'axios';
+import {
+    ApplicationErrorType,
+    IApplicationErrorState,
+} from '../applicationError/applicationErrorSlice';
+import { IIdentity } from '../identity/identitySlice';
 import { ILocalApiState } from '../localApi/localApiSlice';
 import { IPartPackaging } from '../partPackaging/partPackagingSlice';
 import { DemoParts } from './demo/demoParts';
@@ -20,12 +30,15 @@ interface IPartAPI {
 
 export function retrieveParts(
     localApi: ILocalApiState,
-    setError?: React.Dispatch<React.SetStateAction<string>>,
+    identity: IIdentity,
+    dispatch: ThunkDispatch<unknown, unknown, AnyAction>,
+    setError?: ActionCreatorWithPayload<IApplicationErrorState, string>,
 ) {
     const queryString = `https://localhost:${localApi.port}/Packline/PartsWithPack`;
     const headers = {
         headers: {
             'x-signing-key': localApi.signingKey,
+            user: identity.userCode,
         },
     };
 
@@ -52,8 +65,14 @@ export function retrieveParts(
                             ? 'A timeout has occurred'
                             : ex.response?.status === 404
                             ? 'Resource not found'
-                            : 'An unexpected error has occurred';
-                    setError && setError(error);
+                            : ex.message;
+                    setError &&
+                        dispatch(
+                            setError({
+                                type: ApplicationErrorType.Unknown,
+                                message: error,
+                            }),
+                        );
                 });
         }
 

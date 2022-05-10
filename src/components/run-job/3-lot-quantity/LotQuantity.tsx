@@ -9,8 +9,8 @@ import {
     Row,
 } from '../../../bootstrap';
 import {
+    generatePackingJobInventoryAsync,
     cancelPackingJobAsync,
-    generateInventory,
     IPackingJob,
     setBoxes,
     setPartialBoxQuantity,
@@ -32,7 +32,8 @@ export function LotQuantity(props: { packingJob: IPackingJob }) {
             dispatch(setPartialBoxQuantity(partialBoxQuantity));
     }
     function generateInventoryHandler(): void {
-        if (!props.packingJob.demoJob) dispatch(generateInventory());
+        if (!props.packingJob.demoJob)
+            dispatch(generatePackingJobInventoryAsync());
     }
 
     return (
@@ -130,13 +131,13 @@ export function LotQuantity(props: { packingJob: IPackingJob }) {
                                                     .partialBoxQuantity
                                                     ? `${props.packingJob.partialBoxQuantity.toLocaleString()} partial`
                                                     : ''
-                                            } = ${
+                                            } = ${(
                                                 (props.packingJob.boxes || 0) *
                                                     props.packingJob.packaging!
                                                         .standardPack +
                                                 (props.packingJob
                                                     .partialBoxQuantity || 0)
-                                            }`}
+                                            ).toLocaleString()}`}
                                         />
                                     </Col>
                                 </Form.Group>
