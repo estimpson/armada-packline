@@ -316,6 +316,7 @@ export function getPackingJob(
     return new Promise<{
         data: IPackingJob;
     }>((resolve) => {
+        if (!packingJob.packingJobNumber) return packingJob;
         if (process.env['REACT_APP_API'] === 'Enabled') {
             return axios
                 .get<IPackingJobAPI>(queryString, headers)
