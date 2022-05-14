@@ -13,6 +13,7 @@ import { getMachineListAsync } from '../../features/machine/machineSlice';
 import { isFulfilled } from '@reduxjs/toolkit';
 import { selectApiDetails } from '../../features/localApi/localApiSlice';
 import { getPartialBoxListAsync } from '../../features/partialBox/partialBoxListSlice';
+import { getRecentPieceWeightListAsync } from '../../features/recentPieceWeight/recentPieceWeightSlice';
 
 export function RunJob(props: { step?: string; packingJob: IPackingJob }) {
     const apiDetails = useAppSelector(selectApiDetails);
@@ -25,13 +26,19 @@ export function RunJob(props: { step?: string; packingJob: IPackingJob }) {
                     dispatch(
                         getPartialBoxListAsync(props.packingJob.part?.partCode),
                     );
+                    dispatch(
+                        getRecentPieceWeightListAsync(
+                            props.packingJob.part?.partCode,
+                        ),
+                    );
                 }
                 // is either a fulfilled or rejected action
                 const machineListAction = await dispatch(getMachineListAsync());
                 const partListAction = await dispatch(getPartListAsync());
                 if (
                     isFulfilled(machineListAction) &&
-                    isFulfilled(partListAction)
+                    isFulfilled(partListAction) &&
+                    !!props.packingJob.packingJobNumber
                 ) {
                     dispatch(getPackingJobAsync());
                 }
@@ -51,10 +58,10 @@ export function RunJob(props: { step?: string; packingJob: IPackingJob }) {
                 !props.packingJob.objectList?.length && (
                     <LotQuantity packingJob={props.packingJob} />
                 )}
-            {props.packingJob.objectList?.length && (
+            {!!props.packingJob.objectList?.length && (
                 <JobInventory packingJob={props.packingJob} />
             )}
-            {props.packingJob.objectList?.length &&
+            {!!props.packingJob.objectList?.length &&
                 (props.packingJob.objectList.filter((object) => !object.printed)
                     .length ? (
                     <></>

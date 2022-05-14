@@ -4,6 +4,8 @@ import localApiDetailsReducer from '../features/localApi/localApiSlice';
 import machineReducer from '../features/machine/machineSlice';
 import partReducer from '../features/part/partSlice';
 import packingJobReducer from '../features/packingJob/packingJobSlice';
+import partialBoxReducer from '../features/partialBox/partialBoxListSlice';
+import recentPieceWeightReducer from '../features/recentPieceWeight/recentPieceWeightSlice';
 
 import {
     Action,
@@ -21,7 +23,6 @@ import {
     REGISTER,
     REHYDRATE,
 } from 'redux-persist';
-import partialBoxReducer from '../features/partialBox/partialBoxListSlice';
 
 const reducers = combineReducers({
     identity: identityReducer,
@@ -31,6 +32,7 @@ const reducers = combineReducers({
     partList: partReducer,
     packingJob: packingJobReducer,
     partialBoxList: partialBoxReducer,
+    recentPieceWeightList: recentPieceWeightReducer,
 });
 const persistConfig = {
     key: 'root',

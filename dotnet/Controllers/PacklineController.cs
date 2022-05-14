@@ -92,6 +92,22 @@ execute FXPL.usp_Q_Partials_byPart
             return partials;
         }
 
+        [HttpGet("RecentPieceWeights")]
+        public IEnumerable<RecentPieceWeight> GetRecentPieceWeights([FromQuery] string partCode="")
+        {
+            var result = _fxContext.XmlResults.FromSqlInterpolated(
+                $@"
+execute FXPL.usp_Q_PreviousPiecesWeights_byPart
+    @PartCode = {partCode}
+").ToArray()[0];
+
+            var deserializer = new XmlSerializer(typeof(List<RecentPieceWeight>), new XmlRootAttribute("RecentPieceWeightList"));
+            var recentPieceWeight = (List<RecentPieceWeight>)deserializer.Deserialize(
+                new StringReader($"<RecentPieceWeightList>{result.Result}</RecentPieceWeightList>"));
+
+            return recentPieceWeight;
+        }
+
         [HttpPost("OpenPackingJob")]
         public PackingJob OpenPackingJob([FromHeader] string user, [FromBody] NewPackingJobInput input)
         {

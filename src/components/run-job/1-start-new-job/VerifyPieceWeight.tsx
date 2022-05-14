@@ -1,4 +1,5 @@
-import { useAppDispatch } from '../../../app/hooks';
+import { useEffect } from 'react';
+import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import {
     Accordion,
     Button,
@@ -14,8 +15,10 @@ import {
     setPieceWeightDiscrepancyNote,
     setPieceWeightQuantity,
 } from '../../../features/packingJob/packingJobSlice';
+import { selectRecentPieceWeightList } from '../../../features/recentPieceWeight/recentPieceWeightSlice';
 
 export function VerifyPieceWeight(props: { packingJob: IPackingJob }) {
+    const recentPieceWeightList = useAppSelector(selectRecentPieceWeightList);
     const dispatch = useAppDispatch();
 
     function pieceWeightQuantityHandler(
@@ -24,7 +27,7 @@ export function VerifyPieceWeight(props: { packingJob: IPackingJob }) {
         if (!props.packingJob.demoJob)
             dispatch(setPieceWeightQuantity(pieceWeightQuantity));
     }
-    function pieceWeightHandler(pieceweight: number | undefined): void {
+    function pieceWeightHandler(pieceweight: string | undefined): void {
         if (!props.packingJob.demoJob) dispatch(setPieceWeight(pieceweight));
     }
     function pieceWeightDiscrepancyNoteHandler(note: string): void {
@@ -76,13 +79,14 @@ export function VerifyPieceWeight(props: { packingJob: IPackingJob }) {
                     >
                         <Form.Control
                             type="number"
+                            min={0}
                             value={props.packingJob.pieceWeight || 0}
                             onChange={(
                                 event: React.ChangeEvent<HTMLInputElement>,
                             ) => {
                                 const target = event.target;
                                 const value = target.value;
-                                pieceWeightHandler(parseFloat(value));
+                                pieceWeightHandler(value);
                             }}
                             onFocus={(
                                 event: React.FocusEvent<HTMLInputElement>,
@@ -145,10 +149,23 @@ export function VerifyPieceWeight(props: { packingJob: IPackingJob }) {
                                                 </Accordion.Header>
                                                 <Accordion.Body>
                                                     <ol>
-                                                        <li>1.23</li>
-                                                        <li>.123</li>
-                                                        <li>12.3</li>
-                                                        <li>123</li>
+                                                        {recentPieceWeightList?.map(
+                                                            (
+                                                                recentPieceWeight,
+                                                            ) => {
+                                                                return (
+                                                                    <li
+                                                                        key={
+                                                                            recentPieceWeight.rowID
+                                                                        }
+                                                                    >
+                                                                        {
+                                                                            recentPieceWeight.pieceWeight
+                                                                        }
+                                                                    </li>
+                                                                );
+                                                            },
+                                                        )}
                                                     </ol>
                                                 </Accordion.Body>
                                             </Accordion.Item>

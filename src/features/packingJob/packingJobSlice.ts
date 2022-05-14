@@ -228,7 +228,7 @@ export const packingJobSlice = createSlice({
         },
         setPart: (state, action: PayloadAction<IPart | undefined>) => {
             // pre-modification state validation
-            if (state.value.objectList)
+            if (!!state.value.objectList?.length)
                 throw new Error(
                     'Changing parts on a job forbidden when that job has associated' +
                         ' inventory.  Delete all inventory first or start a new job.',
@@ -295,21 +295,25 @@ export const packingJobSlice = createSlice({
                 );
             state.value.quantity = action.payload;
         },
-        setPieceWeight: (state, action: PayloadAction<number | undefined>) => {
-            if (!action.payload) {
+        setPieceWeight: (state, action: PayloadAction<string | undefined>) => {
+            let enteredText = action.payload;
+            if (!enteredText) {
                 state.value.validPieceWeight = false;
                 state.value.pieceWeight = undefined;
-                return;
             }
+            if (enteredText?.startsWith('.')) {
+                enteredText = '0' + enteredText;
+            }
+            let enteredValue = parseFloat(enteredText!);
 
-            if (action.payload < 0)
+            if (enteredValue < 0)
                 throw new Error('Piece weight must be greater than zero');
-            state.value.pieceWeight = action.payload;
+            state.value.pieceWeight = enteredValue;
 
             const pieceWeightError =
                 state.value.part?.unitWeight &&
                 state.value.part?.weightTolerance &&
-                (action.payload - state.value.part.unitWeight) /
+                (enteredValue - state.value.part.unitWeight) /
                     state.value.part.unitWeight;
 
             const valid =

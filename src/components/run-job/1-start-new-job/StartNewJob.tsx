@@ -5,18 +5,13 @@ import {
     setPackaging,
     setPart,
 } from '../../../features/packingJob/packingJobSlice';
-import {
-    getPartListAsync,
-    IPart,
-    selectPartList,
-} from '../../../features/part/partSlice';
+import { IPart, selectPartList } from '../../../features/part/partSlice';
 import { IPartPackaging } from '../../../features/partPackaging/partPackagingSlice';
 import { DeflashDetails } from './DeflashDetails';
 import { OpenJob } from './OpenJob';
 import { IListItem, ObjectSelect } from '../../shared/ObjectSelect';
 import { SpecialInstructions } from './SpecialInstructions';
 import { VerifyPieceWeight } from './VerifyPieceWeight';
-import { useEffect } from 'react';
 import { ObjectAutosuggest } from '../../shared/ObjectAutosuggest';
 
 export function StartNewJob(props: { packingJob: IPackingJob }) {
@@ -24,10 +19,6 @@ export function StartNewJob(props: { packingJob: IPackingJob }) {
 
     // dependent data sets
     const partList: IPart[] = useAppSelector(selectPartList);
-
-    useEffect(() => {
-        dispatch(getPartListAsync());
-    }, [dispatch]);
 
     function partHandler(part: IPart | undefined): void {
         if (!props.packingJob.demoJob) dispatch(setPart(part));
