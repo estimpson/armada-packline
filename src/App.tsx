@@ -6,15 +6,15 @@ import { Footer } from './components/layout/Footer';
 import { MainMenu } from './components/layout/Menu';
 import { Routes } from './routes';
 import { store } from './app/store';
-import {
-    localApiInitialized,
-    selectApiDetails,
-} from './features/localApi/localApiSlice';
+import { localApiInitialized } from './features/localApi/localApiSlice';
 import {
     applicationErrorOccurred,
     ApplicationErrorType,
 } from './features/applicationError/applicationErrorSlice';
-import { useAppSelector } from './app/hooks';
+import { useAppDispatch } from './app/hooks';
+import { useHotkeys } from 'react-hotkeys-hook';
+import { useRef, useState } from 'react';
+import { newScan } from './features/barcodeScanner/barcodeScannerSlice';
 export { default as logo } from './icon.png';
 
 declare const window: Window &
@@ -59,6 +59,73 @@ function closeApp() {
 }
 
 export default function App() {
+    const dispatch = useAppDispatch();
+
+    const [scannerData, setScannerData] = useState('');
+    const [readingScanner, setReadingScanner] = useState(false);
+
+    const timerRef = useRef<NodeJS.Timeout>();
+
+    useHotkeys('F8', (event) => {
+        scanBegin(event);
+    });
+    useHotkeys(
+        'F9',
+        (event) => {
+            scanEnd(event);
+        },
+        [scannerData],
+    );
+    useHotkeys(
+        '*',
+        (event) => {
+            scanData(event);
+        },
+        [readingScanner, scannerData],
+    );
+
+    function scanBegin(event: KeyboardEvent) {
+        event.preventDefault();
+        setScannerData('');
+        setReadingScanner(true);
+        if (timerRef.current) clearTimeout(timerRef.current);
+        timerRef.current = setTimeout(scanCancelled, 10000);
+    }
+
+    function scanEnd(event: KeyboardEvent) {
+        event.preventDefault();
+        if (timerRef.current) clearTimeout(timerRef.current);
+        setReadingScanner(false);
+
+        // Pass along the scanned data to the store?
+        dispatch(newScan(scannerData));
+        console.log(`Scan: ${scannerData}`);
+
+        setScannerData('');
+    }
+
+    function scanData(event: KeyboardEvent) {
+        if (
+            readingScanner &&
+            !(event.key === 'F8') &&
+            !(event.key === 'F9') &&
+            !(event.key === 'Shift') &&
+            !event.ctrlKey &&
+            !event.altKey
+        ) {
+            event.preventDefault();
+            if (timerRef.current) clearTimeout(timerRef.current);
+            timerRef.current = setTimeout(scanCancelled, 1000);
+
+            setScannerData(scannerData + event.key);
+        }
+    }
+
+    function scanCancelled() {
+        setScannerData('');
+        setReadingScanner(false);
+    }
+
     return (
         <>
             <Router>

@@ -1,6 +1,7 @@
 import identityReducer from '../features/identity/identitySlice';
 import applicationErrorReducer from '../features/applicationError/applicationErrorSlice';
 import localApiDetailsReducer from '../features/localApi/localApiSlice';
+import barcodeScannerReducer from '../features/barcodeScanner/barcodeScannerSlice';
 import machineReducer from '../features/machine/machineSlice';
 import partReducer from '../features/part/partSlice';
 import packingJobReducer from '../features/packingJob/packingJobSlice';
@@ -28,6 +29,7 @@ const reducers = combineReducers({
     identity: identityReducer,
     applicationError: applicationErrorReducer,
     localApiDetails: localApiDetailsReducer,
+    scannerData: barcodeScannerReducer,
     machineList: machineReducer,
     partList: partReducer,
     packingJob: packingJobReducer,
