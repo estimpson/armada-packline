@@ -1,10 +1,9 @@
 import { useAppDispatch } from '../../../app/hooks';
 import { Button, Card, Col, Row, Form } from '../../../bootstrap';
 import {
-    combinePartialBox,
     deleteBox,
     IPackingJob,
-    printLabels,
+    printPackingJobLablesAsync,
     resetPackingJobInventoryAsync,
 } from '../../../features/packingJob/packingJobSlice';
 import { InventoryBox } from './InventoryBox';
@@ -19,11 +18,8 @@ export function JobInventory(props: { packingJob: IPackingJob }) {
     function deleteBoxHandler(serial: number): void {
         if (!props.packingJob.demoJob) dispatch(deleteBox(serial));
     }
-    function combinePartialBoxHandler(scanData: string): void {
-        if (!props.packingJob.demoJob) dispatch(combinePartialBox(scanData));
-    }
     function printLabelsHandler(): void {
-        if (!props.packingJob.demoJob) dispatch(printLabels());
+        if (!props.packingJob.demoJob) dispatch(printPackingJobLablesAsync());
     }
 
     return (
@@ -44,9 +40,6 @@ export function JobInventory(props: { packingJob: IPackingJob }) {
                             <InventoryBox
                                 object={object}
                                 deleteBoxHandler={deleteBoxHandler}
-                                combinePartialBoxHandler={
-                                    combinePartialBoxHandler
-                                }
                             />
                         </Col>
                     ))}

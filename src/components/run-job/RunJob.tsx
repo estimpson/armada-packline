@@ -1,4 +1,5 @@
 import {
+    combinePreObjectAsync,
     getPackingJobAsync,
     IPackingJob,
 } from '../../features/packingJob/packingJobSlice';
@@ -14,17 +15,21 @@ import { isFulfilled } from '@reduxjs/toolkit';
 import { selectApiDetails } from '../../features/localApi/localApiSlice';
 import { getPartialBoxListAsync } from '../../features/partialBox/partialBoxListSlice';
 import { getRecentPieceWeightListAsync } from '../../features/recentPieceWeight/recentPieceWeightSlice';
+import { selectScannerData } from '../../features/barcodeScanner/barcodeScannerSlice';
 
 export function RunJob(props: { step?: string; packingJob: IPackingJob }) {
-    const apiDetails = useAppSelector(selectApiDetails);
     const dispatch = useAppDispatch();
+
+    // dependent state
+    const apiDetails = useAppSelector(selectApiDetails);
+    const scannerData = useAppSelector(selectScannerData);
 
     useEffect(() => {
         const load = async () => {
             if (apiDetails.port) {
                 if (props.packingJob.part) {
                     dispatch(
-                        getPartialBoxListAsync(props.packingJob.part?.partCode),
+                        getPartialBoxListAsync(props.packingJob.part!.partCode),
                     );
                     dispatch(
                         getRecentPieceWeightListAsync(
@@ -46,6 +51,29 @@ export function RunJob(props: { step?: string; packingJob: IPackingJob }) {
         };
         load();
     }, [dispatch, apiDetails]);
+
+    useEffect(() => {
+        const combine = async () => {
+            if (
+                apiDetails.port &&
+                !!props.packingJob.packingJobNumber &&
+                !!props.packingJob.objectList &&
+                !!props.packingJob.partialBoxQuantity &&
+                !!scannerData &&
+                !!scannerData.scanData
+            ) {
+                const combineAction = await dispatch(
+                    combinePreObjectAsync(scannerData),
+                );
+                if (isFulfilled(combineAction) && props.packingJob.part) {
+                    dispatch(
+                        getPartialBoxListAsync(props.packingJob.part!.partCode),
+                    );
+                }
+            }
+        };
+        combine();
+    }, [dispatch, scannerData]);
 
     return (
         <>

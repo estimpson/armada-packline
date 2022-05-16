@@ -7,6 +7,7 @@ import {
 import { AxiosError } from 'axios';
 import { RootState } from '../../app/store';
 import { IApplicationErrorState } from '../applicationError/applicationErrorSlice';
+import { IScannerData } from '../barcodeScanner/barcodeScannerSlice';
 import { IIdentityState } from '../identity/identitySlice';
 import { ILocalApiState } from '../localApi/localApiSlice';
 import { IMachine, IMachineListState } from '../machine/machineSlice';
@@ -14,9 +15,11 @@ import { IPart, IPartListState } from '../part/partSlice';
 import { IPartPackaging } from '../partPackaging/partPackagingSlice';
 import {
     cancelPackingJob,
+    combinePreObject,
     generatePackingJobInventory,
     getPackingJob,
     openPackingJob,
+    printPackingJobLabels,
     resetPackingJobInventory,
 } from './packingJobAPI';
 
@@ -89,6 +92,8 @@ const initialState: IPackagingJobState = {
 export const SetError = createAction<IApplicationErrorState>(
     'applicationError/applicationErrorOccurred',
 );
+
+export const ScanHandled = createAction<void>('barcodeScanner/scanHandled');
 
 export const generatePackingJobInventoryAsync = createAsyncThunk(
     'packingJob/generatePackingJobInventory',
@@ -196,6 +201,96 @@ export const getPackingJobAsync = createAsyncThunk<IPackingJob, void>(
         // Action definied in packingJobAPI
         try {
             const response = await getPackingJob(
+                localApiDetails,
+                identity.value,
+                packingJob.value,
+                partList.value,
+                machineList.value,
+                dispatch,
+                SetError,
+            );
+
+            return response.data;
+        } catch (err: any) {
+            let error: AxiosError<ValidationErrors> = err; // cast the error for access to response
+            if (!error.response) {
+                throw err;
+            }
+            return rejectWithValue(error.response.data);
+        }
+    },
+);
+
+export const combinePreObjectAsync = createAsyncThunk<
+    IPackingJob,
+    IScannerData
+>(
+    'packingJob/combinePreObject',
+    async (
+        scannerData: IScannerData,
+        { dispatch, getState, rejectWithValue },
+    ) => {
+        const { localApiDetails, identity, packingJob, partList, machineList } =
+            getState() as {
+                localApiDetails: ILocalApiState;
+                identity: IIdentityState;
+                packingJob: IPackagingJobState;
+                partList: IPartListState;
+                machineList: IMachineListState;
+            };
+
+        // Action definied in packingJobAPI
+        try {
+            let data = scannerData.scanData;
+            dispatch(ScanHandled());
+            if (data.startsWith('X') || data.startsWith('S')) {
+                data = data.substring(1);
+            }
+            const combineSerial = parseInt(data);
+            if (isNaN(combineSerial)) {
+                console.log(`No serial in scan data: ${scannerData.scanData}`);
+                throw new Error(
+                    `No serial in scan data: ${scannerData.scanData}`,
+                );
+            }
+
+            const response = await combinePreObject(
+                localApiDetails,
+                identity.value,
+                packingJob.value,
+                partList.value,
+                machineList.value,
+                combineSerial,
+                dispatch,
+                SetError,
+            );
+
+            return response.data;
+        } catch (err: any) {
+            let error: AxiosError<ValidationErrors> = err; // cast the error for access to response
+            if (!error.response) {
+                throw err;
+            }
+            return rejectWithValue(error.response.data);
+        }
+    },
+);
+
+export const printPackingJobLablesAsync = createAsyncThunk<IPackingJob, void>(
+    'packingJob/printPackingJobLabels',
+    async (_: void, { dispatch, getState, rejectWithValue }) => {
+        const { localApiDetails, identity, packingJob, partList, machineList } =
+            getState() as {
+                localApiDetails: ILocalApiState;
+                identity: IIdentityState;
+                packingJob: IPackagingJobState;
+                partList: IPartListState;
+                machineList: IMachineListState;
+            };
+
+        // Action definied in packingJobAPI
+        try {
+            const response = await printPackingJobLabels(
                 localApiDetails,
                 identity.value,
                 packingJob.value,
@@ -371,38 +466,6 @@ export const packingJobSlice = createSlice({
                     object.quantity !== state.value.packaging!.standardPack,
             )?.quantity;
         },
-        printLabels: (state) => {
-            state.value.objectList?.forEach((object) => {
-                object.printed = true;
-            });
-        },
-        combinePartialBox: (state, action: PayloadAction<string>) => {
-            if (state.value.partialBoxQuantity) {
-                let partialIndex = state.value.objectList!.length - 1;
-                state.value.objectList![partialIndex].combinedObjects =
-                    state.value.objectList![partialIndex].combinedObjects ||
-                    new Array<IPackingCombinedObject>(0);
-                if (action.payload === 'S3521477') {
-                    let quantityToUse = clamp(
-                        state.value.packaging!.standardPack -
-                            state.value.partialBoxQuantity,
-                        0,
-                        35,
-                    );
-                    let combinedObject: IPackingCombinedObject = {
-                        serial: 3521477,
-                        quantityOriginal: 35,
-                        quantityRemaining: 35 - quantityToUse,
-                        quantityUsed: quantityToUse,
-                    };
-                    state.value.objectList![partialIndex].combinedObjects!.push(
-                        combinedObject,
-                    );
-                    state.value.objectList![partialIndex].quantity +=
-                        quantityToUse;
-                }
-            }
-        },
         setJobIsDoneFlag: (
             state,
             action: PayloadAction<boolean | undefined>,
@@ -483,6 +546,42 @@ export const packingJobSlice = createSlice({
                 } else {
                     state.error = action.error.message;
                 }
+            })
+
+            .addCase(combinePreObjectAsync.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(combinePreObjectAsync.fulfilled, (state, action) => {
+                state.status = 'idle';
+                state.value = action.payload;
+            })
+            .addCase(combinePreObjectAsync.rejected, (state, action) => {
+                state.status = 'failed';
+                if (action.payload) {
+                    // Being that we passed in Validationerrors to rejectType in `createAsyncThunk`, the payload will be available here.
+                    // state.error = action.payload.errorMessage;
+                    console.log(action.payload);
+                } else {
+                    state.error = action.error.message;
+                }
+            })
+
+            .addCase(printPackingJobLablesAsync.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(printPackingJobLablesAsync.fulfilled, (state, action) => {
+                state.status = 'idle';
+                state.value = action.payload;
+            })
+            .addCase(printPackingJobLablesAsync.rejected, (state, action) => {
+                state.status = 'failed';
+                if (action.payload) {
+                    // Being that we passed in Validationerrors to rejectType in `createAsyncThunk`, the payload will be available here.
+                    // state.error = action.payload.errorMessage;
+                    console.log(action.payload);
+                } else {
+                    state.error = action.error.message;
+                }
             });
     },
 });
@@ -501,8 +600,6 @@ export const {
     setBoxes,
     setPartialBoxQuantity,
     deleteBox,
-    printLabels,
-    combinePartialBox,
     setJobIsDoneFlag,
     setShelfInventoryFlag,
     completeJob,

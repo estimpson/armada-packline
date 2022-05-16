@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -8,6 +9,7 @@ using api.Models;
 using Microsoft.AspNetCore.Http;
 using SysFile = System.IO.File;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -26,8 +28,8 @@ namespace api.Controllers
             _fxContext = fxContext;
         }
 
-        [HttpPost("printPackingJobBT")]
-        public IEnumerable<PackingJobObject> PrintPackingJobBT([FromQuery] string user, [FromQuery] string packingJobNumber)
+        [HttpPost("PrintPackingJobBT")]
+        public PackingJob PrintPackingJobBT([FromHeader] string user, [FromQuery] string packingJobNumber)
         {
             var openedPackingJobObjects = OpenPackingJobObjectsForPrint(user, packingJobNumber);
 
@@ -73,7 +75,7 @@ namespace api.Controllers
             return closedPackingJobObjects;
         }
 
-        [HttpPost("printSerialBT")]
+        [HttpPost("PrintSerialBT")]
         public PackingJobObject PrintSerialBT([FromQuery] string user, [FromQuery] long serial, [FromQuery] string labelPath, int copies)
         {
             var openedPackingJobObject = OpenPreObject(user, serial);
@@ -165,8 +167,10 @@ execute FXPL.usp_CRUD_OpenPackingJobPreObjectsForPrint
             return packingJobObjects;
         }
 
-        private IEnumerable<PackingJobObject> ClosePackingJobPreObjectsAfterPrint(string user, string packingJobNumber, bool printed)
+        private PackingJob ClosePackingJobPreObjectsAfterPrint(string user, string packingJobNumber, bool printed)
         {
+            try
+            {
             var result = _fxContext.XmlResults.FromSqlInterpolated(
             $@"
 execute FXPL.usp_CRUD_ClosePackingJobPreObjectsAfterPrint
@@ -175,11 +179,21 @@ execute FXPL.usp_CRUD_ClosePackingJobPreObjectsAfterPrint
 ,   @Printed = {(printed ? 1 : 0)}
 ").ToArray()[0];
 
-            var deserializer = new XmlSerializer(typeof(List<PackingJobObject>), new XmlRootAttribute("Result"));
-            var packingJobObjects = ((List<PackingJobObject>)deserializer.Deserialize(
-                new StringReader($"<Result>{result.Result}</Result>")));
+            var deserializer = new XmlSerializer(typeof(List<PackingJob>), new XmlRootAttribute("Result"));
+            var packingJob = ((List<PackingJob>)deserializer.Deserialize(
+                new StringReader($"<Result>{result.Result}</Result>"))).ToArray()[0];
 
-            return packingJobObjects;
+            return packingJob;
+            }
+            catch (SqlException e)
+            {
+                throw new Exception(e.Message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
-   }
+    }
 }
