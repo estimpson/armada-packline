@@ -114,7 +114,9 @@ execute FXPL.usp_Q_PreviousPiecesWeights_byPart
         [HttpPost("OpenPackingJob")]
         public PackingJob OpenPackingJob([FromHeader] string user, [FromBody] NewPackingJobInput input)
         {
-            var result = _fxContext.XmlResults.FromSqlInterpolated(
+            try
+            {
+                var result = _fxContext.XmlResults.FromSqlInterpolated(
                 $@"
 execute FXPL.usp_CRUD_OpenPackingJob
 	@User = {user}
@@ -131,12 +133,21 @@ execute FXPL.usp_CRUD_OpenPackingJob
 ,	@DeflashMachine = {input.DeflashMachine}
 ").ToArray()[0];
 
+                var deserializer = new XmlSerializer(typeof(List<PackingJob>), new XmlRootAttribute("Result"));
+                var packingJobs = ((List<PackingJob>)deserializer.Deserialize(
+                    new StringReader($"<Result>{result.Result}</Result>"))).ToArray()[0];
 
-            var deserializer = new XmlSerializer(typeof(List<PackingJob>), new XmlRootAttribute("Result"));
-            var packingJobs = ((List<PackingJob>)deserializer.Deserialize(
-                new StringReader($"<Result>{result.Result}</Result>"))).ToArray()[0];
-
-            return packingJobs;
+                return packingJobs;
+            }
+            catch (SqlException e)
+            {
+                throw new Exception(e.Message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         [HttpPost("CancelPackingJob")]
@@ -154,24 +165,38 @@ execute FXPL.usp_CRUD_CancelPackingJob
         [HttpGet("PackingJob")]
         public PackingJob GetPackingJob([FromQuery] string packingJobNumber = "")
         {
-            var result = _fxContext.XmlResults.FromSqlInterpolated(
+            try
+            {
+                var result = _fxContext.XmlResults.FromSqlInterpolated(
                 $@"
 execute FXPL.usp_Q_PackingJob_byJobNumber
     @PackingJobNumber = {packingJobNumber}
 ").ToArray()[0];
 
-            var deserializer = new XmlSerializer(typeof(List<PackingJob>), new XmlRootAttribute("Result"));
-            var packingJob = ((List<PackingJob>)deserializer.Deserialize(
-                new StringReader($"<Result>{result.Result}</Result>"))).ToArray()[0];
+                var deserializer = new XmlSerializer(typeof(List<PackingJob>), new XmlRootAttribute("Result"));
+                var packingJob = ((List<PackingJob>)deserializer.Deserialize(
+                    new StringReader($"<Result>{result.Result}</Result>"))).ToArray()[0];
 
-            return packingJob;
+                return packingJob;
+            }
+            catch (SqlException e)
+            {
+                throw new Exception(e.Message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         [HttpPost("GeneratePreObjects")]
-        public IEnumerable<PackingJobObject> GeneratePreObjects([FromHeader] string user,
+        public PackingJob GeneratePreObjects([FromHeader] string user,
             [FromBody] GeneratePreObjectsInput input)
         {
-            var result = _fxContext.XmlResults.FromSqlInterpolated(
+            try
+            {
+                var result = _fxContext.XmlResults.FromSqlInterpolated(
                 $@"
 execute FXPL.usp_CRUD_GeneratePreObjects
     @User = {user}
@@ -180,23 +205,49 @@ execute FXPL.usp_CRUD_GeneratePreObjects
 ,   @PartialBoxQuantity = {input.PartialBoxQuantity}
 ").ToArray()[0];
 
-            var deserializer = new XmlSerializer(typeof(List<PackingJobObject>), new XmlRootAttribute("Result"));
-            var packingJobObjects = (List<PackingJobObject>)deserializer.Deserialize(
-                new StringReader($"<Result>{result.Result}</Result>"));
+                var deserializer = new XmlSerializer(typeof(List<PackingJob>), new XmlRootAttribute("Result"));
+                var packingJob = ((List<PackingJob>)deserializer.Deserialize(
+                    new StringReader($"<Result>{result.Result}</Result>"))).ToArray()[0];
 
-            return packingJobObjects;
+                return packingJob;
+            }
+            catch (SqlException e)
+            {
+                throw new Exception(e.Message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         [HttpPost("CancelPreObjects")]
-        public IActionResult CancelPreObjects([FromHeader] string user, [FromBody] CancelPreObjects input)
+        public PackingJob CancelPreObjects([FromHeader] string user, [FromBody] CancelPreObjects input)
         {
-            var result = _fxContext.XmlResults.FromSqlInterpolated(
-                $@"
+            try
+            {
+                var result = _fxContext.XmlResults.FromSqlInterpolated(
+                    $@"
 execute FXPL.usp_CRUD_CancelPreObjects
     @User = {user}
 ,   @PackingJobNumber = {input.PackingJobNumber}").ToArray()[0];
 
-            return Ok();
+                var deserializer = new XmlSerializer(typeof(List<PackingJob>), new XmlRootAttribute("Result"));
+                var packingJobs = ((List<PackingJob>)deserializer.Deserialize(
+                    new StringReader($"<Result>{result.Result}</Result>"))).ToArray()[0];
+
+                return packingJobs;
+            }
+            catch (SqlException e)
+            {
+                throw new Exception(e.Message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         [HttpPost("CombinePreObject")]
@@ -233,53 +284,80 @@ execute FXPL.usp_CRUD_CombinePreObject
         [HttpPost("PrintPackingJobBT")]
         public PackingJob PrintPackingJobBT([FromHeader] string user, [FromBody] PackingJobInput input)
         {
-            var openResult = _fxContext.XmlResults.FromSqlInterpolated($@"
+            List<PackingJobObjectForPrint> openedPackingJobObjects;
+            try
+            {
+                var openResult = _fxContext.XmlResults.FromSqlInterpolated($@"
 execute FXPL.usp_CRUD_OpenPackingJobPreObjectsForPrint
     @User = {user}
 ,   @PackingJobNumber = {input.PackingJobNumber}
 ").ToArray()[0];
 
-
-            var deserializer1 = new XmlSerializer(typeof(List<PackingJobObjectForPrint>), new XmlRootAttribute("Result"));
-            var openedPackingJobObjects = (List<PackingJobObjectForPrint>)deserializer1.Deserialize(
-                new StringReader($"<Result>{openResult.Result}</Result>"));
-
-            string bartenderPath;
-            if (System.IO.File.Exists(@"c:\Program Files (x86)\Seagull\BarTender Suite\bartend.exe"))
-            {
-                bartenderPath = @"""c:\Program Files (x86)\Seagull\BarTender Suite\bartend.exe""";
+                var deserializer1 = new XmlSerializer(typeof(List<PackingJobObjectForPrint>), new XmlRootAttribute("Result"));
+                openedPackingJobObjects = (List<PackingJobObjectForPrint>)deserializer1.Deserialize(
+                    new StringReader($"<Result>{openResult.Result}</Result>"));
             }
-            else if (System.IO.File.Exists(@"c:\Program Files (x86)\Seagull\BarTender Suite 2021\bartend.exe"))
+            catch (SqlException e)
             {
-                bartenderPath = @"""c:\Program Files (x86)\Seagull\BarTender Suite 2021\bartend.exe""";
+                throw new Exception(e.Message);
             }
-            else if (System.IO.File.Exists(@"c:\Program Files\Seagull\BarTender Suite\bartend.exe"))
+            catch (Exception e)
             {
-                bartenderPath = @"""c:\Program Files\Seagull\BarTender Suite\bartend.exe""";
-            }
-            else if (System.IO.File.Exists(@"c:\Program Files\Seagull\BarTender Suite 2021\bartend.exe"))
-            {
-                bartenderPath = @"""c:\Program Files\Seagull\BarTender Suite 2021\bartend.exe""";
-            }
-            else
-            {
-                throw new BadHttpRequestException("BarTender not found");
+                Console.WriteLine(e);
+                throw;
             }
 
-            foreach (var openedPackingJobObject in openedPackingJobObjects)
+            bool printingFailed = false;
+            string printFailureMessage = "";
+            try
             {
-                var bartenderArgs =
-                    @$"/F=""{openedPackingJobObject.LabelPath}"" /?Serial={openedPackingJobObject.Serial} /C={openedPackingJobObject.Copies} /P /X";
-                var process = new Process
+                string bartenderPath;
+                if (System.IO.File.Exists(@"c:\Program Files (x86)\Seagull\BarTender Suite\bartend.exe"))
                 {
-                    StartInfo = new ProcessStartInfo
+                    bartenderPath = @"""c:\Program Files (x86)\Seagull\BarTender Suite\bartend.exe""";
+                }
+                else if (System.IO.File.Exists(@"c:\Program Files (x86)\Seagull\BarTender Suite 2021\bartend.exe"))
+                {
+                    bartenderPath = @"""c:\Program Files (x86)\Seagull\BarTender Suite 2021\bartend.exe""";
+                }
+                else if (System.IO.File.Exists(@"c:\Program Files\Seagull\BarTender Suite\bartend.exe"))
+                {
+                    bartenderPath = @"""c:\Program Files\Seagull\BarTender Suite\bartend.exe""";
+                }
+                else if (System.IO.File.Exists(@"c:\Program Files\Seagull\BarTender Suite 2021\bartend.exe"))
+                {
+                    bartenderPath = @"""c:\Program Files\Seagull\BarTender Suite 2021\bartend.exe""";
+                }
+                else
+                {
+                    throw new BadHttpRequestException("BarTender not found");
+                }
+
+                foreach (var openedPackingJobObject in openedPackingJobObjects)
+                {
+                    var bartenderArgs =
+                        @$"/F=""{openedPackingJobObject.LabelPath}"" /?Serial={openedPackingJobObject.Serial} /C={openedPackingJobObject.Copies} /P /X";
+                    var process = new Process
                     {
-                        FileName = bartenderPath,
-                        Arguments = bartenderArgs
-                    }
-                };
-                process.Start();
-                process.WaitForExit();
+                        StartInfo = new ProcessStartInfo
+                        {
+                            FileName = bartenderPath,
+                            Arguments = bartenderArgs
+                        }
+                    };
+                    process.Start();
+                    process.WaitForExit();
+                }
+            }
+            catch (SqlException e)
+            {
+                printingFailed = true;
+                printFailureMessage = e.Message;
+            }
+            catch (Exception e)
+            {
+                printingFailed = true;
+                printFailureMessage = e.Message;
             }
 
             try
@@ -289,13 +367,17 @@ execute FXPL.usp_CRUD_OpenPackingJobPreObjectsForPrint
 execute FXPL.usp_CRUD_ClosePackingJobPreObjectsAfterPrint
     @User = {user}
 ,   @PackingJobNumber = {input.PackingJobNumber}
-,   @Printed = 1
+,   @Printed = {(printingFailed ? '0' : '1')}
 ").ToArray()[0];
 
                 var deserializer2 = new XmlSerializer(typeof(List<PackingJob>), new XmlRootAttribute("Result"));
                 var packingJob = ((List<PackingJob>)deserializer2.Deserialize(
                     new StringReader($"<Result>{result.Result}</Result>"))).ToArray()[0];
 
+                if (printingFailed)
+                {
+                    throw new Exception($"Printing failed: {printFailureMessage}");
+                }
                 return packingJob;
             }
             catch (SqlException e)

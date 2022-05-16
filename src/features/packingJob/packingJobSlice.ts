@@ -99,17 +99,22 @@ export const ScanHandled = createAction<void>('barcodeScanner/scanHandled');
 export const generatePackingJobInventoryAsync = createAsyncThunk(
     'packingJob/generatePackingJobInventory',
     async (_: void, { dispatch, getState }) => {
-        const { localApiDetails, identity, packingJob } = getState() as {
-            localApiDetails: ILocalApiState;
-            identity: IIdentityState;
-            packingJob: IPackagingJobState;
-        };
+        const { localApiDetails, identity, packingJob, partList, machineList } =
+            getState() as {
+                localApiDetails: ILocalApiState;
+                identity: IIdentityState;
+                packingJob: IPackagingJobState;
+                partList: IPartListState;
+                machineList: IMachineListState;
+            };
 
         // Action defined in packingJobAPI
         const response = await generatePackingJobInventory(
             localApiDetails,
             identity.value,
             packingJob.value,
+            partList.value,
+            machineList.value,
             dispatch,
             SetError,
         );
@@ -143,17 +148,22 @@ export const resetPackingJobInventoryAsync = createAsyncThunk(
 export const openPackingJobAsync = createAsyncThunk(
     'packingJob/openPackingJob',
     async (_: void, { dispatch, getState }) => {
-        const { localApiDetails, identity, packingJob } = getState() as {
-            localApiDetails: ILocalApiState;
-            identity: IIdentityState;
-            packingJob: IPackagingJobState;
-        };
+        const { localApiDetails, identity, packingJob, partList, machineList } =
+            getState() as {
+                localApiDetails: ILocalApiState;
+                identity: IIdentityState;
+                packingJob: IPackagingJobState;
+                partList: IPartListState;
+                machineList: IMachineListState;
+            };
 
         // Action defined in packingJobAPI
         const response = await openPackingJob(
             localApiDetails,
             identity.value,
             packingJob.value,
+            partList.value,
+            machineList.value,
             dispatch,
             SetError,
         );
@@ -514,9 +524,6 @@ export const packingJobSlice = createSlice({
         ) => {
             state.value.shelfInventoryFlag = action.payload;
         },
-        //todo: error checking
-        //can't edit job with inventory
-        //can't delete box after combine
         //todo: notification on async tasks
     },
     // The `extraReducers` field lets the slice handle actions defined elsewhere,
@@ -541,7 +548,7 @@ export const packingJobSlice = createSlice({
                 generatePackingJobInventoryAsync.fulfilled,
                 (state, action) => {
                     state.status = 'idle';
-                    state.value.objectList = action.payload;
+                    state.value = action.payload;
                 },
             )
 

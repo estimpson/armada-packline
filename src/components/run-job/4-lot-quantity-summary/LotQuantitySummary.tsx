@@ -59,16 +59,20 @@ export function LotQuantitySummary(props: { packingJob: IPackingJob }) {
                         {props.packingJob.shelfInventoryFlag ? 'Yes' : 'No'}
                     </Col>
                 </Row>
-                <Row>
-                    <Col className="form-label">Partial Box(es)</Col>
-                </Row>
-                <Row>
-                    <Col className="mb-1">
-                        <PartialBoxListSummary
-                            partCode={props.packingJob.part!.partCode}
-                        />
-                    </Col>
-                </Row>
+                {props.packingJob.partialBoxQuantity && (
+                    <>
+                        <Row>
+                            <Col className="form-label">Partial Box(es)</Col>
+                        </Row>
+                        <Row>
+                            <Col className="mb-1">
+                                <PartialBoxListSummary
+                                    partCode={props.packingJob.part!.partCode}
+                                />
+                            </Col>
+                        </Row>
+                    </>
+                )}
             </Container>
         </Card.Body>
     );

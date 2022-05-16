@@ -145,7 +145,14 @@ export function LotQuantity(props: { packingJob: IPackingJob }) {
                         ) : (
                             <></>
                         )}
-                        <Form.Group as={Row} className="mb-3">
+                        <Form.Group
+                            as={Row}
+                            className={
+                                props.packingJob.shelfInventoryFlag
+                                    ? 'mb-3 text-white bg-warning'
+                                    : 'mb-3'
+                            }
+                        >
                             <Form.Label column sm="3">
                                 Shelf Inventory
                             </Form.Label>
@@ -157,6 +164,11 @@ export function LotQuantity(props: { packingJob: IPackingJob }) {
                                         props.packingJob.shelfInventoryFlag
                                             ? 'Yes'
                                             : 'No'
+                                    }
+                                    className={
+                                        props.packingJob.shelfInventoryFlag
+                                            ? 'text-white'
+                                            : ''
                                     }
                                 />
                             </Col>

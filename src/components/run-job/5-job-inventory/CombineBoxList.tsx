@@ -1,9 +1,12 @@
+import { useAppSelector } from '../../../app/hooks';
 import { Card, Col, Container, Row } from '../../../bootstrap';
 import { IPackingCombinedObject } from '../../../features/packingJob/packingJobSlice';
+import { selectPartialBoxList } from '../../../features/partialBox/partialBoxListSlice';
 
 export function CombineBoxList(props: {
     combineList: IPackingCombinedObject[];
 }) {
+    const partialBoxes = useAppSelector(selectPartialBoxList);
     return (
         <>
             {props.combineList.length ? (
@@ -62,7 +65,11 @@ export function CombineBoxList(props: {
             ) : (
                 <>
                     <Row key="none">
-                        <Col>None available</Col>
+                        <Col>
+                            {!!partialBoxes.length
+                                ? 'Scan Partial Box label To Combine'
+                                : 'None available'}
+                        </Col>
                     </Row>
                 </>
             )}

@@ -32,6 +32,8 @@ namespace api.Models
         [XmlAttribute]
         public string DeflashMachine { get; set; }
         [XmlAttribute]
+        public bool ShelfInventoryFlag { get; set; }
+        [XmlAttribute]
         public int RowID { get; set; }
         [XmlElement]
         public List<PackingJobObject> Objects { get; set; }

@@ -40,6 +40,8 @@ export function generatePackingJobInventory(
     localApi: ILocalApiState,
     identity: IIdentity,
     packingJob: IPackingJob,
+    parts: IPart[],
+    machines: IMachine[],
     dispatch: ThunkDispatch<unknown, unknown, AnyAction>,
     setError?: ActionCreatorWithPayload<IApplicationErrorState, string>,
 ) {
@@ -53,7 +55,7 @@ export function generatePackingJobInventory(
     };
 
     return new Promise<{
-        data: IPackingObject[];
+        data: IPackingJob;
     }>((resolve) => {
         const jsonBody = {
             packingJobNUmber: packingJob.packingJobNumber!,
@@ -63,23 +65,17 @@ export function generatePackingJobInventory(
 
         if (process.env['REACT_APP_API'] === 'Enabled') {
             return axios
-                .post<IPackingJobInventoryAPI[]>(queryString, jsonBody, headers)
+                .post<IPackingJobAPI>(queryString, jsonBody, headers)
                 .then((response) => {
-                    let apiObjects = response.data;
-                    // mapping of api datastructure to internal datastructure
-                    let objectList = apiObjects.map((object) => {
-                        return {
-                            serial: object.serial,
-                            part: packingJob.part!,
-                            quantity: object.quantity,
-                            partial:
-                                object.quantity <
-                                packingJob.packaging!.standardPack,
-                            printed: object.printed,
-                        };
-                    });
+                    let newPackingJob: IPackingJob = mapPackingJobFromAPI(
+                        response,
+                        parts,
+                        machines,
+                        packingJob,
+                    );
+
                     return resolve({
-                        data: objectList,
+                        data: newPackingJob,
                     });
                 })
                 .catch((ex) => handleAxiosException(ex, dispatch, setError));
@@ -155,6 +151,7 @@ export interface IPackingJobAPI {
     deflashMachine: string;
     boxes: number | undefined;
     partialBoxQuantity: number | undefined;
+    shelfInventoryFlag: boolean;
     objects?: IPackingObjectAPI[];
     rowID: number;
 }
@@ -163,6 +160,8 @@ export function openPackingJob(
     localApi: ILocalApiState,
     identity: IIdentity,
     packingJob: IPackingJob,
+    parts: IPart[],
+    machines: IMachine[],
     dispatch: ThunkDispatch<unknown, unknown, AnyAction>,
     setError?: ActionCreatorWithPayload<IApplicationErrorState, string>,
 ) {
@@ -176,7 +175,7 @@ export function openPackingJob(
     };
     // create a promise that returns data of required type
     return new Promise<{
-        data: IPackingJobAPI;
+        data: IPackingJob;
     }>((resolve) => {
         const jsonBody = {
             partCode: packingJob.part!.partCode,
@@ -196,9 +195,15 @@ export function openPackingJob(
             return axios
                 .post<IPackingJobAPI>(queryString, jsonBody, headers)
                 .then((response) => {
-                    // mapping of api datastructure to internal datastructure
+                    let newPackingJob: IPackingJob = mapPackingJobFromAPI(
+                        response,
+                        parts,
+                        machines,
+                        packingJob,
+                    );
+
                     return resolve({
-                        data: response.data,
+                        data: newPackingJob,
                     });
                 })
                 .catch((ex) => handleAxiosException(ex, dispatch, setError));
@@ -483,7 +488,7 @@ function mapPackingJobFromAPI(
         partialBoxQuantity: partialBoxQuantity,
         objectList: objectList,
         jobIsDoneFlag: false,
-        shelfInventoryFlag: false, // todo
+        shelfInventoryFlag: apiPackingJob.shelfInventoryFlag,
     };
     return newPackingJob;
 }
