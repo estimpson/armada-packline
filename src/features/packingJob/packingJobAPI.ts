@@ -8,6 +8,7 @@ import {
     ApplicationErrorType,
     IApplicationErrorState,
 } from '../applicationError/applicationErrorSlice';
+import { handleAxiosException } from '../handleAxiosException';
 import { IIdentity } from '../identity/identitySlice';
 import { ILocalApiState } from '../localApi/localApiSlice';
 import { IMachine } from '../machine/machineSlice';
@@ -81,21 +82,7 @@ export function generatePackingJobInventory(
                         data: objectList,
                     });
                 })
-                .catch((ex) => {
-                    let error =
-                        ex.code === 'ECONNABORTED'
-                            ? 'A timeout has occurred'
-                            : ex.response?.status === 404
-                            ? 'Resource not found'
-                            : ex.message;
-                    setError &&
-                        dispatch(
-                            setError({
-                                type: ApplicationErrorType.Unknown,
-                                message: error,
-                            }),
-                        );
-                });
+                .catch((ex) => handleAxiosException(ex, dispatch, setError));
         }
     });
 }
@@ -127,21 +114,7 @@ export function resetPackingJobInventory(
                 .then((response) => {
                     return resolve();
                 })
-                .catch((ex) => {
-                    let error =
-                        ex.code === 'ECONNABORTED'
-                            ? 'A timeout has occurred'
-                            : ex.response?.status === 404
-                            ? 'Resource not found'
-                            : ex.message;
-                    setError &&
-                        dispatch(
-                            setError({
-                                type: ApplicationErrorType.Unknown,
-                                message: error,
-                            }),
-                        );
-                });
+                .catch((ex) => handleAxiosException(ex, dispatch, setError));
         }
     });
 }
@@ -228,21 +201,7 @@ export function openPackingJob(
                         data: response.data,
                     });
                 })
-                .catch((ex) => {
-                    let error =
-                        ex.code === 'ECONNABORTED'
-                            ? 'A timeout has occurred'
-                            : ex.response?.status === 404
-                            ? 'Resource not found'
-                            : ex.message;
-                    setError &&
-                        dispatch(
-                            setError({
-                                type: ApplicationErrorType.Unknown,
-                                message: error,
-                            }),
-                        );
-                });
+                .catch((ex) => handleAxiosException(ex, dispatch, setError));
         }
     });
 }
@@ -276,21 +235,7 @@ export function cancelPackingJob(
                     // mapping of api datastructure to internal datastructure
                     return resolve();
                 })
-                .catch((ex) => {
-                    let error =
-                        ex.code === 'ECONNABORTED'
-                            ? 'A timeout has occurred'
-                            : ex.response?.status === 404
-                            ? 'Resource not found'
-                            : ex.message;
-                    setError &&
-                        dispatch(
-                            setError({
-                                type: ApplicationErrorType.Unknown,
-                                message: error,
-                            }),
-                        );
-                });
+                .catch((ex) => handleAxiosException(ex, dispatch, setError));
         }
     });
 }
@@ -321,91 +266,18 @@ export function getPackingJob(
             return axios
                 .get<IPackingJobAPI>(queryString, headers)
                 .then((response) => {
-                    let apiPackingJob = response.data;
-                    // mapping of api datastructure to internal datastructure
-                    let part = parts.find(
-                        (p) => p.partCode === apiPackingJob.partCode,
+                    let newPackingJob: IPackingJob = mapPackingJobFromAPI(
+                        response,
+                        parts,
+                        machines,
+                        packingJob,
                     );
-                    let partPack = part?.packagingList.find(
-                        (pp) => pp.packageCode === apiPackingJob.packagingCode,
-                    );
-                    let machine = machines.find(
-                        (m) => m.machineCode === apiPackingJob.deflashMachine,
-                    );
-                    let objectList = apiPackingJob.objects?.map((object) => {
-                        return {
-                            part: part!,
-                            serial: object.serial,
-                            quantity: object.quantity,
-                            partial: object.quantity < partPack!.standardPack,
-                            printed: object.printed,
-                            combinedObjects: object.combines?.map((combine) => {
-                                return {
-                                    serial: combine.fromSerial,
-                                    quantityOriginal:
-                                        combine.fromOriginalQuantity,
-                                    quantityUsed:
-                                        combine.fromOriginalQuantity -
-                                        combine.fromNewQuantity,
-                                    quantityRemaining: combine.fromNewQuantity,
-                                };
-                            }),
-                        };
-                    });
-                    let boxes = objectList
-                        ? objectList.filter(
-                              (object) =>
-                                  object.quantity === partPack?.standardPack,
-                          ).length
-                        : packingJob.boxes;
-                    let partialBoxQuantity = objectList
-                        ? objectList?.find(
-                              (object) =>
-                                  object.quantity < partPack!.standardPack,
-                          )?.quantity
-                        : packingJob.partialBoxQuantity;
-                    let newPackingJob: IPackingJob = {
-                        demoJob: false,
-                        packingJobNumber: apiPackingJob.packingJobNumber,
-                        part: part,
-                        packaging: partPack,
-                        acknowledged: true, // todo
-                        quantity: apiPackingJob.pieceWeightQuantity,
-                        pieceWeight: apiPackingJob.pieceWeight,
-                        validPieceWeight: apiPackingJob.pieceWeightValid,
-                        pieceWeightDiscrepancyNote:
-                            apiPackingJob.pieceWeightDiscrepancyNote,
-                        overridePieceWeight:
-                            !!apiPackingJob.pieceWeightDiscrepancyNote, //was overridden if discrepancy note was recorded
-                        operator: apiPackingJob.deflashOperator,
-                        machine: machine,
-                        jobInProgress: !!apiPackingJob.packingJobNumber, // job is in progress if job number has been assigned
-                        boxes: boxes,
-                        partialBoxQuantity: partialBoxQuantity,
-                        objectList: objectList,
-                        jobIsDoneFlag: false, // todo
-                        shelfInventoryFlag: false, // todo
-                    };
 
                     return resolve({
                         data: newPackingJob,
                     });
                 })
-                .catch((ex) => {
-                    let error =
-                        ex.code === 'ECONNABORTED'
-                            ? 'A timeout has occurred'
-                            : ex.response?.status === 404
-                            ? 'Resource not found'
-                            : ex.message;
-                    setError &&
-                        dispatch(
-                            setError({
-                                type: ApplicationErrorType.Unknown,
-                                message: error,
-                            }),
-                        );
-                });
+                .catch((ex) => handleAxiosException(ex, dispatch, setError));
         }
     });
 }
@@ -441,116 +313,18 @@ export function combinePreObject(
             return axios
                 .post<IPackingJobAPI>(queryString, jsonBody, headers)
                 .then((response) => {
-                    let apiPackingJob = response.data;
-                    // mapping of api datastructure to internal datastructure
-                    let part = parts.find(
-                        (p) => p.partCode === apiPackingJob.partCode,
+                    let newPackingJob: IPackingJob = mapPackingJobFromAPI(
+                        response,
+                        parts,
+                        machines,
+                        packingJob,
                     );
-                    let partPack = part?.packagingList.find(
-                        (pp) => pp.packageCode === apiPackingJob.packagingCode,
-                    );
-                    let machine = machines.find(
-                        (m) => m.machineCode === apiPackingJob.deflashMachine,
-                    );
-                    let objectList = apiPackingJob.objects?.map((object) => {
-                        return {
-                            part: part!,
-                            serial: object.serial,
-                            quantity: object.quantity,
-                            partial: object.quantity < partPack!.standardPack,
-                            printed: object.printed,
-                            combinedObjects: object.combines?.map((combine) => {
-                                return {
-                                    serial: combine.fromSerial,
-                                    quantityOriginal:
-                                        combine.fromOriginalQuantity,
-                                    quantityUsed:
-                                        combine.fromOriginalQuantity -
-                                        combine.fromNewQuantity,
-                                    quantityRemaining: combine.fromNewQuantity,
-                                };
-                            }),
-                        };
-                    });
-                    let boxes = objectList
-                        ? objectList.filter(
-                              (object) =>
-                                  object.quantity === partPack?.standardPack,
-                          ).length
-                        : packingJob.boxes;
-                    let partialBoxQuantity = objectList
-                        ? objectList?.find(
-                              (object) =>
-                                  object.quantity < partPack!.standardPack,
-                          )?.quantity
-                        : packingJob.partialBoxQuantity;
-                    let newPackingJob: IPackingJob = {
-                        demoJob: false,
-                        packingJobNumber: apiPackingJob.packingJobNumber,
-                        part: part,
-                        packaging: partPack,
-                        acknowledged: true, // todo
-                        quantity: apiPackingJob.pieceWeightQuantity,
-                        pieceWeight: apiPackingJob.pieceWeight,
-                        validPieceWeight: apiPackingJob.pieceWeightValid,
-                        pieceWeightDiscrepancyNote:
-                            apiPackingJob.pieceWeightDiscrepancyNote,
-                        overridePieceWeight:
-                            !!apiPackingJob.pieceWeightDiscrepancyNote, //was overridden if discrepancy note was recorded
-                        operator: apiPackingJob.deflashOperator,
-                        machine: machine,
-                        jobInProgress: !!apiPackingJob.packingJobNumber, // job is in progress if job number has been assigned
-                        boxes: boxes,
-                        partialBoxQuantity: partialBoxQuantity,
-                        objectList: objectList,
-                        jobIsDoneFlag: false, // todo
-                        shelfInventoryFlag: false, // todo
-                    };
 
                     return resolve({
                         data: newPackingJob,
                     });
                 })
-                .catch((ex) => {
-                    if (ex.response) {
-                        console.log(ex.response.data);
-                        try {
-                            let errors = (ex.response.data as string)
-                                .split('\n')[0]
-                                .split(':')
-                                .slice(1);
-                            setError &&
-                                dispatch(
-                                    setError({
-                                        type: ApplicationErrorType.Unknown,
-                                        message: errors.join(),
-                                    }),
-                                );
-                        } catch {
-                            setError &&
-                                dispatch(
-                                    setError({
-                                        type: ApplicationErrorType.Unknown,
-                                        message: ex.response.data,
-                                    }),
-                                );
-                        }
-                        return;
-                    }
-                    let error =
-                        ex.code === 'ECONNABORTED'
-                            ? 'A timeout has occurred'
-                            : ex.response?.status === 404
-                            ? 'Resource not found'
-                            : ex.message;
-                    setError &&
-                        dispatch(
-                            setError({
-                                type: ApplicationErrorType.Unknown,
-                                message: error,
-                            }),
-                        );
-                });
+                .catch((ex) => handleAxiosException(ex, dispatch, setError));
         }
     });
 }
@@ -564,7 +338,7 @@ export function printPackingJobLabels(
     dispatch: ThunkDispatch<unknown, unknown, AnyAction>,
     setError?: ActionCreatorWithPayload<IApplicationErrorState, string>,
 ) {
-    const queryString = `https://localhost:${localApi.port}/Packline/PrintPackingJobBT?packingJobNumber=${packingJob.packingJobNumber}`;
+    const queryString = `https://localhost:${localApi.port}/Packline/PrintPackingJobBT`;
     const headers = {
         headers: {
             'x-signing-key': localApi.signingKey,
@@ -585,91 +359,131 @@ export function printPackingJobLabels(
             return axios
                 .post<IPackingJobAPI>(queryString, jsonBody, headers)
                 .then((response) => {
-                    let apiPackingJob = response.data;
-                    // mapping of api datastructure to internal datastructure
-                    let part = parts.find(
-                        (p) => p.partCode === apiPackingJob.partCode,
+                    let newPackingJob: IPackingJob = mapPackingJobFromAPI(
+                        response,
+                        parts,
+                        machines,
+                        packingJob,
                     );
-                    let partPack = part?.packagingList.find(
-                        (pp) => pp.packageCode === apiPackingJob.packagingCode,
-                    );
-                    let machine = machines.find(
-                        (m) => m.machineCode === apiPackingJob.deflashMachine,
-                    );
-                    let objectList = apiPackingJob.objects?.map((object) => {
-                        return {
-                            part: part!,
-                            serial: object.serial,
-                            quantity: object.quantity,
-                            partial: object.quantity < partPack!.standardPack,
-                            printed: object.printed,
-                            combinedObjects: object.combines?.map((combine) => {
-                                return {
-                                    serial: combine.fromSerial,
-                                    quantityOriginal:
-                                        combine.fromOriginalQuantity,
-                                    quantityUsed:
-                                        combine.fromOriginalQuantity -
-                                        combine.fromNewQuantity,
-                                    quantityRemaining: combine.fromNewQuantity,
-                                };
-                            }),
-                        };
-                    });
-                    let boxes = objectList
-                        ? objectList.filter(
-                              (object) =>
-                                  object.quantity === partPack?.standardPack,
-                          ).length
-                        : packingJob.boxes;
-                    let partialBoxQuantity = objectList
-                        ? objectList?.find(
-                              (object) =>
-                                  object.quantity < partPack!.standardPack,
-                          )?.quantity
-                        : packingJob.partialBoxQuantity;
-                    let newPackingJob: IPackingJob = {
-                        demoJob: false,
-                        packingJobNumber: apiPackingJob.packingJobNumber,
-                        part: part,
-                        packaging: partPack,
-                        acknowledged: true, // todo
-                        quantity: apiPackingJob.pieceWeightQuantity,
-                        pieceWeight: apiPackingJob.pieceWeight,
-                        validPieceWeight: apiPackingJob.pieceWeightValid,
-                        pieceWeightDiscrepancyNote:
-                            apiPackingJob.pieceWeightDiscrepancyNote,
-                        overridePieceWeight:
-                            !!apiPackingJob.pieceWeightDiscrepancyNote, //was overridden if discrepancy note was recorded
-                        operator: apiPackingJob.deflashOperator,
-                        machine: machine,
-                        jobInProgress: !!apiPackingJob.packingJobNumber, // job is in progress if job number has been assigned
-                        boxes: boxes,
-                        partialBoxQuantity: partialBoxQuantity,
-                        objectList: objectList,
-                        jobIsDoneFlag: false, // todo
-                        shelfInventoryFlag: false, // todo
-                    };
 
                     return resolve({
                         data: newPackingJob,
                     });
                 })
-                .catch((ex) => {
-                    let error =
-                        ex.code === 'ECONNABORTED'
-                            ? 'A timeout has occurred'
-                            : ex.response?.status === 404
-                            ? 'Resource not found'
-                            : ex.message;
-                    setError &&
-                        dispatch(
-                            setError({
-                                type: ApplicationErrorType.Unknown,
-                                message: error,
-                            }),
-                        );
-                });
+                .catch((ex) => handleAxiosException(ex, dispatch, setError));
         }
     });
+}
+
+export function completePackingJob(
+    localApi: ILocalApiState,
+    identity: IIdentity,
+    packingJob: IPackingJob,
+    parts: IPart[],
+    machines: IMachine[],
+    dispatch: ThunkDispatch<unknown, unknown, AnyAction>,
+    setError?: ActionCreatorWithPayload<IApplicationErrorState, string>,
+) {
+    const queryString = `https://localhost:${localApi.port}/Packline/CompletePackingJob`;
+    const headers = {
+        headers: {
+            'x-signing-key': localApi.signingKey,
+            'Content-Type': 'application/json',
+            user: identity.userCode,
+        },
+    };
+    // create a promise that returns data of required type
+    return new Promise<{
+        data: IPackingJob;
+    }>((resolve) => {
+        if (!packingJob.packingJobNumber) return packingJob;
+        const jsonBody = {
+            packingJobNumber: packingJob.packingJobNumber!,
+            shelfInventoryFlag: packingJob.shelfInventoryFlag,
+            jobDoneFlag: packingJob.jobIsDoneFlag,
+        };
+
+        if (process.env['REACT_APP_API'] === 'Enabled') {
+            return axios
+                .post<IPackingJobAPI>(queryString, jsonBody, headers)
+                .then((response) => {
+                    let newPackingJob: IPackingJob = mapPackingJobFromAPI(
+                        response,
+                        parts,
+                        machines,
+                        packingJob,
+                    );
+
+                    return resolve({
+                        data: newPackingJob,
+                    });
+                })
+                .catch((ex) => handleAxiosException(ex, dispatch, setError));
+        }
+    });
+}
+
+function mapPackingJobFromAPI(
+    response: { data: IPackingJobAPI },
+    parts: IPart[],
+    machines: IMachine[],
+    packingJob: IPackingJob,
+) {
+    let apiPackingJob = response.data;
+    // mapping of api datastructure to internal datastructure
+    let part = parts.find((p) => p.partCode === apiPackingJob.partCode);
+    let partPack = part?.packagingList.find(
+        (pp) => pp.packageCode === apiPackingJob.packagingCode,
+    );
+    let machine = machines.find(
+        (m) => m.machineCode === apiPackingJob.deflashMachine,
+    );
+    let objectList = apiPackingJob.objects?.map((object) => {
+        return {
+            part: part!,
+            serial: object.serial,
+            quantity: object.quantity,
+            partial: object.quantity < partPack!.standardPack,
+            printed: object.printed,
+            combinedObjects: object.combines?.map((combine) => {
+                return {
+                    serial: combine.fromSerial,
+                    quantityOriginal: combine.fromOriginalQuantity,
+                    quantityUsed:
+                        combine.fromOriginalQuantity - combine.fromNewQuantity,
+                    quantityRemaining: combine.fromNewQuantity,
+                };
+            }),
+        };
+    });
+    let boxes = objectList
+        ? objectList.filter(
+              (object) => object.quantity === partPack?.standardPack,
+          ).length
+        : packingJob.boxes;
+    let partialBoxQuantity = objectList
+        ? objectList?.find((object) => object.quantity < partPack!.standardPack)
+              ?.quantity
+        : packingJob.partialBoxQuantity;
+    let newPackingJob: IPackingJob = {
+        demoJob: false,
+        packingJobNumber: apiPackingJob.packingJobNumber,
+        part: part,
+        packaging: partPack,
+        acknowledged: true,
+        quantity: apiPackingJob.pieceWeightQuantity,
+        pieceWeight: apiPackingJob.pieceWeight,
+        validPieceWeight: apiPackingJob.pieceWeightValid,
+        pieceWeightDiscrepancyNote: apiPackingJob.pieceWeightDiscrepancyNote,
+        overridePieceWeight: !!apiPackingJob.pieceWeightDiscrepancyNote,
+        operator: apiPackingJob.deflashOperator,
+        machine: machine,
+        jobInProgress: !!apiPackingJob.packingJobNumber,
+        boxes: boxes,
+        partialBoxQuantity: partialBoxQuantity,
+        objectList: objectList,
+        jobIsDoneFlag: false,
+        shelfInventoryFlag: false, // todo
+    };
+    return newPackingJob;
 }

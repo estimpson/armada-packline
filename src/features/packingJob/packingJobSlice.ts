@@ -16,6 +16,7 @@ import { IPartPackaging } from '../partPackaging/partPackagingSlice';
 import {
     cancelPackingJob,
     combinePreObject,
+    completePackingJob,
     generatePackingJobInventory,
     getPackingJob,
     openPackingJob,
@@ -311,6 +312,41 @@ export const printPackingJobLablesAsync = createAsyncThunk<IPackingJob, void>(
     },
 );
 
+export const completePackingJobAsync = createAsyncThunk<IPackingJob, void>(
+    'packingJob/completePackingJob',
+    async (_: void, { dispatch, getState, rejectWithValue }) => {
+        const { localApiDetails, identity, packingJob, partList, machineList } =
+            getState() as {
+                localApiDetails: ILocalApiState;
+                identity: IIdentityState;
+                packingJob: IPackagingJobState;
+                partList: IPartListState;
+                machineList: IMachineListState;
+            };
+
+        // Action definied in packingJobAPI
+        try {
+            const response = await completePackingJob(
+                localApiDetails,
+                identity.value,
+                packingJob.value,
+                partList.value,
+                machineList.value,
+                dispatch,
+                SetError,
+            );
+
+            return response.data;
+        } catch (err: any) {
+            let error: AxiosError<ValidationErrors> = err; // cast the error for access to response
+            if (!error.response) {
+                throw err;
+            }
+            return rejectWithValue(error.response.data);
+        }
+    },
+);
+
 // A function that accepts an initial state, an object full of reducer functions,
 // and a "slice name", and automatically generates action creators and action types
 // that correspond to the reducers and state.
@@ -478,9 +514,6 @@ export const packingJobSlice = createSlice({
         ) => {
             state.value.shelfInventoryFlag = action.payload;
         },
-        completeJob: (state) => {
-            state.value = initialState.value;
-        },
         //todo: error checking
         //can't edit job with inventory
         //can't delete box after combine
@@ -582,6 +615,25 @@ export const packingJobSlice = createSlice({
                 } else {
                     state.error = action.error.message;
                 }
+            })
+
+            .addCase(completePackingJobAsync.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(completePackingJobAsync.fulfilled, (state, action) => {
+                state.status = 'idle';
+                //state.value = action.payload;
+                state.value = initialState.value;
+            })
+            .addCase(completePackingJobAsync.rejected, (state, action) => {
+                state.status = 'failed';
+                if (action.payload) {
+                    // Being that we passed in Validationerrors to rejectType in `createAsyncThunk`, the payload will be available here.
+                    // state.error = action.payload.errorMessage;
+                    console.log(action.payload);
+                } else {
+                    state.error = action.error.message;
+                }
             });
     },
 });
@@ -602,7 +654,6 @@ export const {
     deleteBox,
     setJobIsDoneFlag,
     setShelfInventoryFlag,
-    completeJob,
 } = packingJobSlice.actions;
 
 // The function below is called a selector and allows us to select a value from

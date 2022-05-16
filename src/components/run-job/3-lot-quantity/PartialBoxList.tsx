@@ -1,20 +1,9 @@
-import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { useAppDispatch } from '../../../app/hooks';
-import {
-    getPartialBoxListAsync,
-    selectPartialBoxList,
-} from '../../../features/partialBox/partialBoxListSlice';
+import { selectPartialBoxList } from '../../../features/partialBox/partialBoxListSlice';
 import TableGrid from '../../shared/TableGrid';
 
 export function PartialBoxList(props: { partCode: string }) {
-    const dispatch = useAppDispatch();
-
     const partialBoxes = useSelector(selectPartialBoxList);
-
-    useEffect(() => {
-        dispatch(getPartialBoxListAsync(props.partCode));
-    }, [dispatch, props.partCode]);
 
     return (
         <>

@@ -1,7 +1,7 @@
 import { useAppDispatch } from '../../../app/hooks';
 import { Button, Card, FloatingLabel, Form } from '../../../bootstrap';
 import {
-    completeJob,
+    completePackingJobAsync,
     IPackingJob,
     setJobIsDoneFlag,
     setShelfInventoryFlag,
@@ -19,7 +19,7 @@ export function CompleteJob(props: { packingJob: IPackingJob }) {
     }
 
     function completeJobHandler(): void {
-        if (!props.packingJob.demoJob) dispatch(completeJob());
+        if (!props.packingJob.demoJob) dispatch(completePackingJobAsync());
     }
 
     return (

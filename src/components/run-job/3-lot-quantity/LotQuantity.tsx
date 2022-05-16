@@ -161,9 +161,13 @@ export function LotQuantity(props: { packingJob: IPackingJob }) {
                                 />
                             </Col>
                         </Form.Group>
-                        <PartialBoxList
-                            partCode={props.packingJob.part!.partCode}
-                        />
+                        {props.packingJob.partialBoxQuantity ? (
+                            <PartialBoxList
+                                partCode={props.packingJob.part!.partCode}
+                            />
+                        ) : (
+                            <></>
+                        )}
 
                         {props.packingJob.boxes ||
                         props.packingJob.partialBoxQuantity ? (
