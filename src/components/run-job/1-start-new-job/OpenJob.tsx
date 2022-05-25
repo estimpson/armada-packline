@@ -4,12 +4,16 @@ import {
     IPackingJob,
     openPackingJobAsync,
 } from '../../../features/packingJob/packingJobSlice';
+import { getPartialBoxListAsync } from '../../../features/partialBox/partialBoxListSlice';
 
 export function OpenJob(props: { packingJob: IPackingJob }) {
     const dispatch = useAppDispatch();
 
     function startJobHandler(): void {
-        if (!props.packingJob.demoJob) dispatch(openPackingJobAsync());
+        if (!props.packingJob.demoJob) {
+            dispatch(openPackingJobAsync());
+            dispatch(getPartialBoxListAsync(props.packingJob.part!.partCode));
+        }
     }
     return (
         <>

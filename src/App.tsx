@@ -13,8 +13,10 @@ import {
 } from './features/applicationError/applicationErrorSlice';
 import { useAppDispatch } from './app/hooks';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { newScan } from './features/barcodeScanner/barcodeScannerSlice';
+import { ApplicationNotification } from './components/layout/ApplicationNotification';
+import { logout } from './features/identity/identitySlice';
 export { default as logo } from './icon.png';
 
 declare const window: Window &
@@ -31,6 +33,10 @@ declare const window: Window &
 let electron = window?.electron;
 
 if (electron) {
+    electron.receive('system-idle', (_: void) => {
+        console.log('system-idle');
+        store.dispatch(logout());
+    });
     electron.receive('api-details', (data: string) => {
         console.log(`Received ${data} about dotnet api`);
         store.dispatch(localApiInitialized(JSON.parse(data)));
@@ -58,19 +64,35 @@ function closeApp() {
     }
 }
 
+let scannerData = '';
+let readingScanner = false;
+
+/* anti pattern because react useState can't keep up */
+let setScannerData = (newScannerData: string) => (scannerData = newScannerData);
+let setReadingScanner = (newReadingScanner: boolean) =>
+    (readingScanner = newReadingScanner);
+
 export default function App() {
     const dispatch = useAppDispatch();
-
-    const [scannerData, setScannerData] = useState('');
-    const [readingScanner, setReadingScanner] = useState(false);
 
     const timerRef = useRef<NodeJS.Timeout>();
 
     useHotkeys('F8', (event) => {
         scanBegin(event);
     });
+    useHotkeys('ctrl+j', (event) => {
+        setReadingScanner(true);
+        scanBegin(event);
+    });
     useHotkeys(
         'F9',
+        (event) => {
+            scanEnd(event);
+        },
+        [scannerData],
+    );
+    useHotkeys(
+        'ctrl+k',
         (event) => {
             scanEnd(event);
         },
@@ -110,6 +132,7 @@ export default function App() {
             !(event.key === 'F8') &&
             !(event.key === 'F9') &&
             !(event.key === 'Shift') &&
+            !(event.key === 'Control') &&
             !event.ctrlKey &&
             !event.altKey
         ) {
@@ -147,6 +170,7 @@ export default function App() {
                     </Container>
                     <Footer />
                 </Container>
+                <ApplicationNotification />
                 <ApplicationError />
             </Router>
         </>

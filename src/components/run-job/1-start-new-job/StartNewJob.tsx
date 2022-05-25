@@ -13,6 +13,7 @@ import { IListItem, ObjectSelect } from '../../shared/ObjectSelect';
 import { SpecialInstructions } from './SpecialInstructions';
 import { VerifyPieceWeight } from './VerifyPieceWeight';
 import { ObjectAutosuggest } from '../../shared/ObjectAutosuggest';
+import { getRecentPieceWeightListAsync } from '../../../features/recentPieceWeight/recentPieceWeightSlice';
 
 export function StartNewJob(props: { packingJob: IPackingJob }) {
     const dispatch = useAppDispatch();
@@ -21,7 +22,10 @@ export function StartNewJob(props: { packingJob: IPackingJob }) {
     const partList: IPart[] = useAppSelector(selectPartList);
 
     function partHandler(part: IPart | undefined): void {
-        if (!props.packingJob.demoJob) dispatch(setPart(part));
+        if (!props.packingJob.demoJob) {
+            dispatch(setPart(part));
+            if (part) dispatch(getRecentPieceWeightListAsync(part.partCode));
+        }
     }
     function packagingHandler(packaging: IPartPackaging | undefined): void {
         if (!props.packingJob.demoJob) dispatch(setPackaging(packaging));

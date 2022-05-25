@@ -151,7 +151,8 @@ export interface IPackingJobAPI {
     deflashMachine: string;
     boxes: number | undefined;
     partialBoxQuantity: number | undefined;
-    shelfInventoryFlag: boolean;
+    shelfInventoryFlag: number;
+    previousJobShelfInventoryFlag: number;
     objects?: IPackingObjectAPI[];
     rowID: number;
 }
@@ -487,8 +488,14 @@ function mapPackingJobFromAPI(
         boxes: boxes,
         partialBoxQuantity: partialBoxQuantity,
         objectList: objectList,
-        jobIsDoneFlag: false,
-        shelfInventoryFlag: apiPackingJob.shelfInventoryFlag,
+        shelfInventoryFlag:
+            apiPackingJob.shelfInventoryFlag !== -1
+                ? apiPackingJob.shelfInventoryFlag === 1
+                : undefined,
+        previousJobShelfInventoryFlag:
+            apiPackingJob.previousJobShelfInventoryFlag !== null
+                ? apiPackingJob.previousJobShelfInventoryFlag === 1
+                : undefined,
     };
     return newPackingJob;
 }

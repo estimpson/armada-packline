@@ -161,12 +161,14 @@ export function LotQuantity(props: { packingJob: IPackingJob }) {
                                     plaintext
                                     readOnly
                                     value={
-                                        props.packingJob.shelfInventoryFlag
+                                        props.packingJob
+                                            .previousJobShelfInventoryFlag
                                             ? 'Yes'
                                             : 'No'
                                     }
                                     className={
-                                        props.packingJob.shelfInventoryFlag
+                                        props.packingJob
+                                            .previousJobShelfInventoryFlag
                                             ? 'text-white'
                                             : ''
                                     }

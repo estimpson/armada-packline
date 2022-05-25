@@ -33,16 +33,12 @@ export const SetError = createAction<IApplicationErrorState>(
 
 export const loginAsync = createAsyncThunk(
     'identity/login',
-    async (
-        loginInfo: { user: string; password: string },
-        { dispatch, getState },
-    ) => {
+    async (loginInfo: { password: string }, { dispatch, getState }) => {
         const { localApiDetails } = getState() as {
             localApiDetails: ILocalApiState;
         };
         const response = await validateLogin(
             localApiDetails,
-            loginInfo.user,
             loginInfo.password,
             dispatch,
             SetError,

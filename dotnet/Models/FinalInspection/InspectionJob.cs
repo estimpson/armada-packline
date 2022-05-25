@@ -7,14 +7,22 @@ using System.Xml.Serialization;
 namespace api.Models
 {
     [XmlRoot]
-    public class PackingJob
+    public class InspectionJob
     {
+        [XmlAttribute]        
+        public string InspectionJobNumber { get; set; }
+        [XmlAttribute]
+        public string InspectionOperator { get; set; }
+        [XmlAttribute]
+        public string InspectionStatus { get; set; }
         [XmlAttribute]
         public string PackingJobNumber { get; set; }
         [XmlAttribute]
-        public string PartCode { get; set; }
+        public string PackingOperator { get; set; }
         [XmlAttribute]
-        public string PackagingCode { get; set; }
+        public Part Part { get; set; }
+        [XmlAttribute]
+        public Packaging Packaging { get; set; }
         [XmlAttribute]
         public string SpecialInstructions { get; set; }
         [XmlAttribute]
@@ -36,6 +44,7 @@ namespace api.Models
         [XmlAttribute]
         public int RowID { get; set; }
         [XmlElement]
-        public List<PackingJobObject> Objects { get; set; }
+        public List<PackingJobObject> ObjectList { get; set; }
+
     }
 }

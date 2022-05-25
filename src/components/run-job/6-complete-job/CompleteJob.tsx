@@ -1,6 +1,11 @@
 import { useAppDispatch } from '../../../app/hooks';
 import { Button, Card, FloatingLabel, Form } from '../../../bootstrap';
 import {
+    applicationNoticeOccurred,
+    ApplicationNoticeType,
+    PromptType,
+} from '../../../features/applicationNotice/applicationNoticeSlice';
+import {
     completePackingJobAsync,
     IPackingJob,
     setJobIsDoneFlag,
@@ -15,7 +20,22 @@ export function CompleteJob(props: { packingJob: IPackingJob }) {
     }
 
     function shelfInventoryHandler(flag: boolean | undefined): void {
-        if (!props.packingJob.demoJob) dispatch(setShelfInventoryFlag(flag));
+        if (!props.packingJob.demoJob) {
+            if (props.packingJob.partialBoxQuantity && flag) {
+                dispatch(
+                    applicationNoticeOccurred({
+                        type: ApplicationNoticeType.Warning,
+                        promptType: PromptType.OkCancel,
+                        message:
+                            'A partial box was created.  Please confirm there is still shelf inventory.',
+                        conditionalActionName: setShelfInventoryFlag.toString(),
+                        conditionalActionPayload: flag,
+                    }),
+                );
+            } else {
+                dispatch(setShelfInventoryFlag(flag));
+            }
+        }
     }
 
     function completeJobHandler(): void {
@@ -57,35 +77,40 @@ export function CompleteJob(props: { packingJob: IPackingJob }) {
                                 <option value="No">No</option>
                             </Form.Select>
                         </FloatingLabel>
-                        <FloatingLabel label="Shelf Inventory" className="mb-3">
-                            <Form.Select
-                                value={
-                                    props.packingJob.shelfInventoryFlag
-                                        ? 'Yes'
-                                        : props.packingJob
-                                              .shelfInventoryFlag === false
-                                        ? 'No'
-                                        : ''
-                                }
-                                onChange={(
-                                    event: React.ChangeEvent<HTMLSelectElement>,
-                                ) => {
-                                    const target = event.target;
-                                    const value = target.value;
-                                    const flag =
-                                        value === 'Yes'
-                                            ? true
-                                            : value === 'No'
-                                            ? false
-                                            : undefined;
-                                    shelfInventoryHandler(flag);
-                                }}
+                        {props.packingJob.jobIsDoneFlag === false && (
+                            <FloatingLabel
+                                label="Shelf Inventory"
+                                className="mb-3"
                             >
-                                <option value="">Choose option...</option>
-                                <option value="Yes">Yes</option>
-                                <option value="No">No</option>
-                            </Form.Select>
-                        </FloatingLabel>
+                                <Form.Select
+                                    value={
+                                        props.packingJob.shelfInventoryFlag
+                                            ? 'Yes'
+                                            : props.packingJob
+                                                  .shelfInventoryFlag === false
+                                            ? 'No'
+                                            : ''
+                                    }
+                                    onChange={(
+                                        event: React.ChangeEvent<HTMLSelectElement>,
+                                    ) => {
+                                        const target = event.target;
+                                        const value = target.value;
+                                        const flag =
+                                            value === 'Yes'
+                                                ? true
+                                                : value === 'No'
+                                                ? false
+                                                : undefined;
+                                        shelfInventoryHandler(flag);
+                                    }}
+                                >
+                                    <option value="">Choose option...</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </Form.Select>
+                            </FloatingLabel>
+                        )}
                     </Form>
                     <Button
                         disabled={

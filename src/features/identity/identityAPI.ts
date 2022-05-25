@@ -18,12 +18,11 @@ interface IIdentityAPI {
 
 export function validateLogin(
     localApi: ILocalApiState,
-    user: string,
     password: string,
     dispatch: ThunkDispatch<unknown, unknown, AnyAction>,
     setError?: ActionCreatorWithPayload<IApplicationErrorState, string>,
 ) {
-    const queryString = `https://localhost:${localApi.port}/Packline/Login?user=${user}&password=${password}`;
+    const queryString = `https://localhost:${localApi.port}/Home/Login?password=${password}`;
     const headers = {
         headers: {
             'x-signing-key': localApi.signingKey,
@@ -63,7 +62,7 @@ export function validateLogin(
 
         return resolve({
             data: {
-                userCode: user,
+                userCode: 'user',
                 userName: 'Sample User',
             },
         });

@@ -1,5 +1,6 @@
 import identityReducer from '../features/identity/identitySlice';
 import applicationErrorReducer from '../features/applicationError/applicationErrorSlice';
+import applicationNoticeReducer from '../features/applicationNotice/applicationNoticeSlice';
 import localApiDetailsReducer from '../features/localApi/localApiSlice';
 import barcodeScannerReducer from '../features/barcodeScanner/barcodeScannerSlice';
 import machineReducer from '../features/machine/machineSlice';
@@ -28,6 +29,7 @@ import {
 const reducers = combineReducers({
     identity: identityReducer,
     applicationError: applicationErrorReducer,
+    applicationNotice: applicationNoticeReducer,
     localApiDetails: localApiDetailsReducer,
     scannerData: barcodeScannerReducer,
     machineList: machineReducer,
@@ -39,7 +41,7 @@ const reducers = combineReducers({
 const persistConfig = {
     key: 'root',
     storage,
-    blacklist: ['applicationError', 'localApiDetails'],
+    blacklist: ['identity', 'applicationError', 'localApiDetails'],
 };
 const persistedReducer = persistReducer(persistConfig, reducers);
 

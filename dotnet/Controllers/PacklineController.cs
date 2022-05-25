@@ -27,29 +27,6 @@ namespace api.Controllers
             _fxContext = fxContext;
         }
 
-        [HttpGet("Login")]
-        public ResultLogin Get([FromQuery] string user = "", [FromQuery] string password = "")
-        {
-            try
-            {
-                return _fxContext.ResultLogins.FromSqlInterpolated($@"
-select
-	[user] = e.operator_code
-,	name = e.name
-from
-	dbo.employee e
-where
-	e.operator_code = {user}
-	and e.password = {password}
-").ToArray()[0];
-            }
-            catch (Exception ex)
-            {
-                Response.StatusCode = 403;
-                return null;
-            }
-        }
-
         [HttpGet("PartsWithPack")]
         public IEnumerable<Part> GetPartsWithPack()
         {
@@ -327,6 +304,14 @@ execute FXPL.usp_CRUD_OpenPackingJobPreObjectsForPrint
                 else if (System.IO.File.Exists(@"c:\Program Files\Seagull\BarTender Suite 2021\bartend.exe"))
                 {
                     bartenderPath = @"""c:\Program Files\Seagull\BarTender Suite 2021\bartend.exe""";
+                }
+                else if (System.IO.File.Exists(@"c:\Program Files (x86)\Seagull\BarTender 2021\bartend.exe"))
+                {
+                    bartenderPath = @"""c:\Program Files (x86)\Seagull\BarTender 2021\bartend.exe""";
+                }
+                else if (System.IO.File.Exists(@"c:\Program Files\Seagull\BarTender 2021\bartend.exe"))
+                {
+                    bartenderPath = @"""c:\Program Files\Seagull\BarTender 2021\bartend.exe""";
                 }
                 else
                 {

@@ -42,7 +42,7 @@ export function MainMenu(prop: { closeAction?: () => void }) {
                     {identity.userName && (
                         <>
                             <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                            <Navbar.Collapse id="basic-navbar-nav">
+                            {/* <Navbar.Collapse id="basic-navbar-nav">
                                 <Nav className="me-auto">
                                     <Nav.Link as={Link} to="/jobs-demo">
                                         Jobs Demo
@@ -51,7 +51,7 @@ export function MainMenu(prop: { closeAction?: () => void }) {
                                         Printers
                                     </Nav.Link>
                                 </Nav>
-                            </Navbar.Collapse>
+                            </Navbar.Collapse> */}
                         </>
                     )}
                 </Container>

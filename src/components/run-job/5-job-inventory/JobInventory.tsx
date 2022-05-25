@@ -1,6 +1,11 @@
 import { useAppDispatch } from '../../../app/hooks';
 import { Button, Card, Col, Row, Form } from '../../../bootstrap';
 import {
+    applicationNoticeOccurred,
+    ApplicationNoticeType,
+    PromptType,
+} from '../../../features/applicationNotice/applicationNoticeSlice';
+import {
     deleteBox,
     IPackingJob,
     printPackingJobLablesAsync,
@@ -12,8 +17,22 @@ export function JobInventory(props: { packingJob: IPackingJob }) {
     const dispatch = useAppDispatch();
 
     function resetInventoryHandler(): void {
-        if (!props.packingJob.demoJob)
-            dispatch(resetPackingJobInventoryAsync());
+        if (!props.packingJob.demoJob) {
+            if (props.packingJob.objectList?.find((o) => o.printed)) {
+                dispatch(
+                    applicationNoticeOccurred({
+                        type: ApplicationNoticeType.Warning,
+                        promptType: PromptType.OkCancel,
+                        message:
+                            'Any printed labels must be discarded if you reset the inventory for this job.',
+                        conditionalActionName:
+                            resetPackingJobInventoryAsync.toString(),
+                    }),
+                );
+            } else {
+                dispatch(resetPackingJobInventoryAsync());
+            }
+        }
     }
     function deleteBoxHandler(serial: number): void {
         if (!props.packingJob.demoJob) dispatch(deleteBox(serial));
@@ -34,7 +53,7 @@ export function JobInventory(props: { packingJob: IPackingJob }) {
                 >
                     Reset Inventory
                 </Button>
-                <Row xs={1} md={2} className="g-4">
+                <Row xs={1} md={2} className="g-4 mb-3">
                     {props.packingJob.objectList!.map((object) => (
                         <Col key={object.serial}>
                             <InventoryBox

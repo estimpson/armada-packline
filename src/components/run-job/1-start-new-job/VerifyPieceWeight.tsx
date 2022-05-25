@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import {
     Accordion,
@@ -9,6 +9,10 @@ import {
     Row,
 } from '../../../bootstrap';
 import {
+    applicationNoticeOccurred,
+    ApplicationNoticeType,
+} from '../../../features/applicationNotice/applicationNoticeSlice';
+import {
     IPackingJob,
     overridePieceWeight,
     setPieceWeight,
@@ -18,6 +22,9 @@ import {
 import { selectRecentPieceWeightList } from '../../../features/recentPieceWeight/recentPieceWeightSlice';
 
 export function VerifyPieceWeight(props: { packingJob: IPackingJob }) {
+    const [enteredPieceWeight, setEnteredPieceWeight] = useState<string>(
+        props.packingJob.pieceWeight?.toString() || '',
+    );
     const recentPieceWeightList = useAppSelector(selectRecentPieceWeightList);
     const dispatch = useAppDispatch();
 
@@ -27,15 +34,34 @@ export function VerifyPieceWeight(props: { packingJob: IPackingJob }) {
         if (!props.packingJob.demoJob)
             dispatch(setPieceWeightQuantity(pieceWeightQuantity));
     }
-    function pieceWeightHandler(pieceweight: string | undefined): void {
-        if (!props.packingJob.demoJob) dispatch(setPieceWeight(pieceweight));
-    }
     function pieceWeightDiscrepancyNoteHandler(note: string): void {
         if (!props.packingJob.demoJob)
             dispatch(setPieceWeightDiscrepancyNote(note));
     }
     function pieceWeightOverrideHandler(): void {
         if (!props.packingJob.demoJob) dispatch(overridePieceWeight());
+    }
+
+    function validatePieceWeight() {
+        let enteredText = enteredPieceWeight;
+        if (!enteredText) {
+            dispatch(setPieceWeight(undefined));
+            return;
+        }
+        if (enteredText?.startsWith('.')) {
+            enteredText = '0' + enteredText;
+        }
+        let enteredValue = parseFloat(enteredText!);
+
+        if (enteredValue <= 0) {
+            dispatch(
+                applicationNoticeOccurred({
+                    type: ApplicationNoticeType.Warning,
+                    message: 'Piece weight must be greater than zero',
+                }),
+            );
+        }
+        dispatch(setPieceWeight(enteredValue));
     }
 
     const pieceWeightError =
@@ -78,15 +104,23 @@ export function VerifyPieceWeight(props: { packingJob: IPackingJob }) {
                         className="mb-3"
                     >
                         <Form.Control
-                            type="number"
-                            min={0}
-                            value={props.packingJob.pieceWeight || 0}
+                            type="text"
+                            value={enteredPieceWeight}
                             onChange={(
                                 event: React.ChangeEvent<HTMLInputElement>,
                             ) => {
                                 const target = event.target;
                                 const value = target.value;
-                                pieceWeightHandler(value);
+                                setEnteredPieceWeight(value);
+                                dispatch(setPieceWeight(undefined));
+                            }}
+                            onBlur={() => validatePieceWeight()}
+                            onKeyPress={(
+                                event: React.KeyboardEvent<HTMLInputElement>,
+                            ) => {
+                                if (event.key === 'Enter') {
+                                    validatePieceWeight();
+                                }
                             }}
                             onFocus={(
                                 event: React.FocusEvent<HTMLInputElement>,

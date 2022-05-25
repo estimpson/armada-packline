@@ -15,7 +15,11 @@ process.once('loaded', () => {
             }
         },
         receive: (channel: string, func: any) => {
-            let validChannels = ['api-details', 'api-details-error'];
+            let validChannels = [
+                'api-details',
+                'api-details-error',
+                'system-idle',
+            ];
             if (validChannels.includes(channel)) {
                 // deliberately strip event as it includes `sender`
                 ipcRenderer.on(channel, (event, ...args) => func(...args));

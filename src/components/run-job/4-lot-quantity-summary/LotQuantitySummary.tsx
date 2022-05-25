@@ -56,7 +56,9 @@ export function LotQuantitySummary(props: { packingJob: IPackingJob }) {
                 </Row>
                 <Row>
                     <Col className="mb-1">
-                        {props.packingJob.shelfInventoryFlag ? 'Yes' : 'No'}
+                        {props.packingJob.previousJobShelfInventoryFlag
+                            ? 'Yes'
+                            : 'No'}
                     </Col>
                 </Row>
                 {props.packingJob.partialBoxQuantity && (

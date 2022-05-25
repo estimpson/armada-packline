@@ -1,4 +1,5 @@
 // Module to control the application lifecycle and the native browser window.
+import electron, { ipcRenderer } from 'electron';
 import { app, BrowserWindow, ipcMain, protocol } from 'electron';
 import path from 'path';
 import installExtension, { REDUX_DEVTOOLS } from 'electron-devtools-installer';
@@ -105,3 +106,28 @@ ipcMain.on('app-close', (event, args) => {
 
     mainWindow.close();
 });
+
+const powerMonitor = electron.powerMonitor;
+
+powerMonitor.on('lock-screen', () => {
+    mainWindow.webContents.send('system-idle', {});
+    console.log('System is about to become locked');
+});
+
+powerMonitor.on('unlock-screen', () => {
+    mainWindow.webContents.send('system-idle', {});
+    console.log('system was unlocked');
+});
+
+let systemIdle = false;
+
+setInterval(() => {
+    const idleTime = powerMonitor.getSystemIdleTime();
+    if (idleTime > 60 * 5 && !systemIdle) {
+        systemIdle = true;
+        mainWindow.webContents.send('system-idle', {});
+        console.log(`system has been idle for ${idleTime} seconds`);
+    } else {
+        systemIdle = idleTime > 60;
+    }
+}, 10000);

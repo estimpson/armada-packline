@@ -142,7 +142,7 @@ const initializeApi = async () => {
         });
         const url = `https://localhost:${apiDetails.port}/home/ping`;
 
-        var i = 12;
+        var i = 20;
         do {
             let response = await client
                 .get(url)
@@ -160,6 +160,7 @@ const initializeApi = async () => {
             else break;
             i--;
         } while (i > 0);
+        if (i === 0) throw new Error('Failure initiating API');
     }
     apiDetails.log += 'leaving initializeApi()';
     console.log('leaving initializeApi()');

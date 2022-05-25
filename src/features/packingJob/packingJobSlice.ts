@@ -68,8 +68,9 @@ export interface IPackingJob {
     boxes?: number;
     partialBoxQuantity?: number;
     objectList?: IPackingObject[];
-    jobIsDoneFlag?: boolean;
-    shelfInventoryFlag?: boolean;
+    jobIsDoneFlag?: boolean | undefined;
+    shelfInventoryFlag?: boolean | undefined;
+    previousJobShelfInventoryFlag?: boolean;
     packingJobNumber?: string;
 }
 
@@ -133,7 +134,7 @@ export const resetPackingJobInventoryAsync = createAsyncThunk(
         };
 
         // Action defined in packingJobAPI
-        const response = await resetPackingJobInventory(
+        resetPackingJobInventory(
             localApiDetails,
             identity.value,
             packingJob.value,
@@ -254,6 +255,9 @@ export const combinePreObjectAsync = createAsyncThunk<
         try {
             let data = scannerData.scanData;
             dispatch(ScanHandled());
+            if (data.startsWith('XX')) {
+                data = data.substring(2);
+            }
             if (data.startsWith('X') || data.startsWith('S')) {
                 data = data.substring(1);
             }
@@ -436,32 +440,29 @@ export const packingJobSlice = createSlice({
                 );
             state.value.quantity = action.payload;
         },
-        setPieceWeight: (state, action: PayloadAction<string | undefined>) => {
-            let enteredText = action.payload;
-            if (!enteredText) {
-                state.value.validPieceWeight = false;
+        setPieceWeight: (state, action: PayloadAction<number | undefined>) => {
+            let pieceWeight = action.payload;
+
+            if (!!!pieceWeight) {
                 state.value.pieceWeight = undefined;
+                state.value.validPieceWeight = undefined;
+                state.value.pieceWeightDiscrepancyNote = undefined;
+                state.value.overridePieceWeight = undefined;
+                return;
             }
-            if (enteredText?.startsWith('.')) {
-                enteredText = '0' + enteredText;
-            }
-            let enteredValue = parseFloat(enteredText!);
-
-            if (enteredValue < 0)
-                throw new Error('Piece weight must be greater than zero');
-            state.value.pieceWeight = enteredValue;
-
-            const pieceWeightError =
-                state.value.part?.unitWeight &&
-                state.value.part?.weightTolerance &&
-                (enteredValue - state.value.part.unitWeight) /
-                    state.value.part.unitWeight;
+            const pieceWeightDelta = pieceWeight
+                ? state.value.part?.unitWeight &&
+                  state.value.part?.weightTolerance &&
+                  (pieceWeight - state.value.part.unitWeight) /
+                      state.value.part.unitWeight
+                : undefined;
 
             const valid =
-                pieceWeightError !== undefined &&
+                pieceWeightDelta !== undefined &&
                 state.value.part?.weightTolerance !== undefined &&
-                Math.abs(pieceWeightError) <= state.value.part.weightTolerance;
+                Math.abs(pieceWeightDelta) <= state.value.part.weightTolerance;
 
+            state.value.pieceWeight = pieceWeight;
             state.value.validPieceWeight = valid;
             state.value.pieceWeightDiscrepancyNote = '';
             state.value.overridePieceWeight = false;
@@ -517,6 +518,7 @@ export const packingJobSlice = createSlice({
             action: PayloadAction<boolean | undefined>,
         ) => {
             state.value.jobIsDoneFlag = action.payload;
+            state.value.shelfInventoryFlag = action.payload ? false : undefined;
         },
         setShelfInventoryFlag: (
             state,
