@@ -2,6 +2,6 @@
 {
     public class NewInspectionJobInput
     {
-        public string PackingJobNumber;
+        public string PackingJobNumber { get; set; }
     }
 }

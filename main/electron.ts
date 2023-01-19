@@ -123,7 +123,7 @@ let systemIdle = false;
 
 setInterval(() => {
     const idleTime = powerMonitor.getSystemIdleTime();
-    if (idleTime > 60 * 5 && !systemIdle) {
+    if (idleTime > 60 * 15 && !systemIdle) {
         systemIdle = true;
         mainWindow.webContents.send('system-idle', {});
         console.log(`system has been idle for ${idleTime} seconds`);

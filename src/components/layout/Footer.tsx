@@ -20,7 +20,7 @@ export function Footer() {
                 </p>
                 <p className="m-0">
                     <a href="/" className="text-decoration-none text-reset">
-                        Fx Pack Line (
+                        Fx Pack Line v{process.env.REACT_APP_VERSION} (
                         {apiDetails.port ? 'Ready' : 'Awaiting API'})
                     </a>
                 </p>

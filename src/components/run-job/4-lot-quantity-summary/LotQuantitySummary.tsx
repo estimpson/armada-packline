@@ -52,7 +52,7 @@ export function LotQuantitySummary(props: { packingJob: IPackingJob }) {
                     ).toLocaleString()} pieces`}</Col>
                 </Row>
                 <Row>
-                    <Col className="form-label">Shelf Inventory</Col>
+                    <Col className="form-label">Unpacked Partial</Col>
                 </Row>
                 <Row>
                     <Col className="mb-1">

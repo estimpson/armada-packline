@@ -1,11 +1,13 @@
+import { useState } from 'react';
 import { useAppDispatch } from '../../../app/hooks';
-import { Button, Card, Col, Row, Form } from '../../../bootstrap';
+import { Button, Card, Col, Modal, Row, Form } from '../../../bootstrap';
 import {
     applicationNoticeOccurred,
     ApplicationNoticeType,
     PromptType,
 } from '../../../features/applicationNotice/applicationNoticeSlice';
 import {
+    combinePreObjectAsync,
     deleteBox,
     IPackingJob,
     printPackingJobLablesAsync,
@@ -14,6 +16,9 @@ import {
 import { InventoryBox } from './InventoryBox';
 
 export function JobInventory(props: { packingJob: IPackingJob }) {
+    const [showManualCombineModal, setShowManualCombineModal] = useState(false);
+    const [combineSerial, setCombineSerial] = useState('');
+
     const dispatch = useAppDispatch();
 
     function resetInventoryHandler(): void {
@@ -90,7 +95,84 @@ export function JobInventory(props: { packingJob: IPackingJob }) {
                 >
                     Print Labels
                 </Button>
+                <Button
+                    className="ms-3 my-3"
+                    disabled={!props.packingJob.objectList?.length}
+                    onClick={() => {
+                        setCombineSerial('');
+                        setShowManualCombineModal(true);
+                    }}
+                >
+                    Manual Combine
+                </Button>
             </Card.Body>
+
+            <Modal
+                show={showManualCombineModal}
+                onHide={() => {
+                    setShowManualCombineModal(false);
+                    setCombineSerial('');
+                }}
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>
+                        Combine Partial Box of {props.packingJob.part!.partCode}
+                    </Modal.Title>
+                    <Modal.Body></Modal.Body>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group>
+                            <Form.Label>Enter Serial to Combine</Form.Label>
+                            <Form.Control
+                                value={combineSerial}
+                                onChange={(
+                                    event: React.ChangeEvent<HTMLInputElement>,
+                                ) => {
+                                    const target = event.target;
+                                    const value = target.value;
+                                    setCombineSerial(value);
+                                }}
+                                onKeyPress={(e) => {
+                                    if (e.key === 'Enter') {
+                                        dispatch(
+                                            combinePreObjectAsync({
+                                                scanData: combineSerial,
+                                                dateReceived:
+                                                    Date.now().toString(),
+                                            }),
+                                        );
+                                        setShowManualCombineModal(false);
+                                    }
+                                }}
+                            ></Form.Control>
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button
+                        variant="secondary"
+                        disabled={!!!combineSerial}
+                        onClick={() => {
+                            dispatch(
+                                combinePreObjectAsync({
+                                    scanData: combineSerial,
+                                    dateReceived: Date.now().toString(),
+                                }),
+                            );
+                            setShowManualCombineModal(false);
+                        }}
+                    >
+                        Combine
+                    </Button>
+                    <Button
+                        variant="secondary"
+                        onClick={() => setShowManualCombineModal(false)}
+                    >
+                        Cancel
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </>
     );
 }

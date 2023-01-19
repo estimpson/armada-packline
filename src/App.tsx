@@ -64,10 +64,10 @@ function closeApp() {
     }
 }
 
+/* anti pattern because react useState can't keep up */
 let scannerData = '';
 let readingScanner = false;
 
-/* anti pattern because react useState can't keep up */
 let setScannerData = (newScannerData: string) => (scannerData = newScannerData);
 let setReadingScanner = (newReadingScanner: boolean) =>
     (readingScanner = newReadingScanner);

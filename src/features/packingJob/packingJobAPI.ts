@@ -436,6 +436,7 @@ function mapPackingJobFromAPI(
     packingJob: IPackingJob,
 ) {
     let apiPackingJob = response.data;
+    console.log(apiPackingJob);
     // mapping of api datastructure to internal datastructure
     let part = parts.find((p) => p.partCode === apiPackingJob.partCode);
     let partPack = part?.packagingList.find(

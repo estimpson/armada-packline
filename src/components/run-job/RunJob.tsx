@@ -25,34 +25,6 @@ export function RunJob(props: { step?: string; packingJob: IPackingJob }) {
     const scannerData = useAppSelector(selectScannerData);
 
     useEffect(() => {
-        const load = async () => {
-            if (apiDetails.port) {
-                if (props.packingJob.part) {
-                    dispatch(
-                        getPartialBoxListAsync(props.packingJob.part!.partCode),
-                    );
-                    dispatch(
-                        getRecentPieceWeightListAsync(
-                            props.packingJob.part?.partCode,
-                        ),
-                    );
-                }
-                // is either a fulfilled or rejected action
-                const machineListAction = await dispatch(getMachineListAsync());
-                const partListAction = await dispatch(getPartListAsync());
-                if (
-                    isFulfilled(machineListAction) &&
-                    isFulfilled(partListAction) &&
-                    !!props.packingJob.packingJobNumber
-                ) {
-                    dispatch(getPackingJobAsync());
-                }
-            }
-        };
-        load();
-    }, [dispatch, apiDetails]);
-
-    useEffect(() => {
         const combine = async () => {
             if (
                 apiDetails.port &&

@@ -1,17 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace api.Models
 {
     [XmlRoot]
-    public class InspectionJob
+    public class CompletedPackingJob
     {
-        [XmlAttribute]        
-        public string InspectionJobNumber { get; set; }
-        [XmlAttribute]
-        public string InspectionOperator { get; set; }
-        [XmlAttribute]
-        public string InspectionStatus { get; set; }
         [XmlAttribute]
         public string PackingJobNumber { get; set; }
         [XmlAttribute]
@@ -39,23 +36,12 @@ namespace api.Models
         [XmlAttribute]
         public bool ShelfInventoryFlag { get; set; }
         [XmlAttribute]
-        public bool JobDoneFlag { get; set; }
-        [XmlAttribute]
         public int RowID { get; set; }
         [XmlElement]
         public InspectionPart Part { get; set; }
         [XmlElement]
         public PartPackaging PartPackaging { get; set; }
         [XmlElement]
-        public List<InspectionHeaderNote> Notes { get; set; }
-        [XmlElement]
-        public List<InspectionHeaderPicture> Pictures { get; set; }
-        [XmlElement]
-        public List<InspectionObject> Objects { get; set; }
-        [XmlElement]
-        public List<InspectionBulletin> Bulletins { get; set; }
-        [XmlElement]
-        public List<InspectionPriorLot> PriorLots { get; set; }
-
+        public List<InspectionPackingObject> Objects { get; set; }
     }
 }

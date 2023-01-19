@@ -253,7 +253,7 @@ export const combinePreObjectAsync = createAsyncThunk<
 
         // Action definied in packingJobAPI
         try {
-            let data = scannerData.scanData;
+            let data = scannerData.scanData.toUpperCase();
             dispatch(ScanHandled());
             if (data.startsWith('XX')) {
                 data = data.substring(2);
@@ -404,7 +404,7 @@ export const packingJobSlice = createSlice({
             action: PayloadAction<IPartPackaging | undefined>,
         ) => {
             // pre-modification state validation
-            if (state.value.objectList)
+            if (!!state.value.objectList?.length)
                 throw new Error(
                     'Changing packaging on a job forbidden when that job has associated' +
                         ' inventory.  Delete all inventory first or start a new job.',
@@ -559,8 +559,7 @@ export const packingJobSlice = createSlice({
             })
             .addCase(openPackingJobAsync.fulfilled, (state, action) => {
                 state.status = 'idle';
-                state.value.jobInProgress = true;
-                state.value.packingJobNumber = action.payload.packingJobNumber;
+                state.value = action.payload;
             })
 
             .addCase(cancelPackingJobAsync.pending, (state) => {

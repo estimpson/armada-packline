@@ -4,9 +4,9 @@ using System.Xml.Serialization;
 namespace api.Models
 {
     [XmlRoot]
-    public class InspectionJob
+    public class InspectionPriorLot
     {
-        [XmlAttribute]        
+        [XmlAttribute]
         public string InspectionJobNumber { get; set; }
         [XmlAttribute]
         public string InspectionOperator { get; set; }
@@ -52,10 +52,5 @@ namespace api.Models
         public List<InspectionHeaderPicture> Pictures { get; set; }
         [XmlElement]
         public List<InspectionObject> Objects { get; set; }
-        [XmlElement]
-        public List<InspectionBulletin> Bulletins { get; set; }
-        [XmlElement]
-        public List<InspectionPriorLot> PriorLots { get; set; }
-
     }
 }

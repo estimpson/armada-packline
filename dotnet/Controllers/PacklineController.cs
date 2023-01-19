@@ -318,10 +318,12 @@ execute FXPL.usp_CRUD_OpenPackingJobPreObjectsForPrint
                     throw new BadHttpRequestException("BarTender not found");
                 }
 
-                foreach (var openedPackingJobObject in openedPackingJobObjects)
-                {
-                    var bartenderArgs =
-                        @$"/F=""{openedPackingJobObject.LabelPath}"" /?Serial={openedPackingJobObject.Serial} /C={openedPackingJobObject.Copies} /P /X";
+                var serialList = string.Join(',', openedPackingJobObjects.Select(o => o.Serial.ToString()).ToArray());
+
+                //foreach (var openedPackingJobObject in openedPackingJobObjects)
+                //{
+                var bartenderArgs =
+                        @$"/F=""{openedPackingJobObjects.First().LabelPath}"" /?Serial=""{serialList}"" /C={openedPackingJobObjects.First().Copies} /P /X";
                     var process = new Process
                     {
                         StartInfo = new ProcessStartInfo
@@ -332,7 +334,7 @@ execute FXPL.usp_CRUD_OpenPackingJobPreObjectsForPrint
                     };
                     process.Start();
                     process.WaitForExit();
-                }
+                //}
             }
             catch (SqlException e)
             {

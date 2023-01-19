@@ -20,7 +20,7 @@ export function BeginJobSummary(props: { packingJob: IPackingJob }) {
                 </Row>
                 <Row>
                     <Col className="mb-1">
-                        {props.packingJob.packaging!.packageCode}
+                        {props.packingJob.packaging?.packageCode ?? 'Invalid'}
                     </Col>
                 </Row>
                 <Row>

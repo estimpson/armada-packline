@@ -28,7 +28,23 @@ export function InventoryBox(props: {
                         label="Quantity"
                         className="mb-3"
                     >
-                        <Form.Control readOnly value={props.object.quantity} />
+                        <Form.Control
+                            readOnly
+                            value={`${props.object.quantity}${
+                                props.object.partial &&
+                                !!props.object.combinedObjects?.length
+                                    ? `  |  ${
+                                          props.object.quantity +
+                                          props.object.combinedObjects!.reduce(
+                                              (combinedQty, co) =>
+                                                  combinedQty +
+                                                  co!.quantityUsed,
+                                              0,
+                                          )
+                                      } after all combine(s)`
+                                    : ''
+                            }`}
+                        />
                     </FloatingLabel>
                     {props.object.partial && !!props.object.combinedObjects && (
                         <>

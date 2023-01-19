@@ -9,6 +9,7 @@ import Form from 'react-bootstrap/form';
 import FormControl from 'react-bootstrap/FormControl';
 import InputGroup from 'react-bootstrap/inputgroup';
 import Offcanvas from 'react-bootstrap/Offcanvas';
+import Modal from 'react-bootstrap/Modal';
 import Row from 'react-bootstrap/row';
 
 export {
@@ -23,5 +24,6 @@ export {
     FormControl,
     InputGroup,
     Offcanvas,
+    Modal,
     Row,
 };

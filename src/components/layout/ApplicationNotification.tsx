@@ -9,6 +9,7 @@ import {
 import { createAction } from '@reduxjs/toolkit';
 import {
     resetPackingJobInventoryAsync,
+    setJobIsDoneFlag,
     setShelfInventoryFlag,
 } from '../../features/packingJob/packingJobSlice';
 import { Container } from 'react-bootstrap';
@@ -54,31 +55,7 @@ export function ApplicationNotification() {
                 <Offcanvas.Title>Fx Pack Line</Offcanvas.Title>
             </Offcanvas.Header>
             <Offcanvas.Body className="danger">
-                <p
-                    className={`${
-                        applicationNotice.type === ApplicationNoticeType.Success
-                            ? 'text-success'
-                            : ''
-                    }${
-                        applicationNotice.type === ApplicationNoticeType.Warning
-                            ? 'text-warning'
-                            : ''
-                    }${
-                        applicationNotice.type === ApplicationNoticeType.Info
-                            ? 'text-info'
-                            : ''
-                    }${
-                        applicationNotice.type === ApplicationNoticeType.Danger
-                            ? 'text-danger'
-                            : ''
-                    }${
-                        applicationNotice.type === ApplicationNoticeType.Unknown
-                            ? 'text-muted'
-                            : ''
-                    }`}
-                >
-                    {applicationNotice.message}
-                </p>
+                <p>{applicationNotice.message}</p>
                 {/* Refactor this to dynamic code */}
                 <Container
                     fluid
@@ -95,6 +72,14 @@ export function ApplicationNotification() {
                                 case setShelfInventoryFlag.toString():
                                     dispatch(
                                         setShelfInventoryFlag(
+                                            applicationNotice.conditionalActionPayload,
+                                        ),
+                                    );
+                                    dispatch(applicationNoticeCleared());
+                                    break;
+                                case setJobIsDoneFlag.toString():
+                                    dispatch(
+                                        setJobIsDoneFlag(
                                             applicationNotice.conditionalActionPayload,
                                         ),
                                     );

@@ -16,7 +16,22 @@ export function CompleteJob(props: { packingJob: IPackingJob }) {
     const dispatch = useAppDispatch();
 
     function jobIsDoneHandler(flag: boolean | undefined): void {
-        if (!props.packingJob.demoJob) dispatch(setJobIsDoneFlag(flag));
+        if (!props.packingJob.demoJob) {
+            if (flag) {
+                dispatch(
+                    applicationNoticeOccurred({
+                        type: ApplicationNoticeType.Warning,
+                        promptType: PromptType.OkCancel,
+                        message:
+                            'You are marking this job as done.  Please confirm there is no longer any unpacked partial inventory.',
+                        conditionalActionName: setJobIsDoneFlag.toString(),
+                        conditionalActionPayload: flag,
+                    }),
+                );
+            } else {
+                dispatch(setJobIsDoneFlag(flag));
+            }
+        }
     }
 
     function shelfInventoryHandler(flag: boolean | undefined): void {
@@ -27,7 +42,7 @@ export function CompleteJob(props: { packingJob: IPackingJob }) {
                         type: ApplicationNoticeType.Warning,
                         promptType: PromptType.OkCancel,
                         message:
-                            'A partial box was created.  Please confirm there is still shelf inventory.',
+                            'A partial box was created.  Please confirm there is still unpacked partial inventory.',
                         conditionalActionName: setShelfInventoryFlag.toString(),
                         conditionalActionPayload: flag,
                     }),
@@ -79,7 +94,7 @@ export function CompleteJob(props: { packingJob: IPackingJob }) {
                         </FloatingLabel>
                         {props.packingJob.jobIsDoneFlag === false && (
                             <FloatingLabel
-                                label="Shelf Inventory"
+                                label="Unpacked Partial Inventory"
                                 className="mb-3"
                             >
                                 <Form.Select
