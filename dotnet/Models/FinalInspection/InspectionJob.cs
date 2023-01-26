@@ -42,6 +42,8 @@ namespace api.Models
         public bool JobDoneFlag { get; set; }
         [XmlAttribute]
         public int RowID { get; set; }
+        [XmlAttribute]
+        public string PackingDT { get; set; }
         [XmlElement]
         public InspectionPart Part { get; set; }
         [XmlElement]

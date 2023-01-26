@@ -32,3 +32,4 @@ yarn-error.log*
 *.user
 dotnet/.vs/api/DesignTimeBuild/.dtbcache.v2
 
+dotnet/.vs
