@@ -1,17 +1,17 @@
-﻿using System;
+﻿using api.FxDatabase;
+using api.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
-using api.FxDatabase;
-using api.Models;
-using Microsoft.AspNetCore.Http;
 using SysFile = System.IO.File;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace api.Controllers
 {
@@ -60,17 +60,17 @@ namespace api.Controllers
             //foreach (var openedPackingJobObject in openedPackingJobObjects)
             //{
 
-                var bartenderArgs = @$"/F=""{openedPackingJobObjects.First().LabelPath}"" /?Serial=""{serialList}"" /C={openedPackingJobObjects.First().Copies} /P /X";
-                var process = new Process
+            var bartenderArgs = @$"/F=""{openedPackingJobObjects.First().LabelPath}"" /?Serial=""{serialList}"" /C={openedPackingJobObjects.First().Copies} /P /X";
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
                 {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = bartenderPath,
-                        Arguments = bartenderArgs
-                    }
-                };
-                process.Start();
-                process.WaitForExit();
+                    FileName = bartenderPath,
+                    Arguments = bartenderArgs
+                }
+            };
+            process.Start();
+            process.WaitForExit();
             //}
 
             var closedPackingJobObjects = ClosePackingJobPreObjectsAfterPrint(user, packingJobNumber, true);
@@ -174,19 +174,19 @@ execute FXPL.usp_CRUD_OpenPackingJobPreObjectsForPrint
         {
             try
             {
-            var result = _fxContext.XmlResults.FromSqlInterpolated(
-            $@"
+                var result = _fxContext.XmlResults.FromSqlInterpolated(
+                $@"
 execute FXPL.usp_CRUD_ClosePackingJobPreObjectsAfterPrint
     @User = {user}
 ,   @PackingJobNumber = {packingJobNumber}
 ,   @Printed = {(printed ? 1 : 0)}
 ").ToArray()[0];
 
-            var deserializer = new XmlSerializer(typeof(List<PackingJob>), new XmlRootAttribute("Result"));
-            var packingJob = ((List<PackingJob>)deserializer.Deserialize(
-                new StringReader($"<Result>{result.Result}</Result>"))).ToArray()[0];
+                var deserializer = new XmlSerializer(typeof(List<PackingJob>), new XmlRootAttribute("Result"));
+                var packingJob = ((List<PackingJob>)deserializer.Deserialize(
+                    new StringReader($"<Result>{result.Result}</Result>"))).ToArray()[0];
 
-            return packingJob;
+                return packingJob;
             }
             catch (SqlException e)
             {

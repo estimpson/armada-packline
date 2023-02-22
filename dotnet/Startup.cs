@@ -1,12 +1,11 @@
-using System.Collections.Generic;
+using api.FxDatabase;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using api.FxDatabase;
+using System.Collections.Generic;
 
 
 namespace api
@@ -52,16 +51,16 @@ namespace api
         {
             //if (env.IsDevelopment())
             //{
-                app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c =>
+            app.UseDeveloperExceptionPage();
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.ConfigObject.AdditionalItems["syntaxHighlight"] = new Dictionary<string, object>
                 {
-                    c.ConfigObject.AdditionalItems["syntaxHighlight"] = new Dictionary<string, object>
-                    {
-                        ["activated"] = false
-                    };
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "api v1");
-                });
+                    ["activated"] = false
+                };
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "api v1");
+            });
             //}
 
             app.UseHttpsRedirection();

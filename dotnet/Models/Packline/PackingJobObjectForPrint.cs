@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 
 namespace api.Models
 {
@@ -15,7 +14,7 @@ namespace api.Models
         [XmlAttribute] public bool Printed { get; set; }
 
         [XmlAttribute] public string LabelPath { get; set; }
-        
+
         [XmlAttribute] public int Copies { get; set; }
 
         [XmlAttribute] public int RowID { get; set; }

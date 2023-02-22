@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Xml.Serialization;
 using api.FxDatabase;
 using api.Models;
 using Microsoft.AspNetCore.Http;
@@ -11,6 +5,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Xml.Serialization;
 
 namespace api.Controllers
 {
@@ -324,16 +324,16 @@ execute FXPL.usp_CRUD_OpenPackingJobPreObjectsForPrint
                 //{
                 var bartenderArgs =
                         @$"/F=""{openedPackingJobObjects.First().LabelPath}"" /?Serial=""{serialList}"" /C={openedPackingJobObjects.First().Copies} /P /X";
-                    var process = new Process
+                var process = new Process
+                {
+                    StartInfo = new ProcessStartInfo
                     {
-                        StartInfo = new ProcessStartInfo
-                        {
-                            FileName = bartenderPath,
-                            Arguments = bartenderArgs
-                        }
-                    };
-                    process.Start();
-                    process.WaitForExit();
+                        FileName = bartenderPath,
+                        Arguments = bartenderArgs
+                    }
+                };
+                process.Start();
+                process.WaitForExit();
                 //}
             }
             catch (SqlException e)

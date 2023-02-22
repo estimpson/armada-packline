@@ -47,5 +47,20 @@ where
                 return null;
             }
         }
+
+        [HttpPost("SaveState")]
+        public IActionResult SaveState([FromHeader] string state)
+        {
+            try
+            {
+                _logger.LogWarning(state);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+            return Ok();
+        }
     }
 }

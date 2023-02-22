@@ -6,7 +6,7 @@ namespace api.Models
     [XmlRoot]
     public class InspectionJob
     {
-        [XmlAttribute]        
+        [XmlAttribute]
         public string InspectionJobNumber { get; set; }
         [XmlAttribute]
         public string InspectionOperator { get; set; }

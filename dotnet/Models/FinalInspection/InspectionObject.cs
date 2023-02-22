@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace api.Models
@@ -28,6 +25,6 @@ namespace api.Models
         [XmlElement]
         public List<InspectionObjectPicture> Pictures { get; set; }
         [XmlElement]
-        public List<InspectionCombine> Combines { get; set;}
+        public List<InspectionCombine> Combines { get; set; }
     }
 }

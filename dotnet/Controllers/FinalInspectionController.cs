@@ -1,14 +1,14 @@
-﻿using System;
-using api.FxDatabase;
+﻿using api.FxDatabase;
+using api.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
-using api.Models;
-using Microsoft.Data.SqlClient;
 
 namespace api.Controllers
 {
@@ -327,7 +327,7 @@ execute FXFI.usp_CRUD_Inspection_EditBulletin
         }
 
         [HttpPost("RemoveBulletin")]
-        public IActionResult RemoveBulletin ([FromHeader] string user, [FromBody] RemoveInspectionBulletinInput input)
+        public IActionResult RemoveBulletin([FromHeader] string user, [FromBody] RemoveInspectionBulletinInput input)
         {
             try
             {
